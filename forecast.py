@@ -1,11 +1,20 @@
 import pandas as pd
 import xgboost as xgb
+from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, HistGradientBoostingRegressor
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.svm import SVR
+
+from hyperparam_search import Searcher
+import warnings
+xgb.set_config(verbosity=0)
+warnings.filterwarnings(action="ignore")
 
 
-class FirstDayModel:
-    def __init__(self, data, y_label, len_test=24):
+class Forecast:
+    def __init__(self, data, y_label, models, len_test=24):
         self.data = data
         self.y_label = y_label
+        self.models = models
         self.len_test = len_test
         self.x_train, self.y_train, self.x_test, self.y_test = self.split_data()
 
@@ -26,4 +35,12 @@ class FirstDayModel:
 
         pred = pd.DataFrame(reg.predict(self.x_test), index=self.x_test.index)
         return pred
+
+    def search(self):
+        for model_name, model_info in self.models.items():
+            searcher = Searcher(model_name, model_info, self.x_train, self.y_train)
+            searcher.grid_search()
+            searcher.ga_search()
+            searcher.export_results()
+
 
