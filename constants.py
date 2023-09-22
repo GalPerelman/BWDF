@@ -49,3 +49,10 @@ SPECIAL_DATES = [
     datetime.datetime(2023, 1, 1, tzinfo=TZ),
     datetime.datetime(2023, 1, 6, tzinfo=TZ),
 ]
+
+TEST_TIMES = {
+    'w1': {'start': datetime.datetime(2022, 7, 25, tzinfo=TZ), 'end': datetime.datetime(2022, 8, 1, tzinfo=TZ)},
+    'w2': {'start': datetime.datetime(2022, 10, 31, tzinfo=TZ), 'end': datetime.datetime(2022, 11, 6, tzinfo=TZ)},
+    'w3': {'start': datetime.datetime(2023, 1, 16, tzinfo=TZ), 'end': datetime.datetime(2023, 1, 23, tzinfo=TZ)},
+    'w4': {'start': datetime.datetime(2023, 3, 6, tzinfo=TZ), 'end': datetime.datetime(2023, 3, 13, tzinfo=TZ)}
+}
