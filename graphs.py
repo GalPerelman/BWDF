@@ -5,6 +5,7 @@ from matplotlib.lines import Line2D
 import matplotlib.patches as patches
 
 import constants
+import evaluation
 
 
 def plot_dmas(data: pd.DataFrame, downscale=0, shade_missing: bool = False, axes=None, linestyle=None):
@@ -58,3 +59,16 @@ def visualize_data_completion(raw_data, completed_data):
         patch = patches.Patch(edgecolor='r', facecolor='none', label='Test period')
 
         axes[-1].legend(handles=[line1, line2, patch])
+
+
+def plot_test(observed, predicted, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    mae = evaluation.mean_abs_error(observed.loc[predicted.index], predicted)
+
+    ax.plot(observed.index, observed)
+    ax.plot(predicted.index, predicted)
+    ax.text(0.05, 0.92, f"MAE={mae:.3f}", transform=ax.transAxes, ha='left', va='center')
+    ax.set_ylabel("Net Inflow L/s")
+    ax.grid()
