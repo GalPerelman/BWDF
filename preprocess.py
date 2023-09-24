@@ -13,7 +13,8 @@ class Preprocess:
         self.inflow = self.data_completion(self.inflow)
         self.weather = self.data_completion(self.weather)
         self.data = pd.merge(self.inflow, self.weather, left_index=True, right_index=True, how="left")
-        self.datetime_categorize()
+
+        self.construct_datetime_features()
 
     def data_completion(self, data):
         knn_impute = KNNImputer(n_neighbors=self.n_neighbors)
@@ -21,7 +22,7 @@ class Preprocess:
         data_imputed = pd.DataFrame(data_imputed, columns=data.columns, index=data.index)
         return data_imputed
 
-    def datetime_categorize(self):
+    def construct_datetime_features(self):
         """
         Function to add categories based on the datetime index
         Month, weekday, hour, special dates
@@ -38,5 +39,32 @@ class Preprocess:
 
         self.data['is_dst'] = self.data.index.map(is_dst)
         self.data['is_special'] = self.data.index.normalize().isin(constants.SPECIAL_DATES)
+
+    @staticmethod
+    def construct_lag_features(data, y_label, n_lags):
+        for i in range(1, n_lags+1):
+            data[y_label + f'_{i}'] = data[y_label].shift(i)
+
+        data.dropna(inplace=True)
+        return data
+
+    @staticmethod
+    def split_data(data, y_label, len_train, len_test):
+        x_columns = list(data.columns)
+        x_columns.remove(y_label)
+
+        x_train = data.iloc[-(len_train + len_test): -len_test].loc[:, x_columns]
+        y_train = data.iloc[-(len_train + len_test): -len_test].loc[:, y_label]
+
+        x_test = data.iloc[-len_test:].loc[:, x_columns]
+        y_test = data.iloc[-len_test:].loc[:, y_label]
+        return x_train, y_train, x_test, y_test
+
+    @staticmethod
+    def preprocess_to_label(data, y_label, n_lags, len_train, len_test):
+        data = Preprocess.construct_lag_features(data=data, y_label=y_label, n_lags=n_lags)
+        x_train, y_train, x_test, y_test = Preprocess.split_data(data=data, y_label=y_label,
+                                                                 len_train=len_train, len_test=len_test)
+        return x_train, y_train, x_test, y_test
 
 

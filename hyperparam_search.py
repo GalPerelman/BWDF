@@ -3,32 +3,46 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from sklearn_genetic import GASearchCV
+from sklearn.metrics import make_scorer, mean_absolute_error
 from sklearn_genetic.space import Continuous, Categorical, Integer
 from sklearn_genetic.callbacks import ProgressBar
-import xgboost as xgb
-import warnings
-warnings.filterwarnings(action="ignore")
-xgb.set_config(verbosity=0)
+
+
+import evaluation
+from preprocess import Preprocess
 
 
 class Searcher:
-    def __init__(self, model_name, model_info, x_train, y_train, y_label, name, n_splits=3):
+    def __init__(self, model_name, model_info, data, y_label, n_lags, len_train, len_test, name, n_splits=3):
         self.model_name = model_name
         self.model = model_info['model']
         self.params = model_info['params']
         self.ga_params = model_info['ga_params']
-        self.x_train = x_train
-        self.y_train = y_train
+        self.data = data
         self.y_label = y_label
+        self.n_lags = n_lags
+        self.len_train = len_train
+        self.len_test = len_test
         self.name = name
         self.n_splits = n_splits
+
+        self.scoring = {
+            'MAE': make_scorer(mean_absolute_error, greater_is_better=False),
+            'MAX_E': make_scorer(evaluation.max_abs_error, greater_is_better=False)
+        }
+
+        self.x_train, self.y_train, self.x_test, self.y_test = Preprocess.preprocess_to_label(data=self.data,
+                                                                                              y_label=self.y_label,
+                                                                                              n_lags=self.n_lags,
+                                                                                              len_train=self.len_train,
+                                                                                              len_test=self.len_test)
 
         self.tscv = TimeSeriesSplit(n_splits=self.n_splits)
         self.results = pd.DataFrame()
 
     def grid_search(self):
         gs_model = GridSearchCV(estimator=self.model, param_grid=self.params, cv=self.tscv, verbose=3,
-                                scoring='neg_mean_absolute_error', n_jobs=-1)
+                                scoring=self.scoring, refit='MAE', n_jobs=-1)
 
         gs_model.fit(self.x_train, self.y_train)
         print(gs_model.best_params_, gs_model.best_score_)
