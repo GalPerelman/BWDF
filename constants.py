@@ -1,5 +1,6 @@
 import os
 import datetime
+import pandas as pd
 
 import pytz
 
@@ -55,4 +56,10 @@ TEST_TIMES = {
     'w2': {'start': datetime.datetime(2022, 10, 31, tzinfo=TZ), 'end': datetime.datetime(2022, 11, 6, tzinfo=TZ)},
     'w3': {'start': datetime.datetime(2023, 1, 16, tzinfo=TZ), 'end': datetime.datetime(2023, 1, 23, tzinfo=TZ)},
     'w4': {'start': datetime.datetime(2023, 3, 6, tzinfo=TZ), 'end': datetime.datetime(2023, 3, 13, tzinfo=TZ)}
+}
+
+DATES_TO_TEST_EXTREME_RAINFALL = {
+    'start_train': pd.Timestamp(2021, 1, 1, tzinfo=TZ),
+    'start_test': pd.Timestamp(2021, 9, 17, 0, 0, tzinfo=TZ),
+    'end_test': pd.Timestamp(2021, 9, 18, 0, 0, tzinfo=TZ),
 }
