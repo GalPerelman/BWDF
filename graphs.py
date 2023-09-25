@@ -8,6 +8,19 @@ import constants
 import evaluation
 
 
+def draw_test_periods(ax, y_min, y_max):
+    for test_name, test_dates in constants.TEST_TIMES.items():
+        rect = patches.Rectangle((test_dates['start'], y_min),
+                                 pd.Timestamp(test_dates['end']) - pd.Timestamp(test_dates['start']),
+                                 y_max - y_min,
+                                 linewidth=1,
+                                 edgecolor='r',
+                                 facecolor='none')
+        ax.add_patch(rect)
+
+    return ax
+
+
 def plot_dmas(data: pd.DataFrame, downscale=0, shade_missing: bool = False, axes=None, linestyle=None):
     if downscale > 0:
         data = data.iloc[::downscale]
@@ -25,14 +38,7 @@ def plot_dmas(data: pd.DataFrame, downscale=0, shade_missing: bool = False, axes
             nan_positions = data[col].isna().values
             axes[i].fill_between(data.index, y_min, y_max, where=nan_positions, color='gray', alpha=0.3)
 
-        for test_name, test_dates in constants.TEST_TIMES.items():
-            rect = patches.Rectangle((test_dates['start'], y_min),
-                                     pd.Timestamp(test_dates['end']) - pd.Timestamp(test_dates['start']),
-                                     y_max - y_min,
-                                     linewidth=1,
-                                     edgecolor='r',
-                                     facecolor='none')
-            axes[i].add_patch(rect)
+        axes[i] = draw_test_periods(axes[i], y_min, y_max)
 
     plt.subplots_adjust(bottom=0.05, top=0.95, left=0.1, right=0.9, hspace=0.1)
     return axes
@@ -65,10 +71,32 @@ def plot_test(observed, predicted, ax=None):
     if ax is None:
         fig, ax = plt.subplots()
 
-    mae = evaluation.mean_abs_error(observed.loc[predicted.index], predicted)
+    mae = evaluation.mean_abs_error(observed, predicted)
 
     ax.plot(observed.index, observed)
     ax.plot(predicted.index, predicted)
     ax.text(0.05, 0.92, f"MAE={mae:.3f}", transform=ax.transAxes, ha='left', va='center')
     ax.set_ylabel("Net Inflow L/s")
     ax.grid()
+
+
+def plot_weather(weather_data: pd.DataFrame, shade_missing=False, axes=None):
+    if axes is None:
+        fig, axes = plt.subplots(nrows=len(weather_data.columns), sharex=True, figsize=(10, 7))
+
+    for i, col in enumerate(weather_data.columns):
+        axes[i].plot(weather_data[col])
+        axes[i].set_ylabel(col)
+
+        y_min, y_max = axes[i].get_ylim()
+
+        if shade_missing:
+            nan_positions = weather_data[col].isna().values
+            axes[i].fill_between(weather_data.index, y_min, y_max, where=nan_positions, color='gray', alpha=0.3)
+
+        axes[i] = draw_test_periods(axes[i], y_min, y_max)
+        axes[i].grid()
+
+    plt.subplots_adjust(bottom=0.05, top=0.95, left=0.1, right=0.9, hspace=0.2)
+    return axes
+
