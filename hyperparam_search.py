@@ -1,6 +1,7 @@
 import timeit
 import pandas as pd
 import numpy as np
+import datetime
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from sklearn_genetic import GASearchCV
 from sklearn.metrics import make_scorer, mean_absolute_error
@@ -9,11 +10,23 @@ from sklearn_genetic.callbacks import ProgressBar
 
 
 import evaluation
+import models
 from preprocess import Preprocess
 
 
 class Searcher:
-    def __init__(self, model_name, model_info, data, y_label, n_lags, len_train, len_test, name, n_splits=3):
+    def __init__(self,
+                 model_name,
+                 model_info,
+                 data,
+                 y_label,
+                 n_lags,
+                 start_train,
+                 start_test,
+                 end_test,
+                 name,
+                 n_splits=3):
+
         self.model_name = model_name
         self.model = model_info['model']
         self.params = model_info['params']
@@ -21,8 +34,9 @@ class Searcher:
         self.data = data
         self.y_label = y_label
         self.n_lags = n_lags
-        self.len_train = len_train
-        self.len_test = len_test
+        self.start_train = start_train
+        self.start_test = start_test
+        self.end_test = end_test
         self.name = name
         self.n_splits = n_splits
 
@@ -31,11 +45,12 @@ class Searcher:
             'MAX_E': make_scorer(evaluation.max_abs_error, greater_is_better=False)
         }
 
-        self.x_train, self.y_train, self.x_test, self.y_test = Preprocess.preprocess_to_label(data=self.data,
-                                                                                              y_label=self.y_label,
-                                                                                              n_lags=self.n_lags,
-                                                                                              len_train=self.len_train,
-                                                                                              len_test=self.len_test)
+        self.x_train, self.y_train, self.x_test, self.y_test = Preprocess.by_label(data=self.data,
+                                                                                   y_label=self.y_label,
+                                                                                   n_lags=self.n_lags,
+                                                                                   start_train=self.start_train,
+                                                                                   start_test=self.start_test,
+                                                                                   end_test=self.end_test)
 
         self.tscv = TimeSeriesSplit(n_splits=self.n_splits)
         self.results = pd.DataFrame()
@@ -90,3 +105,19 @@ class Searcher:
         minutes = seconds / 60
         hours = minutes / 60
         print(f"Estimated search time {hours:.1f} hours")
+
+
+def tune_dma(data, dma_name, n_lags, start_train, start_test, end_test):
+    for model_name, model_info in models.items():
+        searcher = Searcher(model_name=model_name,
+                            model_info=model_info,
+                            data=data,
+                            y_label=dma_name,
+                            n_lags=n_lags,
+                            start_train=start_train,
+                            start_test=start_test,
+                            end_test=end_test,
+                            )
+
+        searcher.grid_search()
+

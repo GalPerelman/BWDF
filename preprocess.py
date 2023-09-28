@@ -49,22 +49,25 @@ class Preprocess:
         return data
 
     @staticmethod
-    def split_data(data, y_label, len_train, len_test):
+    def split_data(data, y_label, start_train, start_test, end_test):
         x_columns = list(data.columns)
-        x_columns.remove(y_label)
+        x_columns = list(set(x_columns) - set(constants.DMA_NAMES))
 
-        x_train = data.iloc[-(len_train + len_test): -len_test].loc[:, x_columns]
-        y_train = data.iloc[-(len_train + len_test): -len_test].loc[:, y_label]
+        x_train = data.loc[(data.index >= start_train) & (data.index < start_test), x_columns]
+        y_train = data.loc[(data.index >= start_train) & (data.index < start_test), y_label]
 
-        x_test = data.iloc[-len_test:].loc[:, x_columns]
-        y_test = data.iloc[-len_test:].loc[:, y_label]
+        x_test = data.loc[(data.index >= start_test) & (data.index < end_test), x_columns]
+        y_test = data.loc[(data.index >= start_test) & (data.index < end_test), y_label]
         return x_train, y_train, x_test, y_test
 
     @staticmethod
-    def preprocess_to_label(data, y_label, n_lags, len_train, len_test):
+    def by_label(data, y_label, n_lags, start_train, start_test, end_test):
         data = Preprocess.construct_lag_features(data=data, y_label=y_label, n_lags=n_lags)
-        x_train, y_train, x_test, y_test = Preprocess.split_data(data=data, y_label=y_label,
-                                                                 len_train=len_train, len_test=len_test)
+        x_train, y_train, x_test, y_test = Preprocess.split_data(data=data,
+                                                                 y_label=y_label,
+                                                                 start_train=start_train,
+                                                                 start_test=start_test,
+                                                                 end_test=end_test)
         return x_train, y_train, x_test, y_test
 
 
