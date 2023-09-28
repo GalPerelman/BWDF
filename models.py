@@ -3,10 +3,8 @@ from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, HistGradi
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.svm import SVR
 import xgboost as xgb
-
 from sklearn_genetic.space import Continuous, Categorical, Integer
 
-# from statsmodels.tsa.statespace.sarimax import SARIMAX
 xgb.set_config(verbosity=0)
 
 
@@ -21,7 +19,7 @@ models = {
                  'min_samples_leaf': [1, 2, 4],
                  'min_samples_split': [2, 5, 10],
                  'n_estimators': [25, 50, 100, 200, 500],
-                 'max_features': ['auto', 'sqrt', 'log2']
+                 'max_features': [10, 'sqrt', 'log2']
 
                  },
 
