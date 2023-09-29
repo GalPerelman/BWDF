@@ -52,7 +52,7 @@ SPECIAL_DATES = [
 ]
 
 TEST_TIMES = {
-    'w1': {'start': datetime.datetime(2022, 7, 25, 0, 0,tzinfo=TZ),
+    'w1': {'start': datetime.datetime(2022, 7, 25, 0, 0, tzinfo=TZ),
            'end': datetime.datetime(2022, 8, 1, 0, 0, tzinfo=TZ)},
 
     'w2': {'start': datetime.datetime(2022, 10, 31, 0, 0, tzinfo=TZ),
@@ -70,3 +70,15 @@ DATES_TO_TEST_EXTREME_RAINFALL = {
     'start_test': pd.Timestamp(2021, 9, 17, 0, 0, tzinfo=TZ),
     'end_test': pd.Timestamp(2021, 9, 18, 0, 0, tzinfo=TZ),
 }
+
+
+def get_test_dates(test_name: str):
+    """
+
+    test_name: Must be one of: 'w1', 'w2', 'w3', 'w4'
+    return: tuple of 3 datetime.datetime (start_test, end_short_test, end_long_test)
+    """
+    start_test = TEST_TIMES[test_name]['start']
+    end_short_test = start_test + datetime.timedelta(hours=24)
+    end_long_test = TEST_TIMES[test_name]['end']
+    return start_test, end_short_test, end_long_test

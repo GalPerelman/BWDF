@@ -8,9 +8,10 @@ from sklearn.metrics import make_scorer, mean_absolute_error
 from sklearn_genetic.space import Continuous, Categorical, Integer
 from sklearn_genetic.callbacks import ProgressBar
 
-
+import constants
+from data_loader import Loader
 import evaluation
-import models
+from models import models
 from preprocess import Preprocess
 
 
@@ -24,7 +25,6 @@ class Searcher:
                  start_train,
                  start_test,
                  end_test,
-                 name,
                  n_splits=3):
 
         self.model_name = model_name
@@ -37,8 +37,9 @@ class Searcher:
         self.start_train = start_train
         self.start_test = start_test
         self.end_test = end_test
-        self.name = name
         self.n_splits = n_splits
+
+        self.pred_term = self.is_short_or_long()
 
         self.scoring = {
             'MAE': make_scorer(mean_absolute_error, greater_is_better=False),
@@ -55,6 +56,16 @@ class Searcher:
         self.tscv = TimeSeriesSplit(n_splits=self.n_splits)
         self.results = pd.DataFrame()
 
+    def is_short_or_long(self):
+        """
+        Is model for short term (24 hr) or long term (168 hr)
+        return: str 'short' or 'long'
+        """
+        if self.end_test - self.start_test == datetime.timedelta(hours=24):
+            return 'short'
+        elif self.end_test - self.start_test == datetime.timedelta(hours=168):
+            return 'long'
+
     def grid_search(self):
         gs_model = GridSearchCV(estimator=self.model, param_grid=self.params, cv=self.tscv, verbose=3,
                                 scoring=self.scoring, refit='MAE', n_jobs=-1)
@@ -62,7 +73,7 @@ class Searcher:
         gs_model.fit(self.x_train, self.y_train)
         print(gs_model.best_params_, gs_model.best_score_)
         results = pd.DataFrame(gs_model.cv_results_)
-        results.to_csv(f'{self.name}_{self.y_label[:-6]}_{self.model_name}.csv', index=False)
+        results.to_csv(f'{self.pred_term}_{self.y_label[:-6]}_{self.model_name}.csv', index=False)
 
     def ga_search(self):
         ga_model = GASearchCV(estimator=self.model, param_grid=self.ga_params, scoring="neg_mean_absolute_error",
@@ -80,9 +91,6 @@ class Searcher:
                            'score_value': score_value},
                           index=[len(self.results)])
         self.results = pd.concat([self.results, df])
-
-    def export_results(self, export_file_name):
-        self.results.to_csv(f'{export_file_name}_params.csv')
 
     def estimate_gridsearch_time(self):
         times = []
@@ -120,4 +128,35 @@ def tune_dma(data, dma_name, n_lags, start_train, start_test, end_test):
                             )
 
         searcher.grid_search()
+
+
+def tune_all_dmas():
+    loader = Loader()
+    preprocess = Preprocess(loader.inflow, loader.weather, n_neighbors=3)
+    data = preprocess.data
+
+    start_test, end_short_test, end_long_test = constants.get_test_dates('w1')
+
+    for dma in constants.DMA_NAMES:
+        # tune for short term
+        tune_dma(data=data,
+                 dma_name=dma,
+                 n_lags=12,
+                 start_train=data.index.min(),
+                 start_test=start_test,
+                 end_test=end_short_test
+                 )
+
+        # tune for long term
+        tune_dma(data=data,
+                 dma_name=dma,
+                 n_lags=12,
+                 start_train=data.index.min(),
+                 start_test=start_test,
+                 end_test=end_long_test
+                 )
+
+
+if "__main__" == __name__:
+    tune_all_dmas()
 
