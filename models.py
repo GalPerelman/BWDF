@@ -42,7 +42,6 @@ models = {
                  "max_depth": [4, 5, 6, 7, 8],
                  "learning_rate": [0.01, 0.05, 0.1, 0.2],
                  "n_estimators": [25, 50, 100, 200, 500],
-                 "colsample_bytree": [0.4, 0.5, 0.7],
                  "reg_alpha": [0, 0.1, 0.5],
                  "min_sample_leaf": [2, 3, None],
                  "min_sample_split": [2, 3, None]
@@ -53,7 +52,6 @@ models = {
                  'bootstrap': Categorical([True, False]),
                  'max_depth': Integer(10, 20),
                  'learning_rate': Continuous(0.01, 0.4),
-                 'colsample_bytree': Continuous(0.3, 0.7),
                  'n_estimators': Integer(20, 50)
                  },
         }
