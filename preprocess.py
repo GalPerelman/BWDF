@@ -70,4 +70,7 @@ class Preprocess:
                                                                  end_test=end_test)
         return x_train, y_train, x_test, y_test
 
+    def export(self, path):
+        self.data.to_csv(path)
+
 
