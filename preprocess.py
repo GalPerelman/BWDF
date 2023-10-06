@@ -37,8 +37,8 @@ class Preprocess:
         def is_dst(dt):
             return dt.dst() != pd.Timedelta(0)
 
-        self.data['is_dst'] = self.data.index.map(is_dst)
-        self.data['is_special'] = self.data.index.normalize().isin(constants.SPECIAL_DATES)
+        self.data['is_dst'] = self.data.index.map(is_dst).astype(int)
+        self.data['is_special'] = self.data.index.normalize().isin(constants.SPECIAL_DATES).astype(int)
 
     @staticmethod
     def construct_lag_features(data, y_label, n_lags):
