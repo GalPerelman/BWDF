@@ -1,4 +1,6 @@
 import timeit
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import datetime
@@ -9,9 +11,9 @@ from sklearn_genetic.space import Continuous, Categorical, Integer
 from sklearn_genetic.callbacks import ProgressBar
 
 import constants
-from data_loader import Loader
 import evaluation
-from models import models
+from data_loader import Loader
+from params_grids import models
 from preprocess import Preprocess
 
 
@@ -30,7 +32,6 @@ class Searcher:
         self.model_name = model_name
         self.model = model_info['model']
         self.params = model_info['params']
-        self.ga_params = model_info['ga_params']
         self.data = data
         self.y_label = y_label
         self.n_lags = n_lags
@@ -71,7 +72,6 @@ class Searcher:
                                 scoring=self.scoring, refit='MAE', n_jobs=-1)
 
         gs_model.fit(self.x_train, self.y_train)
-        print(gs_model.best_params_, gs_model.best_score_)
         results = pd.DataFrame(gs_model.cv_results_)
         results.to_csv(f'{self.pred_term}_{self.y_label[:-6]}_{self.model_name}.csv', index=False)
 
@@ -80,7 +80,6 @@ class Searcher:
                               cv=self.tscv, verbose=True, population_size=10, generations=25, n_jobs=-1)
 
         ga_model.fit(self.x_train, self.y_train)
-        print(self.model_name, ga_model.best_params_, ga_model.best_score_)
         results = pd.DataFrame(ga_model.cv_results_)
         results.to_csv(f'{self.y_label[:-6]}_{self.model_name}.csv', index=False)
 
@@ -115,8 +114,9 @@ class Searcher:
         print(f"Estimated search time {hours:.1f} hours")
 
 
-def tune_dma(data, dma_name, n_lags, start_train, start_test, end_test):
-    for model_name, model_info in models.items():
+def tune_dma(data, dma_name, models_names, n_lags, start_train, start_test, end_test):
+    for model_name in models_names:
+        model_info = models[model_name]
         searcher = Searcher(model_name=model_name,
                             model_info=model_info,
                             data=data,
@@ -130,7 +130,7 @@ def tune_dma(data, dma_name, n_lags, start_train, start_test, end_test):
         searcher.grid_search()
 
 
-def tune_all_dmas():
+def tune_all_dmas(models_names: list):
     loader = Loader()
     preprocess = Preprocess(loader.inflow, loader.weather, n_neighbors=3)
     data = preprocess.data
@@ -141,6 +141,7 @@ def tune_all_dmas():
         # tune for short term
         tune_dma(data=data,
                  dma_name=dma,
+                 models_names=models_names,
                  n_lags=12,
                  start_train=data.index.min(),
                  start_test=start_test,
@@ -150,6 +151,7 @@ def tune_all_dmas():
         # tune for long term
         tune_dma(data=data,
                  dma_name=dma,
+                 models_names=models_names,
                  n_lags=12,
                  start_train=data.index.min(),
                  start_test=start_test,
@@ -158,5 +160,4 @@ def tune_all_dmas():
 
 
 if "__main__" == __name__:
-    tune_all_dmas()
-
+    tune_all_dmas(['prophet'])
