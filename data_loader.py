@@ -18,12 +18,13 @@ class Loader:
     @staticmethod
     def load_excel(file_path: str):
         """
-        This function loads Excel files with the BWDF structure
+        This function loads Excel file with the BWDF structure
+        After loading the file the function convert the datetime index to be timezone aware
         First column is a datetime index
         The datetime format is DD/MM/YYYY HH:mm
         :return: pandas.DataFrame with datetime index
         """
         df = pd.read_excel(file_path, index_col=0)
         df.index = pd.to_datetime(df.index, format="%d/%m/%Y %H:%M")
-        df.index = df.index.tz_localize('UTC').tz_convert(constants.TZ)
+        df.index = df.index.tz_localize(constants.TZ, ambiguous='infer')
         return df
