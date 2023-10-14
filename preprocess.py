@@ -12,8 +12,9 @@ class Preprocess:
 
         self.inflow = self.data_completion(self.inflow)
         self.weather = self.data_completion(self.weather)
-        self.data = pd.merge(self.inflow, self.weather, left_index=True, right_index=True, how="left")
 
+        # merge on weather such that data will include test periods
+        self.data = pd.merge(self.inflow, self.weather, left_index=True, right_index=True, how="right")
         self.construct_datetime_features()
 
     def data_completion(self, data):
@@ -45,7 +46,8 @@ class Preprocess:
         for i in range(1, n_lags+1):
             data[y_label + f'_{i}'] = data[y_label].shift(i)
 
-        data.dropna(inplace=True)
+        # drop the n_lags first rows to clear Nans
+        data = data.iloc[n_lags:]
         return data
 
     @staticmethod
