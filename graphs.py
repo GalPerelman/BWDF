@@ -21,14 +21,14 @@ def draw_test_periods(ax, y_min, y_max):
     return ax
 
 
-def plot_dmas(data: pd.DataFrame, downscale=0, shade_missing: bool = False, axes=None, linestyle=None):
+def plot_raw_data(data, columns, downscale=0, shade_missing: bool = False, axes=None, linestyle=None):
     if downscale > 0:
         data = data.iloc[::downscale]
 
     if axes is None:
         fig, axes = plt.subplots(nrows=len(data.columns), sharex=True, figsize=(12, 8))
 
-    for i, col in enumerate(constants.DMA_NAMES):
+    for i, col in enumerate(columns):
         axes[i].plot(data[col], linestyle=linestyle, label='Raw')
         axes[i].text(0.03, 0.8, f"{col[:-6]}", transform=axes[i].transAxes, ha='center', va='center')
 
@@ -44,10 +44,10 @@ def plot_dmas(data: pd.DataFrame, downscale=0, shade_missing: bool = False, axes
     return axes
 
 
-def visualize_data_completion(raw_data, completed_data):
-    axes = plot_dmas(data=raw_data, downscale=0, shade_missing=True)
+def visualize_data_completion(raw_data, completed_data, columns):
+    axes = plot_raw_data(data=raw_data, columns=columns, downscale=0, shade_missing=True)
 
-    for i, col in enumerate(constants.DMA_NAMES):
+    for i, col in enumerate(columns):
         nan_idx = raw_data[raw_data[col].isna()].index
 
         gaps = np.where(np.diff(nan_idx) > pd.Timedelta('1H'))[0]
