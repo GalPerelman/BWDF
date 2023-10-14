@@ -27,3 +27,26 @@ class Forecast:
 
         pred = pd.DataFrame(reg.predict(self.x_test), index=self.x_test.index)
         return pred
+
+    def one_step_loop_predict(self, model, params, n_periods):
+        """
+        Function to predict with lagged features
+
+        param n_periods:    int, number of periods to predict
+        :return:
+        """
+        pred = pd.DataFrame()
+
+        reg = model(**params)
+        reg.fit(self.x_train, self.y_train)
+
+        for i in range(n_periods):
+            next_step_idx = self.x_test.index[i]
+            for j in range(self.n_lags):
+                self.x_test.loc[next_step_idx, self.y_label + f'_{j+1}'] = self.y_train.iloc[-(j+1)]
+
+            pred_value = reg.predict(self.x_test.iloc[[i]])[0]
+            pred.loc[next_step_idx, 'value'] = pred_value
+            self.y_train.loc[next_step_idx] = pred_value
+
+        return pred
