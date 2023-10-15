@@ -14,6 +14,8 @@ DMA_NAMES = ["DMA A (L/s)", "DMA B (L/s)", "DMA C (L/s)", "DMA D (L/s)", "DMA E 
 EXOG_COLUMNS = ['is_dst', 'is_special', 'day', 'month', 'Rainfall depth (mm)', 'Air temperature (°C)',
                 'Windspeed (km/h)', 'week_num', 'Air humidity (%)', 'weekday_int', 'hour']
 
+WEATHER_COLUMNS = ['Rainfall depth (mm)', 'Air temperature (°C)', 'Windspeed (km/h)', 'Air humidity (%)']
+
 TZ = pytz.timezone('CET')
 
 SUMMER_TIME = [
