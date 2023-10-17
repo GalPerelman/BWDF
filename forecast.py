@@ -14,12 +14,11 @@ class Forecast:
         self.start_test = start_test
         self.end_test = end_test
 
-        self.x_train, self.y_train, self.x_test, self.y_test = Preprocess.by_label(data=self.data,
-                                                                                   y_label=self.y_label,
-                                                                                   n_lags=self.n_lags,
-                                                                                   start_train=self.start_train,
-                                                                                   start_test=self.start_test,
-                                                                                   end_test=self.end_test)
+        self.x_train, self.y_train, self.x_test, self.y_test = Preprocess.split_data(data=self.data,
+                                                                                     y_label=self.y_label,
+                                                                                     start_train=self.start_train,
+                                                                                     start_test=self.start_test,
+                                                                                     end_test=self.end_test)
 
     def predict(self, model, params):
         reg = model(**params)
@@ -43,7 +42,7 @@ class Forecast:
         for i in range(n_periods):
             next_step_idx = self.x_test.index[i]
             for j in range(self.n_lags):
-                self.x_test.loc[next_step_idx, self.y_label + f'_{j+1}'] = self.y_train.iloc[-(j+1)]
+                self.x_test.loc[next_step_idx, self.y_label + f'_{j + 1}'] = self.y_train.iloc[-(j + 1)]
 
             pred_value = reg.predict(self.x_test.iloc[[i]])[0]
             pred.loc[next_step_idx, 'value'] = pred_value
