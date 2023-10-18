@@ -78,6 +78,7 @@ def plot_test(observed, predicted, ax=None):
     ax.text(0.05, 0.92, f"MAE={mae:.3f}", transform=ax.transAxes, ha='left', va='center')
     ax.set_ylabel("Net Inflow L/s")
     ax.grid()
+    return ax
 
 
 def plot_weather(weather_data: pd.DataFrame, shade_missing=False, axes=None):
