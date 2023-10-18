@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.impute import KNNImputer
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 import constants
 
@@ -37,16 +38,16 @@ class Preprocess:
         # self.data['weekday_int'] = (self.data.index.weekday + 1) % 7 + 1
         # self.data['week_num'] = self.data.index.strftime('%U').astype(int) + 1
 
-        self.data['hour_sin'] = self.data.index.hour * (2. * np.pi / 24)
-        self.data['hour_cos'] = self.data.index.hour * (2. * np.pi / 24)
-        self.data['day_sin'] = self.data.index.day * (2. * np.pi / 31)  # Assuming max 31 days in a month
-        self.data['day_cos'] = self.data.index.day * (2. * np.pi / 31)
-        self.data['weekday_sin'] = ((self.data.index.weekday + 1) % 7 + 1) * (2. * np.pi / 7)
-        self.data['weekday_cos'] = ((self.data.index.weekday + 1) % 7 + 1) * (2. * np.pi / 7)
-        self.data['month_sin'] = self.data.index.month * (2. * np.pi / 12)
-        self.data['month_cos'] = self.data.index.month * (2. * np.pi / 12)
-        self.data['weeknum_sin'] = (self.data.index.strftime('%U').astype(int) + 1) * (2. * np.pi / 52)
-        self.data['weeknum_cos'] = (self.data.index.strftime('%U').astype(int) + 1) * (2. * np.pi / 52)
+        self.data['hour_sin'] = np.sin(self.data.index.hour * (2. * np.pi / 24))
+        self.data['hour_cos'] = np.cos(self.data.index.hour * (2. * np.pi / 24))
+        self.data['day_sin'] = np.sin(self.data.index.day * (2. * np.pi / 31))  # Assuming max 31 days in a month
+        self.data['day_cos'] = np.cos(self.data.index.day * (2. * np.pi / 31))
+        self.data['weekday_sin'] = np.sin(((self.data.index.weekday + 1) % 7 + 1) * (2. * np.pi / 7))
+        self.data['weekday_cos'] = np.cos(((self.data.index.weekday + 1) % 7 + 1) * (2. * np.pi / 7))
+        self.data['month_sin'] = np.sin(self.data.index.month * (2. * np.pi / 12))
+        self.data['month_cos'] = np.cos(self.data.index.month * (2. * np.pi / 12))
+        self.data['weeknum_sin'] = np.sin((self.data.index.strftime('%U').astype(int) + 1) * (2. * np.pi / 52))
+        self.data['weeknum_cos'] = np.cos((self.data.index.strftime('%U').astype(int) + 1) * (2. * np.pi / 52))
 
         def is_dst(dt):
             return dt.dst() != pd.Timedelta(0)
@@ -75,6 +76,30 @@ class Preprocess:
         x_test = data.loc[(data.index >= start_test) & (data.index < end_test), x_columns]
         y_test = data.loc[(data.index >= start_test) & (data.index < end_test), y_label]
         return x_train, y_train, x_test, y_test
+
+    @staticmethod
+    def standardize(data, columns, scalers=None, method='standard'):
+        scalers_by_method = {'standard': StandardScaler, 'min_max': MinMaxScaler}
+        if scalers is None:
+            scalers = {}
+            scaler = scalers_by_method[method]
+
+            for col in columns:
+                data.loc[:, col] = scaler.fit_transform(data[[col]])
+                scalers[col] = scaler
+
+        if isinstance(scalers, dict):
+            for col in columns:
+                scaler = scalers[col]
+                data.loc[:, col] = scaler.transform(data[[col]])
+
+        return data, scalers
+
+    @staticmethod
+    def drop_other_dmas(data, y_label):
+        cols_to_drop = list(set(constants.DMA_NAMES) - set([y_label]))
+        data = data.drop(cols_to_drop, axis=1)
+        return data
 
     def export(self, path):
         self.data.to_csv(path)
