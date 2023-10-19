@@ -48,3 +48,9 @@ def get_test_dates(test_name: str):
     end_short_test = start_test + datetime.timedelta(hours=24)
     end_long_test = constants.TEST_TIMES[test_name]['end']
     return start_test, end_short_test, end_long_test
+
+
+def drop_other_dmas(data, y_label):
+    cols_to_drop = list(set(constants.DMA_NAMES) - set([y_label]))
+    data = data.drop(cols_to_drop, axis=1)
+    return data
