@@ -78,22 +78,26 @@ class Preprocess:
         return x_train, y_train, x_test, y_test
 
     @staticmethod
-    def standardize(data, columns, scalers=None, method='standard'):
-        scalers_by_method = {'standard': StandardScaler, 'min_max': MinMaxScaler}
-        if scalers is None:
-            scalers = {}
-            scaler = scalers_by_method[method]
+    def fit_transform(data, columns, method='standard'):
+        scalers = {}
+        for col in columns:
+            if method == 'standard':
+                scaler = StandardScaler()
+            elif method == 'min_max':
+                scaler = MinMaxScaler(feature_range=(0, 1))
 
-            for col in columns:
-                data.loc[:, col] = scaler.fit_transform(data[[col]])
-                scalers[col] = scaler
-
-        if isinstance(scalers, dict):
-            for col in columns:
-                scaler = scalers[col]
-                data.loc[:, col] = scaler.transform(data[[col]])
+            data.loc[:, col] = scaler.fit_transform(data[[col]])
+            scalers[col] = scaler
 
         return data, scalers
+
+    @staticmethod
+    def transform(data,  columns, scalers):
+        for col in columns:
+            scaler = scalers[col]
+            data.loc[:, col] = scaler.transform(data[[col]])
+
+        return data
 
     @staticmethod
     def drop_other_dmas(data, y_label):
