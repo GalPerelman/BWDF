@@ -54,3 +54,16 @@ def drop_other_dmas(data, y_label):
     cols_to_drop = list(set(constants.DMA_NAMES) - set([y_label]))
     data = data.drop(cols_to_drop, axis=1)
     return data
+
+
+def num_hours_between_timestamps(t1, t2):
+    """
+    Calculate the number of hours between two timestamps where t2 > t1
+    param t1:       datetime.datetime, period start
+    param t2:       datetime.datetime, period end
+    return:         int, number of hours
+    """
+    diff = t2 - t1
+    days, seconds = diff.days, diff.seconds
+    hours = int(days * 24 + seconds // 3600)
+    return hours

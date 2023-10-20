@@ -1,12 +1,7 @@
 import pandas as pd
 import numpy as np
 import datetime
-import math
-import json
-
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.base import BaseEstimator, TransformerMixin
+import matplotlib.pyplot as plt
 
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation, Dropout, LSTM
@@ -16,6 +11,7 @@ from keras.preprocessing.sequence import TimeseriesGenerator
 
 import constants
 import utils
+import graphs
 from preprocess import Preprocess
 from data_loader import Loader
 
@@ -89,12 +85,11 @@ class LSTMForecaster:
 
         # normalize the final data
         standardize_columns = constants.WEATHER_COLUMNS + [self.y_label]
-        final_data, final_scalers = Preprocess.standardize(final_data, columns=standardize_columns)
+        final_data, final_scalers = Preprocess.fit_transform(final_data, columns=standardize_columns)
 
         # split to features and target
         final_x = final_data.loc[:, [col for col in final_data.columns if col != self.y_label]]
         final_y = final_data.loc[:, self.y_label]
-
         final_train_x = []
         final_train_y = []
 
@@ -112,9 +107,8 @@ class LSTMForecaster:
         return final_scalers, final_train_x, final_train_y, future_exog
 
     def future_predict(self):
-        n_periods = self.start_test - self.end
+        n_periods = utils.num_hours_between_timestamps(self.end_test, self.start_test)
         final_scalers, final_train_x, final_train_y, future_exog = self.future_predict_preprocess(n_periods)
-
         input_sequence = final_train_x[-1].reshape(1, final_train_x.shape[1], final_train_x.shape[2])
 
         forecast = []
@@ -136,7 +130,8 @@ class LSTMForecaster:
 
         forecast = np.array(forecast).reshape(-1, 1)
         forecast = final_scalers[self.y_label].inverse_transform(forecast).flatten()
-        forecast_period_dates = pd.date_range(start=self.start_test, end=self.end_test, freq='1H')
+        forecast_period_dates = pd.date_range(start=self.start_test,
+                                              end=self.end_test - datetime.timedelta(hours=1), freq='1H')
         forecast = pd.DataFrame({'forecast': forecast}, index=forecast_period_dates)
         return forecast
 
@@ -150,11 +145,15 @@ if __name__ == "__main__":
     start_train = constants.TZ.localize(datetime.datetime(2022, 1, 1, 0, 0))
     start_valid = constants.DATES_OF_LATEST_WEEK['start_test']
     start_test = constants.DATES_OF_LATEST_WEEK['end_test']
-    end_test = start_test + datetime.timedelta(days=7)
+    end_test = start_test + datetime.timedelta(hours=168)
 
     lstm = LSTMForecaster(data=data, start_train=start_train, start_valid=start_valid, start_test=start_test,
-                          end_test=end_test, y_label=constants.DMA_NAMES[0], look_back=12)
+                          end_test=end_test, y_label=constants.DMA_NAMES[1], look_back=12)
 
     lstm.fit()
     res = lstm.vaildation_predict()
-    print(res)
+    ax = graphs.plot_test(res['true'], res['pred'])
+
+    forecast = lstm.future_predict()
+    ax.plot(forecast)
+    plt.show()
