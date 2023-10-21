@@ -7,11 +7,10 @@ import constants
 
 
 class Preprocess:
-    def __init__(self, inflow: pd.DataFrame, weather: pd.DataFrame, n_neighbors: int, weather_lags: int):
+    def __init__(self, inflow: pd.DataFrame, weather: pd.DataFrame, n_neighbors: int):
         self.inflow = inflow
         self.weather = weather
         self.n_neighbors = n_neighbors
-        self.weather_lags = weather_lags
 
         self.inflow = self.data_completion(self.inflow)
         self.weather = self.data_completion(self.weather)
