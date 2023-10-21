@@ -63,14 +63,14 @@ class LSTMForecaster:
 
     def build_model(self):
         self.model = Sequential()
-        self.model.add(LSTM(50, input_shape=(self.look_back, self.x_train.shape[1]), return_sequences=True))
-        self.model.add(LSTM(50, return_sequences=False))
+        self.model.add(LSTM(80, input_shape=(self.look_back, self.x_train.shape[1]), return_sequences=True))
+        self.model.add(LSTM(80, return_sequences=False))
         self.model.add(Dropout(0.2))
         self.model.add(Dense(1))
         self.model.compile(optimizer='adam', loss='mse')
 
     def fit(self):
-        history = self.model.fit(self.train_gen, epochs=12, batch_size=48, validation_data=self.valid_gen, shuffle=False)
+        history = self.model.fit(self.train_gen, epochs=12, batch_size=48, validation_data=self.valid_gen)
         return history
 
     def vaildation_predict(self):
@@ -78,7 +78,7 @@ class LSTMForecaster:
         pred = self.scalers[self.y_label].inverse_transform(pred)
         true_values = self.scalers[self.y_label].inverse_transform(self.y_valid.values.reshape(-1, 1)).flatten()
         results = pd.DataFrame({'true': true_values[self.look_back:]}, index=self.y_valid.iloc[self.look_back:].index)
-        results['pred'] = pred.flatten()
+        results[self.y_label] = pred.flatten()
         return results
 
     def future_predict_preprocess(self, n_periods):
@@ -145,10 +145,9 @@ class LSTMForecaster:
         standardize_columns = constants.WEATHER_COLUMNS + [self.y_label]
         final_data = Preprocess.transform(final_data, columns=standardize_columns, scalers=self.scalers)
         final_x = final_data.loc[:, [col for col in final_data.columns if col != self.y_label]]
-        print(final_x.columns)
+
         # prepare the future periods exogenous data
         future_exog = self.data.loc[(self.data.index >= self.start_test) & (self.data.index < self.end_test)]
-        print(future_exog.columns)
         future_exog = Preprocess.transform(future_exog, columns=standardize_columns, scalers=self.scalers)
         future_exog = future_exog.drop(self.y_label, axis=1)
         future_exog = future_exog.values
@@ -160,7 +159,7 @@ class LSTMForecaster:
 
         for i in range(n_periods):
             # Predict the next step using only the feature sequence
-            prediction = self.model.predict(current_sequence_x[np.newaxis, :, :])[0, 0]
+            prediction = self.model.predict(current_sequence_x[np.newaxis, :, :], verbose=0)[0, 0]
             forecast.append(prediction)
 
             # Update the feature sequence:
@@ -172,14 +171,39 @@ class LSTMForecaster:
         forecast = self.scalers[self.y_label].inverse_transform(forecast).flatten()
         forecast_period_dates = pd.date_range(start=self.start_test,
                                               end=self.end_test - datetime.timedelta(hours=1), freq='1H')
-        forecast = pd.DataFrame({'forecast': forecast}, index=forecast_period_dates)
+        forecast = pd.DataFrame({self.y_label: forecast}, index=forecast_period_dates)
         return forecast
+
+
+def predict_all_dmas(data, start_train, start_valid, start_test, end_test):
+    test_true = data.loc[(data.index >= start_test) & (data.index < end_test)]
+    df = pd.DataFrame(index=pd.date_range(start=start_test, end=end_test - datetime.timedelta(hours=1), freq='1H'))
+
+    fig, axes = plt.subplots(nrows=len(constants.DMA_NAMES), sharex=True, figsize=(12, 9))
+
+    for i, dma in enumerate(constants.DMA_NAMES):
+        lstm = LSTMForecaster(data=data, start_train=start_train, start_valid=start_valid, start_test=start_test,
+                              end_test=end_test, y_label=dma, look_back=12)
+
+        lstm.fit()
+        pred = lstm.one_step_future_predict()
+        df = pd.merge(df, pred, left_index=True, right_index=True)
+        axes[i] = graphs.plot_test(test_true[dma], pred, ax=axes[i])
+        axes[i].set_ylabel(dma[:5])
+
+    fig.align_ylabels()
+    fig.subplots_adjust(bottom=0.05, top=0.95, left=0.1, right=0.9, hspace=0.1)
+
+    fig = graphs.plot_time_series(data=test_true, columns=constants.DMA_NAMES)
+    fig = graphs.plot_time_series(data=df, columns=constants.DMA_NAMES, fig=fig)
+
+    return df
 
 
 if __name__ == "__main__":
     # usage example
     loader = Loader()
-    preprocess = Preprocess(loader.inflow, loader.weather, n_neighbors=3)
+    preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
     data = preprocess.data
     y_label = constants.DMA_NAMES[0]
 
@@ -193,7 +217,7 @@ if __name__ == "__main__":
 
     lstm.fit()
     valid_pred = lstm.vaildation_predict()
-    ax = graphs.plot_test(valid_pred['true'], valid_pred['pred'])
+    ax = graphs.plot_test(valid_pred['true'], valid_pred[y_label])
 
     test_pred = lstm.one_step_future_predict()
 
