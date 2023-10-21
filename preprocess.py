@@ -7,9 +7,10 @@ import constants
 
 
 class Preprocess:
-    def __init__(self, inflow: pd.DataFrame, weather: pd.DataFrame, n_neighbors: int):
+    def __init__(self, inflow: pd.DataFrame, weather: pd.DataFrame, cyclic_time_features: bool, n_neighbors: int):
         self.inflow = inflow
         self.weather = weather
+        self.cyclic_time_features = cyclic_time_features
         self.n_neighbors = n_neighbors
 
         self.inflow = self.data_completion(self.inflow)
@@ -30,23 +31,25 @@ class Preprocess:
         Function to add categories based on the datetime index
         Month, weekday, hour, special dates
         """
-        # self.data['month'] = self.data.index.month
-        # self.data['day'] = self.data.index.day
-        # self.data['hour'] = self.data.index.hour
-        # self.data['weekday'] = self.data.index.day_name()
-        # self.data['weekday_int'] = (self.data.index.weekday + 1) % 7 + 1
-        # self.data['week_num'] = self.data.index.strftime('%U').astype(int) + 1
+        if not self.cyclic_time_features:
+            self.data['month'] = self.data.index.month
+            self.data['day'] = self.data.index.day
+            self.data['hour'] = self.data.index.hour
+            # self.data['weekday'] = self.data.index.day_name()
+            self.data['weekday_int'] = (self.data.index.weekday + 1) % 7 + 1
+            self.data['week_num'] = self.data.index.strftime('%U').astype(int) + 1
 
-        self.data['hour_sin'] = np.sin(self.data.index.hour * (2. * np.pi / 24))
-        self.data['hour_cos'] = np.cos(self.data.index.hour * (2. * np.pi / 24))
-        self.data['day_sin'] = np.sin(self.data.index.day * (2. * np.pi / 31))  # Assuming max 31 days in a month
-        self.data['day_cos'] = np.cos(self.data.index.day * (2. * np.pi / 31))
-        self.data['weekday_sin'] = np.sin(((self.data.index.weekday + 1) % 7 + 1) * (2. * np.pi / 7))
-        self.data['weekday_cos'] = np.cos(((self.data.index.weekday + 1) % 7 + 1) * (2. * np.pi / 7))
-        self.data['month_sin'] = np.sin(self.data.index.month * (2. * np.pi / 12))
-        self.data['month_cos'] = np.cos(self.data.index.month * (2. * np.pi / 12))
-        self.data['weeknum_sin'] = np.sin((self.data.index.strftime('%U').astype(int) + 1) * (2. * np.pi / 52))
-        self.data['weeknum_cos'] = np.cos((self.data.index.strftime('%U').astype(int) + 1) * (2. * np.pi / 52))
+        elif self.cyclic_time_features:
+            self.data['hour_sin'] = np.sin(self.data.index.hour * (2. * np.pi / 24))
+            self.data['hour_cos'] = np.cos(self.data.index.hour * (2. * np.pi / 24))
+            self.data['day_sin'] = np.sin(self.data.index.day * (2. * np.pi / 31))  # Assuming max 31 days in a month
+            self.data['day_cos'] = np.cos(self.data.index.day * (2. * np.pi / 31))
+            self.data['weekday_sin'] = np.sin(((self.data.index.weekday + 1) % 7 + 1) * (2. * np.pi / 7))
+            self.data['weekday_cos'] = np.cos(((self.data.index.weekday + 1) % 7 + 1) * (2. * np.pi / 7))
+            self.data['month_sin'] = np.sin(self.data.index.month * (2. * np.pi / 12))
+            self.data['month_cos'] = np.cos(self.data.index.month * (2. * np.pi / 12))
+            self.data['weeknum_sin'] = np.sin((self.data.index.strftime('%U').astype(int) + 1) * (2. * np.pi / 52))
+            self.data['weeknum_cos'] = np.cos((self.data.index.strftime('%U').astype(int) + 1) * (2. * np.pi / 52))
 
         def is_dst(dt):
             return dt.dst() != pd.Timedelta(0)
