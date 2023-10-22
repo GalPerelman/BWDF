@@ -17,7 +17,7 @@ from data_loader import Loader
 
 
 class LSTMForecaster:
-    def __init__(self, data, start_train, start_valid, start_test, end_test, y_label, look_back):
+    def __init__(self, data, start_train, start_valid, start_test, end_test, y_label, look_back, standard_cols):
         self.data = data
         self.start_train = start_train
         self.start_valid = start_valid
@@ -25,6 +25,7 @@ class LSTMForecaster:
         self.end_test = end_test
         self.y_label = y_label
         self.look_back = look_back
+        self.standard_cols = standard_cols + [self.y_label]
 
         self.train_data = None
         self.valid_data = None
@@ -47,9 +48,8 @@ class LSTMForecaster:
         train = self.data.loc[(self.data.index >= self.start_train) & (self.data.index < self.start_valid)]
         valid = self.data.loc[(self.data.index >= self.start_valid) & (self.data.index < self.start_test)]
 
-        standardize_columns = constants.WEATHER_COLUMNS + [self.y_label]
-        self.train_data, self.scalers = Preprocess.fit_transform(train, columns=standardize_columns, method='standard')
-        self.valid_data = Preprocess.transform(valid, columns=standardize_columns, scalers=self.scalers)
+        self.train_data, self.scalers = Preprocess.fit_transform(train, columns=self.standard_cols, method='standard')
+        self.valid_data = Preprocess.transform(valid, columns=self.standard_cols, scalers=self.scalers)
 
         self.x_train = train.loc[:, [col for col in train.columns if col != self.y_label]]
         self.y_train = train.loc[:, self.y_label]
@@ -63,14 +63,17 @@ class LSTMForecaster:
 
     def build_model(self):
         self.model = Sequential()
-        self.model.add(LSTM(80, input_shape=(self.look_back, self.x_train.shape[1]), return_sequences=True))
-        self.model.add(LSTM(80, return_sequences=False))
+        self.model.add(LSTM(100, input_shape=(self.look_back, self.x_train.shape[1]), return_sequences=True))
+        self.model.add(LSTM(100, return_sequences=False))
         self.model.add(Dropout(0.2))
         self.model.add(Dense(1))
         self.model.compile(optimizer='adam', loss='mse')
 
     def fit(self):
-        history = self.model.fit(self.train_gen, epochs=12, batch_size=48, validation_data=self.valid_gen)
+        early_stopping_monitor = EarlyStopping(monitor='val_loss', min_delta=0, patience=0, verbose=0, mode='auto',
+                                               baseline=None, restore_best_weights=True)
+        history = self.model.fit(self.train_gen, epochs=12, batch_size=48, validation_data=self.valid_gen,
+                                 callbacks=[early_stopping_monitor])
         return history
 
     def vaildation_predict(self):
@@ -86,8 +89,7 @@ class LSTMForecaster:
         final_data = self.data.loc[self.data.index < self.start_test]
 
         # normalize the final data
-        standardize_columns = constants.WEATHER_COLUMNS + [self.y_label]
-        final_data = Preprocess.transform(final_data, columns=standardize_columns, scalers=self.scalers)
+        final_data = Preprocess.transform(final_data, columns=self.standard_cols, scalers=self.scalers)
 
         # split to features and target
         final_x = final_data.loc[:, [col for col in final_data.columns if col != self.y_label]]
@@ -142,13 +144,12 @@ class LSTMForecaster:
         final_data = self.data.loc[self.data.index < self.start_test]
 
         # normalize the final data
-        standardize_columns = constants.WEATHER_COLUMNS + [self.y_label]
-        final_data = Preprocess.transform(final_data, columns=standardize_columns, scalers=self.scalers)
+        final_data = Preprocess.transform(final_data, columns=self.standard_cols, scalers=self.scalers)
         final_x = final_data.loc[:, [col for col in final_data.columns if col != self.y_label]]
 
         # prepare the future periods exogenous data
         future_exog = self.data.loc[(self.data.index >= self.start_test) & (self.data.index < self.end_test)]
-        future_exog = Preprocess.transform(future_exog, columns=standardize_columns, scalers=self.scalers)
+        future_exog = Preprocess.transform(future_exog, columns=self.standard_cols, scalers=self.scalers)
         future_exog = future_exog.drop(self.y_label, axis=1)
         future_exog = future_exog.values
 
@@ -175,7 +176,7 @@ class LSTMForecaster:
         return forecast
 
 
-def predict_all_dmas(data, start_train, start_valid, start_test, end_test):
+def predict_all_dmas(data, start_train, start_valid, start_test, end_test, standard_cols):
     test_true = data.loc[(data.index >= start_test) & (data.index < end_test)]
     df = pd.DataFrame(index=pd.date_range(start=start_test, end=end_test - datetime.timedelta(hours=1), freq='1H'))
 
@@ -183,7 +184,7 @@ def predict_all_dmas(data, start_train, start_valid, start_test, end_test):
 
     for i, dma in enumerate(constants.DMA_NAMES):
         lstm = LSTMForecaster(data=data, start_train=start_train, start_valid=start_valid, start_test=start_test,
-                              end_test=end_test, y_label=dma, look_back=12)
+                              end_test=end_test, y_label=dma, look_back=12, standard_cols=standard_cols)
 
         lstm.fit()
         pred = lstm.one_step_future_predict()
@@ -205,6 +206,7 @@ if __name__ == "__main__":
     loader = Loader()
     preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
     data = preprocess.data
+    data, lagged_cols = preprocess.construct_lag_features(data, constants.WEATHER_COLUMNS, n_lags=6)
     y_label = constants.DMA_NAMES[0]
 
     start_train = constants.TZ.localize(datetime.datetime(2022, 1, 1, 0, 0))
@@ -212,19 +214,22 @@ if __name__ == "__main__":
     start_test = constants.TZ.localize(datetime.datetime(2022, 7, 18, 0, 0))
     end_test = start_test + datetime.timedelta(hours=168)
 
-    lstm = LSTMForecaster(data=data, start_train=start_train, start_valid=start_valid, start_test=start_test,
-                          end_test=end_test, y_label=y_label, look_back=6)
+    predict_all_dmas(data, start_train=start_train, start_valid=start_valid, start_test=start_test, end_test=end_test,
+                     standard_cols=constants.WEATHER_COLUMNS + lagged_cols)
 
-    lstm.fit()
-    valid_pred = lstm.vaildation_predict()
-    ax = graphs.plot_test(valid_pred['true'], valid_pred[y_label])
-
-    test_pred = lstm.one_step_future_predict()
-
-    # plot test pred on the same plot as train and valid
-    ax.plot(test_pred)
-
-    # plot test true and test pred
-    test_true = data.loc[(data.index >= start_test) & (data.index < end_test), y_label]
-    ax = graphs.plot_test(test_true, pd.DataFrame(test_pred, index=test_pred.index))
+    # lstm = LSTMForecaster(data=data, start_train=start_train, start_valid=start_valid, start_test=start_test,
+    #                       end_test=end_test, y_label=y_label, look_back=6)
+    #
+    # lstm.fit()
+    # valid_pred = lstm.vaildation_predict()
+    # ax = graphs.plot_test(valid_pred['true'], valid_pred[y_label])
+    #
+    # test_pred = lstm.one_step_future_predict()
+    #
+    # # plot test pred on the same plot as train and valid
+    # ax.plot(test_pred)
+    #
+    # # plot test true and test pred
+    # test_true = data.loc[(data.index >= start_test) & (data.index < end_test), y_label]
+    # ax = graphs.plot_test(test_true, pd.DataFrame(test_pred, index=test_pred.index))
     plt.show()
