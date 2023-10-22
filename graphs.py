@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.offsetbox import AnchoredText
 import matplotlib.patches as patches
 
 import constants
@@ -21,16 +22,21 @@ def draw_test_periods(ax, y_min, y_max):
     return ax
 
 
-def plot_raw_data(data, columns, downscale=0, shade_missing: bool = False, axes=None, linestyle=None):
+def plot_time_series(data, columns, downscale=0, shade_missing: bool = False, test_periods: bool = False, fig=None,
+                     linestyle=None):
+
     if downscale > 0:
         data = data.iloc[::downscale]
 
-    if axes is None:
-        fig, axes = plt.subplots(nrows=len(data.columns), sharex=True, figsize=(12, 8))
+    if fig is None:
+        fig, axes = plt.subplots(nrows=len(columns), sharex=True, figsize=(12, 8))
+    else:
+        axes = fig.axes
 
     for i, col in enumerate(columns):
         axes[i].plot(data[col], linestyle=linestyle, label='Raw')
-        axes[i].text(0.03, 0.8, f"{col[:-6]}", transform=axes[i].transAxes, ha='center', va='center')
+        axes[i].set_ylabel(f"{col[:5]}")
+        axes[i].grid(True)
 
         y_min, y_max = axes[i].get_ylim()
 
@@ -38,14 +44,16 @@ def plot_raw_data(data, columns, downscale=0, shade_missing: bool = False, axes=
             nan_positions = data[col].isna().values
             axes[i].fill_between(data.index, y_min, y_max, where=nan_positions, color='gray', alpha=0.3)
 
-        axes[i] = draw_test_periods(axes[i], y_min, y_max)
+        if test_periods:
+            axes[i] = draw_test_periods(axes[i], y_min, y_max)
 
     plt.subplots_adjust(bottom=0.05, top=0.95, left=0.1, right=0.9, hspace=0.1)
-    return axes
+    fig.align_ylabels()
+    return fig
 
 
 def visualize_data_completion(raw_data, completed_data, columns):
-    axes = plot_raw_data(data=raw_data, columns=columns, downscale=0, shade_missing=True)
+    axes = plot_time_series(data=raw_data, columns=columns, downscale=0, shade_missing=True, test_periods=True)
 
     for i, col in enumerate(columns):
         nan_idx = raw_data[raw_data[col].isna()].index
@@ -75,8 +83,8 @@ def plot_test(observed, predicted, ax=None):
 
     ax.plot(observed.index, observed)
     ax.plot(predicted.index, predicted)
-    ax.text(0.05, 0.92, f"MAE={mae:.3f}", transform=ax.transAxes, ha='left', va='center')
-    ax.set_ylabel("Net Inflow L/s")
+    anchored_text = AnchoredText(f"MAE={mae:.3f}", loc=2)
+    ax.add_artist(anchored_text)
     ax.grid()
     return ax
 
