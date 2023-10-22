@@ -59,13 +59,15 @@ class Preprocess:
 
     @staticmethod
     def construct_lag_features(data: pd.DataFrame, labels: list, n_lags: int):
+        lagged_cols = []
         for i in range(1, n_lags+1):
             for label in labels:
                 data[label + f'_{i}'] = data[label].shift(i)
+                lagged_cols.append(label + f'_{i}')
 
         # drop the n_lags first rows to clear Nans
         data = data.iloc[n_lags:]
-        return data
+        return data, lagged_cols
 
     @staticmethod
     def split_data(data, y_label, start_train, start_test, end_test):
