@@ -89,6 +89,30 @@ def plot_test(observed, predicted, ax=None):
     return ax
 
 
+def feature_importance(model, x_train: pd.DataFrame):
+    max_bars_in_subplot = 28
+    importances = model.feature_importances_
+
+    # sort features by their importance
+    indices = np.argsort(importances)[::-1]
+    names = [x_train.columns[i] for i in indices]
+    values = importances[indices]
+
+    nrows = max(1, int(np.ceil(x_train.shape[1] / max_bars_in_subplot)))
+    fig, axes = plt.subplots(nrows=nrows, ncols=1, sharey=True, figsize=(8, 7))
+    if nrows == 1:
+        axes = [axes]
+
+    for i, ax in enumerate(axes):
+        start_idx = i * max_bars_in_subplot
+        end_idx = min(start_idx + max_bars_in_subplot, len(values))
+        ax.bar(range(start_idx, end_idx, 1), values[start_idx: end_idx])
+        ax.set_xticks(range(start_idx, end_idx, 1))
+        ax.set_xticklabels(names[start_idx: end_idx], rotation=45, ha="right", va="top", fontsize=8)
+
+    plt.subplots_adjust(bottom=0.2, top=0.96, left=0.1, right=0.9, hspace=1.2)
+
+
 def plot_weather(weather_data: pd.DataFrame, shade_missing=False, axes=None):
     if axes is None:
         fig, axes = plt.subplots(nrows=len(weather_data.columns), sharex=True, figsize=(10, 7))
