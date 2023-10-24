@@ -58,15 +58,16 @@ class Preprocess:
         self.data['is_special'] = self.data.index.normalize().isin(constants.SPECIAL_DATES).astype(int)
 
     @staticmethod
-    def construct_lag_features(data: pd.DataFrame, labels: list, n_lags: int):
+    def lag_features(data: pd.DataFrame, cols_to_lag: dict):
         lagged_cols = []
-        for i in range(1, n_lags+1):
-            for label in labels:
-                data[label + f'_{i}'] = data[label].shift(i)
-                lagged_cols.append(label + f'_{i}')
+        for label, lags in cols_to_lag.items():
+            for lag in range(1, lags+1):
+                data[label + f'_{lag}'] = data[label].shift(lag)
+                lagged_cols.append(label + f'_{lag}')
 
-        # drop the n_lags first rows to clear Nans
-        data = data.iloc[n_lags:]
+        # drop the n_lags first rows to clear Nans - according to col with max lags
+        max_n_lags = max(cols_to_lag.values(), default=0)
+        data = data.iloc[max_n_lags:]
         return data, lagged_cols
 
     @staticmethod
