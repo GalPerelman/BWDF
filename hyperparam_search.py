@@ -18,23 +18,13 @@ from preprocess import Preprocess
 
 
 class Searcher:
-    def __init__(self,
-                 model_name,
-                 model_info,
-                 data,
-                 y_label,
-                 n_lags,
-                 start_train,
-                 start_test,
-                 end_test,
-                 n_splits=3):
-
+    def __init__(self, model_name, model_info, data, y_label, cols_to_lag, start_train, start_test, end_test, n_splits=3):
         self.model_name = model_name
         self.model = model_info['model']
         self.params = model_info['params']
         self.data = data
         self.y_label = y_label
-        self.n_lags = n_lags
+        self.cols_to_lag = cols_to_lag
         self.start_train = start_train
         self.start_test = start_test
         self.end_test = end_test
@@ -47,12 +37,12 @@ class Searcher:
             'MAX_E': make_scorer(evaluation.max_abs_error, greater_is_better=False)
         }
 
-        self.x_train, self.y_train, self.x_test, self.y_test = Preprocess.by_label(data=self.data,
-                                                                                   y_label=self.y_label,
-                                                                                   n_lags=self.n_lags,
-                                                                                   start_train=self.start_train,
-                                                                                   start_test=self.start_test,
-                                                                                   end_test=self.end_test)
+        self.data, self.lagged_cols = Preprocess.lag_features(self.data, cols_to_lag=cols_to_lag)
+        self.x_train, self.y_train, self.x_test, self.y_test = Preprocess.split_data(data=self.data,
+                                                                                     y_label=self.y_label,
+                                                                                     start_train=self.start_train,
+                                                                                     start_test=self.start_test,
+                                                                                     end_test=self.end_test)
 
         self.tscv = TimeSeriesSplit(n_splits=self.n_splits)
         self.results = pd.DataFrame()
@@ -114,14 +104,14 @@ class Searcher:
         print(f"Estimated search time {hours:.1f} hours")
 
 
-def tune_dma(data, dma_name, models_names, n_lags, start_train, start_test, end_test):
+def tune_dma(data, dma_name, cols_to_lag, models_names, start_train, start_test, end_test):
     for model_name in models_names:
         model_info = models[model_name]
         searcher = Searcher(model_name=model_name,
                             model_info=model_info,
                             data=data,
                             y_label=dma_name,
-                            n_lags=n_lags,
+                            cols_to_lag=cols_to_lag,
                             start_train=start_train,
                             start_test=start_test,
                             end_test=end_test,
@@ -130,34 +120,37 @@ def tune_dma(data, dma_name, models_names, n_lags, start_train, start_test, end_
         searcher.grid_search()
 
 
-def tune_all_dmas(models_names: list):
+def tune_all_dmas(models_names: list, start_train, start_test, cyclic_time_features, cols_to_lag, lag_target):
     loader = Loader()
-    preprocess = Preprocess(loader.inflow, loader.weather, n_neighbors=3)
+    preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=cyclic_time_features, n_neighbors=3)
     data = preprocess.data
-
-    start_test, end_short_test, end_long_test = constants.get_test_dates('w1')
 
     for dma in constants.DMA_NAMES:
         # tune for short term
         tune_dma(data=data,
                  dma_name=dma,
                  models_names=models_names,
-                 n_lags=12,
-                 start_train=data.index.min(),
+                 start_train=start_train,
                  start_test=start_test,
-                 end_test=end_short_test
+                 end_test=start_test + datetime.timedelta(hours=24),
+                 cols_to_lag={**cols_to_lag, **{dma: lag_target}}
                  )
 
         # tune for long term
         tune_dma(data=data,
                  dma_name=dma,
                  models_names=models_names,
-                 n_lags=12,
-                 start_train=data.index.min(),
+                 start_train=start_train,
                  start_test=start_test,
-                 end_test=end_long_test
+                 end_test=start_test + datetime.timedelta(hours=168),
+                 cols_to_lag={**cols_to_lag, **{dma: lag_target}}
                  )
 
 
 if "__main__" == __name__:
-    tune_all_dmas(['prophet'])
+    tune_all_dmas(['prophet'],
+                  start_train=constants.DATES_OF_LATEST_WEEK['start_train'],
+                  start_test=constants.DATES_OF_LATEST_WEEK['start_test'],
+                  cyclic_time_features=True,
+                  cols_to_lag={'Air humidity (%)': 6},
+                  lag_target=12)
