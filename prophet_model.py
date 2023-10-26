@@ -50,7 +50,7 @@ class ProphetForecaster(BaseEstimator, RegressorMixin):
                              holidays_prior_scale=self.holidays_prior_scale,
                              changepoint_prior_scale=self.changepoint_prior_scale
                              )
-        for col in constants.EXOG_COLUMNS:
+        for col in x.columns:
             self.model.add_regressor(col)
 
         self.model.fit(data)
