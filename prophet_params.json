@@ -1,0 +1,325 @@
+
+{
+    "DMA A":
+        {
+          "short":
+                  {
+                    "model_name": "prophet",
+                    "params":
+                              {"changepoint_prior_scale": 0.01,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.1,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 20.0,
+                                "weekly_seasonality": true},
+                    "mae": 0.895,
+                    "max_e": 15.621
+                  },
+
+          "long":
+                  {
+                  "model_name": "prophet",
+                  "params":
+                              {"changepoint_prior_scale": 0.01,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.1,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 0.01,
+                                "weekly_seasonality": false},
+
+                  "mae": 0.881898408760485
+                  }
+        },
+
+
+
+    "DMA B":
+          {
+            "short":
+                    {
+                      "model_name": "prophet",
+                      "params":
+                              {"changepoint_prior_scale": 0.001,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 10.0,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 20.0,
+                                "weekly_seasonality": true},
+
+                      "mae": 0.440993904747255,
+                      "max_e": 3.64787293091425
+                      },
+
+            "long":
+                  {
+                  "model_name": "prophet",
+                  "params":
+                              {"changepoint_prior_scale": 0.001,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 10.0,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 20.0,
+                                "weekly_seasonality": true},
+
+                    "mae": 0.4409939047472558
+                }
+          },
+
+
+    "DMA C":
+          {
+            "short":
+                    {
+                      "model_name": "prophet",
+                      "params":
+                              {"changepoint_prior_scale": 0.001,
+                                "daily_seasonality": false,
+                                "holidays_prior_scale": 0.1,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 0.1,
+                                "weekly_seasonality": true},
+                      "mae": 0.364367595858656,
+                      "max_e": 3.20462257690741
+                    },
+
+            "long":
+                  {
+                  "model_name": "prophet",
+                  "params":
+                              {"changepoint_prior_scale": 0.001,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 10,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 0.01,
+                                "weekly_seasonality": false},
+
+                  "mae": 0.34794545447623
+                }
+          },
+
+
+    "DMA D":
+          {
+            "short":
+                    {
+                      "model_name": "prophet",
+                      "params":
+                            {"changepoint_prior_scale": 0.001,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.01,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 10,
+                                "weekly_seasonality": false},
+                      "mae": 2.23640673738198,
+                      "max_e": 22.3776909144992
+                    },
+
+            "long":
+                  {
+                  "model_name": "prophet",
+                  "params":
+                              {"changepoint_prior_scale": 0.001,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.01,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 10,
+                                "weekly_seasonality": false},
+
+                  "mae": 2.2364067373819867
+                }
+          },
+
+
+    "DMA E":
+          {
+            "short":
+                    {
+                      "model_name": "prophet",
+                      "params":
+                            {"changepoint_prior_scale": 0.01,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.01,
+                                "seasonality_mode": "additive",
+                                "seasonality_prior_scale": 1.0,
+                                "weekly_seasonality": false},
+                      "mae": 2.76343858509874,
+                      "max_e": 22.5262712499242
+                    },
+
+            "long":
+                  {
+                  "model_name": "prophet",
+                  "params":
+                              {"changepoint_prior_scale": 0.01,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.01,
+                                "seasonality_mode": "additive",
+                                "seasonality_prior_scale": 1.0,
+                                "weekly_seasonality": false},
+
+                  "mae": 2.7634385850987413
+                }
+          },
+
+
+    "DMA F":
+          {
+            "short":
+                    {
+                      "model_name": "prophet",
+                      "params":
+                            {"changepoint_prior_scale": 0.01,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.01,
+                                "seasonality_mode": "additive",
+                                "seasonality_prior_scale": 10.0,
+                                "weekly_seasonality": true},
+                      "mae": 0.894600681447615,
+                      "max_e": 7.2154030767693
+                    },
+
+            "long":
+                  {
+                  "model_name": "prophet",
+                  "params":
+                             {"changepoint_prior_scale": 0.01,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.01,
+                                "seasonality_mode": "additive",
+                                "seasonality_prior_scale": 10.0,
+                                "weekly_seasonality": false},
+
+                  "mae": 0.8450868286873132
+                }
+          },
+
+
+    "DMA G":
+          {
+            "short":
+                    {
+                      "model_name": "prophet",
+                      "params":
+                           {"changepoint_prior_scale": 0.5,
+                                "daily_seasonality": false,
+                                "holidays_prior_scale": 0.01,
+                                "seasonality_mode": "additive",
+                                "seasonality_prior_scale": 0.1,
+                                "weekly_seasonality": true},
+
+                      "mae": 1.63406399113698,
+                      "max_e": 13.3518540814373
+                    },
+
+            "long":
+                  {
+                  "model_name": "prophet",
+                  "params":
+                              {"changepoint_prior_scale": 0.5,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.1,
+                                "seasonality_mode": "additive",
+                                "seasonality_prior_scale": 0.01,
+                                "weekly_seasonality": false},
+
+                  "mae": 1.488681663920221
+                }
+          },
+
+
+    "DMA H":
+          {
+            "short":
+                    {
+                      "model_name": "prophet",
+                      "params":
+                            {"changepoint_prior_scale": 0.01,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 1.0,
+                                "seasonality_mode": "additive",
+                                "seasonality_prior_scale": 1.0,
+                                "weekly_seasonality": false},
+                      "mae": 1.20214151009498,
+                      "max_e": 30.434113178944
+                    },
+
+            "long":
+                  {
+                  "model_name": "prophet",
+                  "params":
+                              {"changepoint_prior_scale": 0.01,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 1.0,
+                                "seasonality_mode": "additive",
+                                "seasonality_prior_scale": 20.0,
+                                "weekly_seasonality": false},
+
+                  "mae": 1.0466587313207951
+                }
+          },
+
+
+    "DMA I":
+          {
+            "short":
+                    {
+                      "model_name": "prophet",
+                      "params":
+                            {"changepoint_prior_scale": 0.1,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.01,
+                                "seasonality_mode": "additive",
+                                "seasonality_prior_scale": 0.01,
+                                "weekly_seasonality": true},
+                      "mae": 1.19881753546837,
+                      "max_e": 10.3902999938126
+                    },
+
+            "long":
+                  {
+                  "model_name": "prophet",
+                  "params":
+                              {"changepoint_prior_scale": 0.001,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 0.01,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 20.0,
+                                "weekly_seasonality": false},
+
+                  "mae": 1.1334534344361402
+                }
+          },
+
+
+    "DMA J":
+          {
+            "short":
+                    {
+                      "model_name": "prophet",
+                      "params":
+                            {"changepoint_prior_scale": 0.1,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 1.0,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 20.0,
+                                "weekly_seasonality": false},
+                      "mae": 1.23647301217974,
+                      "max_e": 11.8880499763758
+                    },
+
+            "long":
+                  {
+                  "model_name": "prophet",
+                  "params":
+                              {"changepoint_prior_scale": 0.01,
+                                "daily_seasonality": true,
+                                "holidays_prior_scale": 10.0,
+                                "seasonality_mode": "multiplicative",
+                                "seasonality_prior_scale": 0.01,
+                                "weekly_seasonality": false},
+
+                  "mae": 1.199011852687519
+                }
+          }
+}
+
