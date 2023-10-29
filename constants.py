@@ -16,6 +16,22 @@ EXOG_COLUMNS = ['is_dst', 'is_special', 'day', 'month', 'Rainfall depth (mm)', '
 
 WEATHER_COLUMNS = ['Rainfall depth (mm)', 'Air temperature (°C)', 'Windspeed (km/h)', 'Air humidity (%)']
 
+DMA_DATA = pd.DataFrame(index=DMA_NAMES,
+                        data={'type': ['Hospital district',
+                                       'Residential-countryside',
+                                       'Residential-countryside',
+                                       'Residential-suburban-commercial',
+                                       'Residential-city-centre-commercial',
+                                       'offices-sport-suburban',
+                                       'Residential-city-centre',
+                                       'City-centre',
+                                       'Commercial-industrial-port',
+                                       'Commercial-industrial-port'
+                                       ],
+                              'type_code': [0, 1, 1, 2, 2, 3, 2, 4, 4, 4],
+                              'n': [162, 531, 607, 2094, 7955, 1135, 3180, 2901, 425, 776]
+                              })
+
 TZ = pytz.timezone('CET')
 
 SUMMER_TIME = [
