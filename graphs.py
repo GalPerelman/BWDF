@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredText
 import matplotlib.patches as patches
+import textwrap
 
 import constants
 import evaluation
@@ -35,7 +36,8 @@ def plot_time_series(data, columns, downscale=0, shade_missing: bool = False, te
 
     for i, col in enumerate(columns):
         axes[i].plot(data[col], linestyle=linestyle, label='Raw')
-        axes[i].set_ylabel(f"{col[:5]}")
+        if len(f"{col}") > 15:
+            axes[i].set_ylabel(textwrap.fill(f"{col}", 15))
         axes[i].grid(True)
 
         y_min, y_max = axes[i].get_ylim()
