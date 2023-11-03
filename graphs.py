@@ -77,7 +77,7 @@ def visualize_data_completion(raw_data, completed_data, columns):
         axes[-1].legend(handles=[line1, line2, patch])
 
 
-def plot_test(observed, predicted, ax=None):
+def plot_test(observed, predicted, ylabel='', ax=None):
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -87,6 +87,7 @@ def plot_test(observed, predicted, ax=None):
     ax.plot(predicted.index, predicted)
     anchored_text = AnchoredText(f"MAE={mae:.3f}", loc=2)
     ax.add_artist(anchored_text)
+    ax.set_ylabel(f"{ylabel}")
     ax.grid()
     return ax
 
@@ -137,29 +138,40 @@ def plot_weather(weather_data: pd.DataFrame, shade_missing=False, axes=None):
 
 
 def plot_pareto():
-    fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(10, 6))
+    fig, axes = plt.subplots(nrows=4, ncols=3, figsize=(10, 7))
     axes = axes.ravel()
 
     for i, dma in enumerate(constants.DMA_NAMES):
-        rf = pd.read_csv(f"grid_search_output/short_{dma[:5]}_rf.csv")
-        xgb = pd.read_csv(f"grid_search_output/short_{dma[:5]}_xgb.csv")
+        rf = pd.read_csv(f"grid_search_output/short_{dma[:5]}_rf.csv") * -1
+        xgb = pd.read_csv(f"grid_search_output/short_{dma[:5]}_xgb.csv") * -1
+        prophet = pd.read_csv(f"grid_search_output/short_{dma[:5]}_prophet.csv") * -1
 
-        axes[i].scatter(rf['mean_test_MAE'], rf['mean_test_MAX_E'], label='RF', s=10, alpha=0.5)
-        axes[i].scatter(xgb['mean_test_MAE'], xgb['mean_test_MAX_E'], label='XGB', s=10, alpha=0.5)
-        axes[i].grid()
+        axes[i].scatter(rf['mean_test_MAE'], rf['mean_test_MAX_E'], label='RF', s=10, alpha=0.8)
+        axes[i].scatter(xgb['mean_test_MAE'], xgb['mean_test_MAX_E'], label='XGB', s=10, alpha=0.8)
+        axes[i].scatter(prophet['mean_test_MAE'], prophet['mean_test_MAX_E'], label='Prophet', s=10, alpha=0.8)
+        axes[i].set_axisbelow(True)
+        axes[i].grid(zorder=0)
+        axes[i].set_title(f"{dma[:5]}", fontsize=10)
 
         # print long term best params
         rf = pd.read_csv(f"grid_search_output/long_{dma[:5]}_rf.csv")
         xgb = pd.read_csv(f"grid_search_output/long_{dma[:5]}_xgb.csv")
+        prophet = pd.read_csv(f"grid_search_output/long_{dma[:5]}_prophet.csv")
         print(dma, 'RF:', rf['mean_test_MAE'].max(), rf.loc[rf['rank_test_MAE'].idxmin()]['params'])
         print(dma, 'XGB:', xgb['mean_test_MAE'].max(), xgb.loc[xgb['rank_test_MAE'].idxmin()]['params'])
+        print(dma, 'Prophet:', prophet['mean_test_MAE'].max(), prophet.loc[prophet['rank_test_MAE'].idxmin()]['params'])
         print('=========================================================================================')
 
     fig.delaxes(axes[10])
     fig.delaxes(axes[11])
+    fig.text(0.5, 0.03, 'Mean Abs Error', ha='center')
+    fig.text(0.04, 0.5, 'Max Abs Error', va='center', rotation='vertical')
 
     handles, labels = axes[0].get_legend_handles_labels()
-    plt.legend(handles, labels)
-
-    plt.subplots_adjust(bottom=0.05, top=0.95, left=0.1, right=0.9, hspace=0.3, wspace=0.3)
+    fig.legend(handles, labels, loc='lower right', bbox_to_anchor=(0.5, 0.15), bbox_transform=fig.transFigure)
+    plt.subplots_adjust(bottom=0.1, top=0.95, left=0.1, right=0.9, hspace=0.4, wspace=0.3)
     plt.show()
+
+
+if __name__ == "__main__":
+    plot_pareto()
