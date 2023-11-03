@@ -31,8 +31,9 @@ class Forecast:
     def predict(self, model, params):
         reg = model(**params)
         reg.fit(self.x_train, self.y_train)
-
-        pred = pd.DataFrame(reg.predict(self.x_test), index=self.x_test.index)
+        pred = self.x_test.copy()
+        pred[self.y_label] = reg.predict(self.x_test)
+        pred = pred[[self.y_label]]
         return pred
 
     def one_step_loop_predict(self, model, params):
