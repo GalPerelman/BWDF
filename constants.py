@@ -74,19 +74,19 @@ SPECIAL_DATES = [
 ]
 
 TEST_TIMES = {
-    'w1': {'start_train': TZ.localize(datetime.datetime(2022, 7, 25, 0, 0)),
+    'w1': {'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
            'start_test': TZ.localize(datetime.datetime(2022, 7, 25, 0, 0)),
            'end_test': TZ.localize(datetime.datetime(2022, 8, 1, 0, 0))},
 
-    'w2': {'start_train': TZ.localize(datetime.datetime(2022, 7, 25, 0, 0)),
+    'w2': {'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
            'start_test': TZ.localize(datetime.datetime(2022, 10, 31, 0, 0)),
            'end_test': TZ.localize(datetime.datetime(2022, 11, 6, 0, 0))},
 
-    'w3': {'start_train': TZ.localize(datetime.datetime(2022, 7, 25, 0, 0)),
+    'w3': {'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
            'start_test': TZ.localize(datetime.datetime(2023, 1, 16, 0, 0)),
            'end_test': TZ.localize(datetime.datetime(2023, 1, 23, 0, 0))},
 
-    'w4': {'start_train': TZ.localize(datetime.datetime(2022, 7, 25, 0, 0)),
+    'w4': {'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
            'start_test': TZ.localize(datetime.datetime(2023, 3, 6, 0, 0)),
            'end_test': TZ.localize(datetime.datetime(2023, 3, 13, 0, 0))}
 }
