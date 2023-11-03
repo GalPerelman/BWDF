@@ -110,35 +110,6 @@ class LSTMForecaster:
 
         return final_train_x, final_train_y, future_exog
 
-    def future_predict(self):
-        n_periods = utils.num_hours_between_timestamps(self.start_test, self.end_test)
-        final_train_x, final_train_y, future_exog = self.future_predict_preprocess(n_periods)
-        input_sequence = final_train_x[-1].reshape(1, final_train_x.shape[1], final_train_x.shape[2])
-
-        forecast = []
-        for i in range(n_periods):
-            # Predict the next value using the current input sequence
-            predicted_value = self.model.predict(input_sequence)[0, 0]
-
-            # Append the predicted value to the forecast list
-            forecast.append(predicted_value)
-
-            # Roll the input sequence one step backward to remove the oldest time-step
-            input_sequence = np.roll(input_sequence, shift=-1, axis=1)
-
-            # Construct a new timestep data: take the first 15 exogenous features and append the predicted value
-            new_timestep = np.append(future_exog[i, :-1], predicted_value)
-
-            # Insert this new timestep at the end of the input sequence
-            input_sequence[0, -1] = new_timestep
-
-        forecast = np.array(forecast).reshape(-1, 1)
-        forecast = self.scalers[self.y_label].inverse_transform(forecast).flatten()
-        forecast_period_dates = pd.date_range(start=self.start_test,
-                                              end=self.end_test - datetime.timedelta(hours=1), freq='1H')
-        forecast = pd.DataFrame({'forecast': forecast}, index=forecast_period_dates)
-        return forecast
-
     def one_step_future_predict(self):
         n_periods = utils.num_hours_between_timestamps(self.start_test, self.end_test)
         final_data = self.data.loc[self.data.index < self.start_test]
@@ -203,11 +174,11 @@ def predict_all_dmas(data, start_train, start_valid, start_test, end_test, stand
 
 if __name__ == "__main__":
     # usage example
+    y_label = constants.DMA_NAMES[0]
     loader = Loader()
     preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
     data = preprocess.data
-    data, lagged_cols = preprocess.construct_lag_features(data, constants.WEATHER_COLUMNS, n_lags=6)
-    y_label = constants.DMA_NAMES[0]
+    data, lagged_cols = preprocess.lag_features(data, cols_to_lag={'Air humidity (%)': 6})
 
     start_train = constants.TZ.localize(datetime.datetime(2022, 1, 1, 0, 0))
     start_valid = constants.TZ.localize(datetime.datetime(2022, 7, 11, 0, 0))
