@@ -3,6 +3,7 @@ import json
 import pytz
 import pandas as pd
 import datetime
+from typing import Iterable
 
 import constants
 
@@ -67,3 +68,24 @@ def num_hours_between_timestamps(t1, t2):
     days, seconds = diff.days, diff.seconds
     hours = int(days * 24 + seconds // 3600)
     return hours
+
+
+def record_results(dma: str, short_model_name: str, long_model_name: str, dates: dict, lags: dict,
+                   pred_type: str, score: Iterable):
+    score = pd.DataFrame({
+        'dma': dma,
+        'short_model_name': short_model_name,
+        'long_model_name': long_model_name,
+        'start_train': dates['start_train'],
+        'start_test': dates['start_test'],
+        'end_test': dates['end_test'],
+        'lags': [lags],
+        'pred_type': pred_type,
+        'i1': score[0],
+        'i2': score[1],
+        'i3': score[2],
+    }, index=[datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")])
+
+    df = pd.read_csv("models_scores.csv", index_col=0)
+    df = pd.concat([df, score])
+    df.to_csv("models_scores.csv", index=True)
