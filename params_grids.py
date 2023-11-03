@@ -63,10 +63,10 @@ models = {
             'params':
                 {
                     'seasonality_mode': ['additive', 'multiplicative'],
-                    # 'daily_seasonality': [True, False],
-                    # 'weekly_seasonality': [True, False],
-                    # 'seasonality_prior_scale': [0.01, 0.1, 1.0, 10.0, 20.0],
-                    # 'holidays_prior_scale': [0.01, 0.1, 1.0, 10.0],
+                    'daily_seasonality': [True, False],
+                    'weekly_seasonality': [True, False],
+                    'seasonality_prior_scale': [0.01, 0.1, 1.0, 10.0, 20.0],
+                    'holidays_prior_scale': [0.01, 0.1, 1.0, 10.0],
                     'changepoint_prior_scale': [0.001, 0.01]#, 0.1, 0.5],
                 }
         }
