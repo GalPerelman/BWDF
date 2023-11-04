@@ -1,0 +1,283 @@
+
+{
+    "DMA A":
+        {
+          "short":
+                  {
+                    "model_name": "lstm",
+                    "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+                    "mae": 0,
+                    "max_e": 0
+                  },
+
+          "long":
+                  {
+                  "model_name": "lstm",
+                  "params":
+                              {"look_back": 12,
+                                "epochs": 2,
+                                "batch_size": 48,
+                                "norm_method": "standard"},
+
+                  "mae": 0
+                  }
+        },
+
+
+
+    "DMA B":
+          {
+            "short":
+                  {
+                    "model_name": "lstm",
+                    "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+                    "mae": 0,
+                    "max_e": 0
+                  },
+
+          "long":
+                  {
+                  "model_name": "lstm",
+                  "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+
+                  "mae": 0
+                  }
+          },
+
+
+    "DMA C":
+          {
+            "short":
+                  {
+                    "model_name": "lstm",
+                    "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+                    "mae": 0,
+                    "max_e": 0
+                  },
+
+          "long":
+                  {
+                  "model_name": "lstm",
+                  "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+
+                  "mae": 0
+                  }
+          },
+
+
+    "DMA D":
+          {
+            "short":
+                  {
+                    "model_name": "lstm",
+                    "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+                    "mae": 0,
+                    "max_e": 0
+                  },
+
+          "long":
+                  {
+                  "model_name": "lstm",
+                  "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+
+                  "mae": 0
+                  }
+          },
+
+
+    "DMA E":
+          {
+            "short":
+                  {
+                    "model_name": "lstm",
+                    "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+                    "mae": 0,
+                    "max_e": 0
+                  },
+
+          "long":
+                  {
+                  "model_name": "lstm",
+                  "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+
+                  "mae": 0
+                  }
+          },
+
+
+    "DMA F":
+          {
+            "short":
+                  {
+                    "model_name": "lstm",
+                    "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+                    "mae": 0,
+                    "max_e": 0
+                  },
+
+          "long":
+                  {
+                  "model_name": "lstm",
+                  "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+
+                  "mae": 0
+                  }
+          },
+
+
+    "DMA G":
+          {
+            "short":
+                  {
+                    "model_name": "lstm",
+                    "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+                    "mae": 0,
+                    "max_e": 0
+                  },
+
+          "long":
+                  {
+                  "model_name": "lstm",
+                  "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+
+                  "mae": 0
+                  }
+          },
+
+
+    "DMA H":
+          {
+            "short":
+                  {
+                    "model_name": "lstm",
+                    "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+                    "mae": 0,
+                    "max_e": 0
+                  },
+
+          "long":
+                  {
+                  "model_name": "lstm",
+                  "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+
+                  "mae": 0
+                  }
+          },
+
+
+    "DMA I":
+          {
+            "short":
+                  {
+                    "model_name": "lstm",
+                    "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+                    "mae": 0,
+                    "max_e": 0
+                  },
+
+          "long":
+                  {
+                  "model_name": "lstm",
+                  "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+
+                  "mae": 0
+                  }
+          },
+
+
+    "DMA J":
+          {
+            "short":
+                  {
+                    "model_name": "lstm",
+                    "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+                    "mae": 0,
+                    "max_e": 0
+                  },
+
+          "long":
+                  {
+                  "model_name": "lstm",
+                  "params":
+                              {"look_back": 24,
+                                "epochs": 15,
+                                "batch_size": 24,
+                                "norm_method": "standard"},
+
+                  "mae": 0
+                  }
+          }
+}
+
