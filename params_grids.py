@@ -6,6 +6,7 @@ import xgboost as xgb
 from sklearn_genetic.space import Continuous, Categorical, Integer
 
 from prophet_model import ProphetForecaster
+from lstm_model import LSTMForecaster
 
 xgb.set_config(verbosity=0)
 
@@ -67,7 +68,19 @@ models = {
                     'weekly_seasonality': [True, False],
                     'seasonality_prior_scale': [0.01, 0.1, 1.0, 10.0, 20.0],
                     'holidays_prior_scale': [0.01, 0.1, 1.0, 10.0],
-                    'changepoint_prior_scale': [0.001, 0.01]#, 0.1, 0.5],
+                    'changepoint_prior_scale': [0.001, 0.01, 0.1, 0.5],
+                }
+        },
+
+    'lstm':
+        {
+            'model': LSTMForecaster(),
+            'params':
+                {
+                    "look_back": [6, 12],#, 24, 48],
+                    "epochs": [5, 10, 15, 20],
+                    "batch_size": [6, 12, 24, 48, 96],
+                    "norm_method": ["standard", "min-max"]
                 }
         }
 }
