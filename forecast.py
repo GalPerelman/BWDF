@@ -1,18 +1,22 @@
+import datetime
+
 import pandas as pd
 import xgboost as xgb
 
-import graphs
+import constants
 from preprocess import Preprocess
+from lstm_model import LSTMForecaster
 
 import utils
 from preprocess import Preprocess
 
 
 class Forecast:
-    def __init__(self, data, y_label, cols_to_lag, start_train, start_test, end_test):
+    def __init__(self, data, y_label, cols_to_lag, norm_method, start_train, start_test, end_test):
         self.data = data
         self.y_label = y_label
         self.cols_to_lag = cols_to_lag
+        self.norm_method = norm_method
         self.start_train = start_train
         self.start_test = start_test
         self.end_test = end_test
@@ -20,13 +24,22 @@ class Forecast:
         if not self.cols_to_lag:
             self.cols_to_lag = {self.y_label: 0}
 
-        self.data = utils.drop_other_dmas(self.data, self.y_label)
-        self.data, self.lagged_cols = Preprocess.lag_features(self.data, cols_to_lag)
-        self.x_train, self.y_train, self.x_test, self.y_test = Preprocess.split_data(data=self.data,
-                                                                                     y_label=self.y_label,
-                                                                                     start_train=self.start_train,
-                                                                                     start_test=self.start_test,
-                                                                                     end_test=self.end_test)
+        temp_data = self.data.copy()
+        temp_data = utils.drop_other_dmas(temp_data, self.y_label)
+        temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
+        if self.norm_method:
+            standard_cols = constants.WEATHER_COLUMNS + lagged_cols + [self.y_label]
+        else:
+            standard_cols = None
+
+        self.x_train, self.y_train, self.x_test, self.y_test, scalers = Preprocess.split_data(data=self.data,
+                                                                                              y_label=self.y_label,
+                                                                                              start_train=self.start_train,
+                                                                                              start_test=self.start_test,
+                                                                                              end_test=self.end_test,
+                                                                                              norm_method=self.norm_method,
+                                                                                              standard_cols=standard_cols
+                                                                                              )
 
     def predict(self, model, params):
         reg = model(**params)

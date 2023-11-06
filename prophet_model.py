@@ -78,13 +78,12 @@ if __name__ == "__main__":
               'seasonality_prior_scale': 1, 'holidays_prior_scale': 2, 'changepoint_prior_scale': 0.01,
               }
 
-    x_train, y_train, x_test, y_test = Preprocess.by_label(data=data,
-                                                           y_label=constants.DMA_NAMES[0],
-                                                           n_lags=0,
-                                                           start_train=start_train,
-                                                           start_test=start_test,
-                                                           end_test=end_short_pred
-                                                           )
+    x_train, y_train, x_test, y_test, scalers = Preprocess.split_data(data=data,
+                                                                      y_label=constants.DMA_NAMES[0],
+                                                                      start_train=start_train,
+                                                                      start_test=start_test,
+                                                                      end_test=end_short_pred
+                                                                      )
 
     p.fit(x_train, y_train)
     y = p.predict(x_test)
@@ -92,5 +91,3 @@ if __name__ == "__main__":
     plt.plot(y_test.index, y_test.values)
     plt.plot(y_test.index, y)
     plt.show()
-
-

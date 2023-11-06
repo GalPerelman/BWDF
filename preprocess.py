@@ -71,16 +71,25 @@ class Preprocess:
         return data, lagged_cols
 
     @staticmethod
-    def split_data(data, y_label, start_train, start_test, end_test):
+    def split_data(data, y_label, start_train, start_test, end_test, norm_method='', standard_cols=None):
         x_columns = list(data.columns)
         x_columns = list(set(x_columns) - set(constants.DMA_NAMES))
 
-        x_train = data.loc[(data.index >= start_train) & (data.index < start_test), x_columns]
-        y_train = data.loc[(data.index >= start_train) & (data.index < start_test), y_label]
+        train = data.loc[(data.index >= start_train) & (data.index < start_test)]
+        test = data.loc[(data.index >= start_test) & (data.index < end_test)]
+        if norm_method and standard_cols is not None:
+            train, scalers = Preprocess.fit_transform(train, columns=standard_cols, method=norm_method)
+            test = Preprocess.transform(test, columns=standard_cols, scalers=scalers)
+        else:
+            scalers = None
 
-        x_test = data.loc[(data.index >= start_test) & (data.index < end_test), x_columns]
-        y_test = data.loc[(data.index >= start_test) & (data.index < end_test), y_label]
-        return x_train, y_train, x_test, y_test
+        x_train = train.loc[:, x_columns]
+        y_train = train.loc[:, y_label]
+
+        x_test = test.loc[:, x_columns]
+        y_test = test.loc[:, y_label]
+
+        return x_train, y_train, x_test, y_test, scalers
 
     @staticmethod
     def fit_transform(data, columns, method='standard'):
