@@ -10,6 +10,7 @@ from sklearn.metrics import make_scorer, mean_absolute_error
 from sklearn_genetic.space import Continuous, Categorical, Integer
 from sklearn_genetic.callbacks import ProgressBar
 
+import utils
 import constants
 import evaluation
 from data_loader import Loader
@@ -18,13 +19,16 @@ from preprocess import Preprocess
 
 
 class Searcher:
-    def __init__(self, model_name, model_info, data, y_label, cols_to_lag, start_train, start_test, end_test, n_splits=3):
+    def __init__(self, model_name, model_info, data, y_label, cols_to_lag, norm_method,
+                 start_train, start_test, end_test, n_splits=3):
+
         self.model_name = model_name
         self.model = model_info['model']
         self.params = model_info['params']
         self.data = data
         self.y_label = y_label
         self.cols_to_lag = cols_to_lag
+        self.norm_method = norm_method
         self.start_train = start_train
         self.start_test = start_test
         self.end_test = end_test
@@ -37,12 +41,22 @@ class Searcher:
             'MAX_E': make_scorer(evaluation.max_abs_error, greater_is_better=False)
         }
 
-        self.data, self.lagged_cols = Preprocess.lag_features(self.data, cols_to_lag=cols_to_lag)
-        self.x_train, self.y_train, self.x_test, self.y_test = Preprocess.split_data(data=self.data,
-                                                                                     y_label=self.y_label,
-                                                                                     start_train=self.start_train,
-                                                                                     start_test=self.start_test,
-                                                                                     end_test=self.end_test)
+        temp_data = self.data.copy()
+        temp_data = utils.drop_other_dmas(temp_data, self.y_label)
+        temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
+        if self.norm_method:
+            standard_cols = constants.WEATHER_COLUMNS + lagged_cols + [self.y_label]
+        else:
+            standard_cols = None
+
+        self.x_train, self.y_train, self.x_test, self.y_test, self.scalers = Preprocess.split_data(data=temp_data,
+                                                                                              y_label=self.y_label,
+                                                                                              start_train=self.start_train,
+                                                                                              start_test=self.start_test,
+                                                                                              end_test=self.end_test,
+                                                                                              norm_method=self.norm_method,
+                                                                                              standard_cols=standard_cols
+                                                                                              )
 
         self.tscv = TimeSeriesSplit(n_splits=self.n_splits)
         self.results = pd.DataFrame()
@@ -104,7 +118,7 @@ class Searcher:
         print(f"Estimated search time {hours:.1f} hours")
 
 
-def tune_dma(data, dma_name, cols_to_lag, models_names, start_train, start_test, end_test):
+def tune_dma(data, dma_name, models_names, start_train, start_test, end_test, cols_to_lag, norm_method):
     for model_name in models_names:
         model_info = models[model_name]
         searcher = Searcher(model_name=model_name,
@@ -112,6 +126,7 @@ def tune_dma(data, dma_name, cols_to_lag, models_names, start_train, start_test,
                             data=data,
                             y_label=dma_name,
                             cols_to_lag=cols_to_lag,
+                            norm_method=norm_method,
                             start_train=start_train,
                             start_test=start_test,
                             end_test=end_test,
@@ -120,7 +135,8 @@ def tune_dma(data, dma_name, cols_to_lag, models_names, start_train, start_test,
         searcher.grid_search()
 
 
-def tune_all_dmas(models_names: list, start_train, start_test, cyclic_time_features, cols_to_lag, lag_target):
+def tune_all_dmas(models_names: list, start_train, start_test, cyclic_time_features, cols_to_lag, lag_target,
+                  norm_method):
     loader = Loader()
     preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=cyclic_time_features, n_neighbors=3)
     data = preprocess.data
@@ -133,7 +149,8 @@ def tune_all_dmas(models_names: list, start_train, start_test, cyclic_time_featu
                  start_train=start_train,
                  start_test=start_test,
                  end_test=start_test + datetime.timedelta(hours=24),
-                 cols_to_lag={**cols_to_lag, **{dma: lag_target}}
+                 cols_to_lag={**cols_to_lag, **{dma: lag_target}},
+                 norm_method=norm_method
                  )
 
         # tune for long term
@@ -143,14 +160,18 @@ def tune_all_dmas(models_names: list, start_train, start_test, cyclic_time_featu
                  start_train=start_train,
                  start_test=start_test,
                  end_test=start_test + datetime.timedelta(hours=168),
-                 cols_to_lag={**cols_to_lag, **{dma: lag_target}}
+                 cols_to_lag={**cols_to_lag, **{dma: lag_target}},
+                 norm_method=norm_method
                  )
 
 
 if "__main__" == __name__:
-    tune_all_dmas(['prophet'],
+    tune_all_dmas(['lstm'],
                   start_train=constants.DATES_OF_LATEST_WEEK['start_train'],
                   start_test=constants.DATES_OF_LATEST_WEEK['start_test'],
                   cyclic_time_features=True,
-                  cols_to_lag={'Air humidity (%)': 6},
-                  lag_target=12)
+                  cols_to_lag={'Air humidity (%)': 12, 'Rainfall depth (mm)': 12, 'Air temperature (°C)': 12,
+                               'Windspeed (km/h)': 12},
+                  lag_target=0,
+                  norm_method='standard'
+                  )
