@@ -118,7 +118,7 @@ class Searcher:
         print(f"Estimated search time {hours:.1f} hours")
 
 
-def tune_dma(data, dma_name, models_names, start_train, start_test, end_test, cols_to_lag, norm_method):
+def tune_dma(data, dma_name, models_names, start_train, start_test, end_test, cols_to_lag, norm_method, n_split):
     for model_name in models_names:
         model_info = models[model_name]
         searcher = Searcher(model_name=model_name,
@@ -130,13 +130,14 @@ def tune_dma(data, dma_name, models_names, start_train, start_test, end_test, co
                             start_train=start_train,
                             start_test=start_test,
                             end_test=end_test,
+                            n_splits=n_split
                             )
 
         searcher.grid_search()
 
 
 def tune_all_dmas(models_names: list, start_train, start_test, cyclic_time_features, cols_to_lag, lag_target,
-                  norm_method):
+                  norm_method, n_split):
     loader = Loader()
     preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=cyclic_time_features, n_neighbors=3)
     data = preprocess.data
@@ -150,7 +151,8 @@ def tune_all_dmas(models_names: list, start_train, start_test, cyclic_time_featu
                  start_test=start_test,
                  end_test=start_test + datetime.timedelta(hours=24),
                  cols_to_lag={**cols_to_lag, **{dma: lag_target}},
-                 norm_method=norm_method
+                 norm_method=norm_method,
+                 n_split=n_split
                  )
 
         # tune for long term
@@ -161,7 +163,8 @@ def tune_all_dmas(models_names: list, start_train, start_test, cyclic_time_featu
                  start_test=start_test,
                  end_test=start_test + datetime.timedelta(hours=168),
                  cols_to_lag={**cols_to_lag, **{dma: lag_target}},
-                 norm_method=norm_method
+                 norm_method=norm_method,
+                 n_split=n_split
                  )
 
 
@@ -173,5 +176,6 @@ if "__main__" == __name__:
                   cols_to_lag={'Air humidity (%)': 12, 'Rainfall depth (mm)': 12, 'Air temperature (°C)': 12,
                                'Windspeed (km/h)': 12},
                   lag_target=0,
-                  norm_method='standard'
+                  norm_method='standard',
+                  n_split=2
                   )
