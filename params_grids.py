@@ -77,10 +77,11 @@ models = {
             'model': LSTMForecaster(),
             'params':
                 {
-                    "look_back": [6, 12],#, 24, 48],
-                    "epochs": [5, 10, 15, 20],
-                    "batch_size": [6, 12, 24, 48, 96],
-                    "norm_method": ["standard", "min-max"]
+                    "look_back": [12, 24, 48],
+                    "epochs": [10],
+                    "batch_size": [24, 48],
+                    "units": [50, 100, 150],
+                    "dropout": [0.1, 0.2, 0.3]
                 }
         }
 }
