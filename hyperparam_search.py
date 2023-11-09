@@ -177,5 +177,5 @@ if "__main__" == __name__:
                                'Windspeed (km/h)': 12},
                   lag_target=0,
                   norm_method='standard',
-                  n_split=2
+                  n_split=3
                   )

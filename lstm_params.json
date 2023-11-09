@@ -6,24 +6,30 @@
                   {
                     "model_name": "lstm",
                     "params":
-                              {"look_back": 24,
-                                "epochs": 15,
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
                                 "batch_size": 24,
-                                "norm_method": "standard"},
-                    "mae": 0,
-                    "max_e": 0
+                                "dropout": 0.3,
+                                "units": 100
+                              },
+                    "mae": 0.57017310223873,
+                    "max_e": 6.27157408330306
                   },
 
           "long":
                   {
                   "model_name": "lstm",
                   "params":
-                              {"look_back": 12,
-                                "epochs": 2,
-                                "batch_size": 48,
-                                "norm_method": "standard"},
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
+                                "batch_size": 24,
+                                "dropout": 0.2,
+                                "units": 150
+                              },
 
-                  "mae": 0
+                  "mae": 0.5175072668988656
                   }
         },
 
@@ -35,24 +41,30 @@
                   {
                     "model_name": "lstm",
                     "params":
-                              {"look_back": 24,
-                                "epochs": 15,
+                              {
+                                "look_back": 48,
+                                "epochs": 10,
                                 "batch_size": 24,
-                                "norm_method": "standard"},
-                    "mae": 0,
-                    "max_e": 0
+                                "dropout": 0.1,
+                                "units": 50
+                              },
+                    "mae": 0.651633313648821,
+                    "max_e": 3.86324443014266
                   },
 
           "long":
                   {
                   "model_name": "lstm",
                   "params":
-                              {"look_back": 24,
-                                "epochs": 15,
-                                "batch_size": 24,
-                                "norm_method": "standard"},
+                              {
+                                "look_back": 12,
+                                "epochs": 10,
+                                "batch_size": 48,
+                                "dropout": 0.3,
+                                "units": 150
+                              },
 
-                  "mae": 0
+                  "mae": 0.6311005388299288
                   }
           },
 
@@ -63,24 +75,30 @@
                   {
                     "model_name": "lstm",
                     "params":
-                              {"look_back": 24,
-                                "epochs": 15,
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
                                 "batch_size": 24,
-                                "norm_method": "standard"},
-                    "mae": 0,
-                    "max_e": 0
+                                "dropout": 0.1,
+                                "units": 150
+                              },
+                    "mae": 0.535768977089551,
+                    "max_e": 2.66232712743825
                   },
 
           "long":
                   {
                   "model_name": "lstm",
                   "params":
-                              {"look_back": 24,
-                                "epochs": 15,
+                              {
+                                "look_back": 48,
+                                "epochs": 10,
                                 "batch_size": 24,
-                                "norm_method": "standard"},
+                                "dropout": 0.2,
+                                "units": 100
+                              },
 
-                  "mae": 0
+                  "mae": 0.5071803504758112
                   }
           },
 
@@ -91,24 +109,30 @@
                   {
                     "model_name": "lstm",
                     "params":
-                              {"look_back": 24,
-                                "epochs": 15,
-                                "batch_size": 24,
-                                "norm_method": "standard"},
-                    "mae": 0,
-                    "max_e": 0
+                              {
+                                "look_back": 12,
+                                "epochs": 10,
+                                "batch_size": 48,
+                                "dropout": 0.2,
+                                "units": 150
+                              },
+                    "mae": 0.448716886307729,
+                    "max_e": 3.91019621824175
                   },
 
           "long":
                   {
                   "model_name": "lstm",
                   "params":
-                              {"look_back": 24,
-                                "epochs": 15,
+                              {
+                                "look_back": 12,
+                                "epochs": 10,
                                 "batch_size": 24,
-                                "norm_method": "standard"},
+                                "dropout": 0.1,
+                                "units": 150
+                              },
 
-                  "mae": 0
+                  "mae": 0.3988624627250656
                   }
           },
 
@@ -119,24 +143,30 @@
                   {
                     "model_name": "lstm",
                     "params":
-                              {"look_back": 24,
-                                "epochs": 15,
+                              {
+                                "look_back": 12,
+                                "epochs": 10,
                                 "batch_size": 24,
-                                "norm_method": "standard"},
-                    "mae": 0,
-                    "max_e": 0
+                                "dropout": 0.1,
+                                "units": 150
+                              },
+                    "mae": 0.313140846016405,
+                    "max_e": 1.9721928958194
                   },
 
           "long":
                   {
                   "model_name": "lstm",
                   "params":
-                              {"look_back": 24,
-                                "epochs": 15,
-                                "batch_size": 24,
-                                "norm_method": "standard"},
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
+                                "batch_size": 48,
+                                "dropout": 0.1,
+                                "units": 150
+                              },
 
-                  "mae": 0
+                  "mae": 0.2932570139106863
                   }
           },
 
@@ -147,24 +177,30 @@
                   {
                     "model_name": "lstm",
                     "params":
-                              {"look_back": 24,
-                                "epochs": 15,
-                                "batch_size": 24,
-                                "norm_method": "standard"},
-                    "mae": 0,
-                    "max_e": 0
+                              {
+                                "look_back": 12,
+                                "epochs": 10,
+                                "batch_size": 48,
+                                "dropout": 0.2,
+                                "units": 150
+                              },
+                    "mae": 0.815487460171607,
+                    "max_e": -4.20570898218642
                   },
 
           "long":
                   {
                   "model_name": "lstm",
                   "params":
-                              {"look_back": 24,
-                                "epochs": 15,
-                                "batch_size": 24,
-                                "norm_method": "standard"},
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
+                                "batch_size": 48,
+                                "dropout": 0.2,
+                                "units": 150
+                              },
 
-                  "mae": 0
+                  "mae": 0.7957337854624885
                   }
           },
 
@@ -175,24 +211,30 @@
                   {
                     "model_name": "lstm",
                     "params":
-                              {"look_back": 24,
-                                "epochs": 15,
+                              {
+                                "look_back": 12,
+                                "epochs": 10,
                                 "batch_size": 24,
-                                "norm_method": "standard"},
-                    "mae": 0,
-                    "max_e": 0
+                                "dropout": 0.3,
+                                "units": 100
+                              },
+                    "mae": 0.514831129487076,
+                    "max_e": 2.71697649950921
                   },
 
           "long":
                   {
                   "model_name": "lstm",
                   "params":
-                              {"look_back": 24,
-                                "epochs": 15,
-                                "batch_size": 24,
-                                "norm_method": "standard"},
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
+                                "batch_size": 48,
+                                "dropout": 0.3,
+                                "units": 150
+                              },
 
-                  "mae": 0
+                  "mae": 0.4553185471561327
                   }
           },
 
@@ -203,24 +245,30 @@
                   {
                     "model_name": "lstm",
                     "params":
-                              {"look_back": 24,
-                                "epochs": 15,
-                                "batch_size": 24,
-                                "norm_method": "standard"},
-                    "mae": 0,
-                    "max_e": 0
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
+                                "batch_size": 48,
+                                "dropout": 0.1,
+                                "units": 100
+                              },
+                    "mae": 0.354362796987827,
+                    "max_e": 5.07712021944812
                   },
 
           "long":
                   {
                   "model_name": "lstm",
                   "params":
-                              {"look_back": 24,
-                                "epochs": 15,
-                                "batch_size": 24,
-                                "norm_method": "standard"},
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
+                                "batch_size": 48,
+                                "dropout": 0.3,
+                                "units": 150
+                              },
 
-                  "mae": 0
+                  "mae": 0.2989760987291509
                   }
           },
 
@@ -231,24 +279,30 @@
                   {
                     "model_name": "lstm",
                     "params":
-                              {"look_back": 24,
-                                "epochs": 15,
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
                                 "batch_size": 24,
-                                "norm_method": "standard"},
-                    "mae": 0,
-                    "max_e": 0
+                                "dropout": 0.3,
+                                "units": 100
+                              },
+                    "mae": 0.717317916650971,
+                    "max_e": 4.3360246623216
                   },
 
           "long":
                   {
                   "model_name": "lstm",
                   "params":
-                              {"look_back": 24,
-                                "epochs": 15,
-                                "batch_size": 24,
-                                "norm_method": "standard"},
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
+                                "batch_size": 48,
+                                "dropout": 0.3,
+                                "units": 150
+                              },
 
-                  "mae": 0
+                  "mae": 0.6668031313033337
                   }
           },
 
@@ -259,24 +313,30 @@
                   {
                     "model_name": "lstm",
                     "params":
-                              {"look_back": 24,
-                                "epochs": 15,
+                              {
+                                "look_back": 24,
+                                "epochs": 10,
                                 "batch_size": 24,
-                                "norm_method": "standard"},
-                    "mae": 0,
-                    "max_e": 0
+                                "dropout": 0.1,
+                                "units": 150
+                              },
+                    "mae": 0.395550881644962,
+                    "max_e": 2.98320061944879
                   },
 
           "long":
                   {
                   "model_name": "lstm",
                   "params":
-                              {"look_back": 24,
-                                "epochs": 15,
+                              {
+                                "look_back": 48,
+                                "epochs": 10,
                                 "batch_size": 24,
-                                "norm_method": "standard"},
+                                "dropout": 0.2,
+                                "units": 150
+                              },
 
-                  "mae": 0
+                  "mae": 0.4199597051755981
                   }
           }
 }
