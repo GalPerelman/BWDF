@@ -1,5 +1,5 @@
 import datetime
-
+import numpy as np
 import pandas as pd
 import xgboost as xgb
 
@@ -32,14 +32,15 @@ class Forecast:
         else:
             standard_cols = None
 
-        self.x_train, self.y_train, self.x_test, self.y_test, scalers = Preprocess.split_data(data=self.data,
-                                                                                              y_label=self.y_label,
-                                                                                              start_train=self.start_train,
-                                                                                              start_test=self.start_test,
-                                                                                              end_test=self.end_test,
-                                                                                              norm_method=self.norm_method,
-                                                                                              standard_cols=standard_cols
-                                                                                              )
+        (self.x_train, self.y_train,
+         self.x_test, self.y_test, self.scalers) = Preprocess.split_data(data=temp_data,
+                                                                         y_label=self.y_label,
+                                                                         start_train=self.start_train,
+                                                                         start_test=self.start_test,
+                                                                         end_test=self.end_test,
+                                                                         norm_method=self.norm_method,
+                                                                         standard_cols=standard_cols
+                                                                         )
 
     def predict(self, model, params):
         reg = model(**params)
@@ -73,3 +74,15 @@ class Forecast:
             self.y_train.loc[next_step_idx] = pred_value
 
         return pred
+
+    def format_forecast(self, pred):
+        """
+        Mainly for LSTM where the returned forecast is normalized array
+        This function inverse normalize the results and forma it in a pandas df with datetime index
+        """
+        pred = np.array(pred).reshape(-1, 1)
+        pred = self.scalers[self.y_label].inverse_transform(pred).flatten()
+        forecast_period_dates = pd.date_range(start=self.start_test,
+                                              end=self.end_test - datetime.timedelta(hours=1), freq='1H')
+        forecast = pd.DataFrame({self.y_label: pred}, index=forecast_period_dates)
+        return forecast
