@@ -94,7 +94,7 @@ TEST_TIMES = {
 DATES_TO_TEST_EXTREME_RAINFALL = {
     'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
     'start_test': TZ.localize(datetime.datetime(2021, 9, 17, 0, 0)),
-    'end_test': TZ.localize(datetime.datetime(2021, 9, 18, 0, 0))
+    'end_test': TZ.localize(datetime.datetime(2021, 9, 24, 0, 0))
 }
 
 DATES_OF_LATEST_WEEK = {
