@@ -25,8 +25,8 @@ class Forecast:
             self.cols_to_lag = {self.y_label: 0}
 
         temp_data = self.data.copy()
-        temp_data = utils.drop_other_dmas(temp_data, self.y_label)
         temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
+        temp_data = utils.drop_other_dmas(temp_data, self.y_label)
         if self.norm_method:
             standard_cols = constants.WEATHER_COLUMNS + lagged_cols + [self.y_label]
         else:
@@ -82,7 +82,6 @@ class Forecast:
         """
         pred = np.array(pred).reshape(-1, 1)
         pred = self.scalers[self.y_label].inverse_transform(pred).flatten()
-        forecast_period_dates = pd.date_range(start=self.start_test,
-                                              end=self.end_test - datetime.timedelta(hours=1), freq='1H')
-        forecast = pd.DataFrame({self.y_label: pred}, index=forecast_period_dates)
+        period_dates = pd.date_range(start=self.start_test, end=self.end_test - datetime.timedelta(hours=1), freq='1H')
+        forecast = pd.DataFrame({self.y_label: pred}, index=period_dates)
         return forecast
