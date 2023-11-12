@@ -1,42 +1,44 @@
 import os
-import datetime
-import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 
 from sklearn.ensemble import RandomForestRegressor
 from prophet_model import ProphetForecaster
 
-import constants
 import graphs
 import evaluation
-import utils
 import warnings
 
 from data_loader import Loader
 from forecast import *
 
-warnings.filterwarnings("ignore")
+# warnings.filterwarnings("ignore")
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
 
-def predict_dma(data, dma_name, model_name, params, start_train, start_test, end_test, cols_to_lag, pred_type):
-    f = Forecast(data=data, y_label=dma_name, cols_to_lag=cols_to_lag,
+def predict_dma(data, dma_name, model_name, params, start_train, start_test, end_test, cols_to_lag, norm_method,
+                pred_type):
+
+    f = Forecast(data=data, y_label=dma_name, cols_to_lag=cols_to_lag, norm_method=norm_method,
                  start_train=start_train, start_test=start_test, end_test=end_test)
 
-    models = {'xgb': xgb.XGBRegressor, 'rf': RandomForestRegressor, 'prophet': ProphetForecaster}
+    models = {'xgb': xgb.XGBRegressor, 'rf': RandomForestRegressor, 'prophet': ProphetForecaster,
+              'lstm': LSTMForecaster}
 
-    if pred_type == 'multi-step':
-        pred = f.predict(model=models[model_name], params=params)
-    elif pred_type == 'step-ahead':
-        pred = f.one_step_loop_predict(model=models[model_name], params=params)
+    if model_name == 'lstm':
+        pred = f.format_forecast(f.predict(model=LSTMForecaster, params=params))
+
+    if model_name in ['xgb', 'rf', 'prophet']:
+        if pred_type == 'multi-step':
+            pred = f.predict(model=models[model_name], params=params)
+        elif pred_type == 'step-ahead':
+            pred = f.one_step_loop_predict(model=models[model_name], params=params)
 
     return pred
 
 
-def predict_all_dmas(data, models: dict, dates: dict, cols_to_lag: dict, lag_target: int, prediction_type: str,
-                     record_score=True, plot=False):
+def predict_all_dmas(data, models: dict, dates: dict, cols_to_lag: dict, lag_target: int, norm_method: str,
+                     prediction_type: str, record_score=True, plot=False):
 
     results = pd.DataFrame()
     if plot:
@@ -58,13 +60,15 @@ def predict_all_dmas(data, models: dict, dates: dict, cols_to_lag: dict, lag_tar
 
         pred_short = predict_dma(data=data, dma_name=dma, model_name=short_model_name, params=short_model_params,
                                  start_train=start_train, start_test=start_test, end_test=end_short_pred,
-                                 cols_to_lag={**cols_to_lag, **{dma: lag_target}}, pred_type=prediction_type)
+                                 cols_to_lag={**cols_to_lag, **{dma: lag_target}}, norm_method=norm_method,
+                                 pred_type=prediction_type)
 
         long_model_name = models[dma[:5]]['long']['model_name']
         long_model_params = models[dma[:5]]['long']['params']
         pred_long = predict_dma(data=data, dma_name=dma, model_name=long_model_name, params=long_model_params,
                                 start_train=start_train, start_test=start_test, end_test=end_long_pred,
-                                cols_to_lag={**cols_to_lag, **{dma: lag_target}}, pred_type=prediction_type)
+                                cols_to_lag={**cols_to_lag, **{dma: lag_target}}, norm_method=norm_method,
+                                pred_type=prediction_type)
 
         pred = pd.concat([pred_short, pred_long.iloc[24:]])
         pred.columns = [dma]
@@ -96,21 +100,35 @@ if __name__ == "__main__":
     os.environ['PYTHONHASHSEED'] = str(global_seed)
     np.random.seed(global_seed)
 
-    xgb_params = utils.read_json("xgb_params.json")
-    prophet_params = utils.read_json("prophet_params.json")
+    xgb_models = utils.read_json("xgb_params.json")
+    prophet_models = utils.read_json("prophet_params.json")
+    lstm_models = utils.read_json('lstm_params.json')
 
     loader = Loader()
     data = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3).data
 
     results = predict_all_dmas(
         data=data,
-        models=prophet_params,
+        models=lstm_models,
         dates=constants.DATES_OF_LATEST_WEEK,
         cols_to_lag={'Air humidity (%)': 6},
         lag_target=0,
-        prediction_type="multi-step",
+        norm_method='standard',
+        prediction_type="step-ahead",
         record_score=True,
         plot=True
                                )
+
+    results = predict_all_dmas(
+        data=data,
+        models=prophet_models,
+        dates=constants.DATES_OF_LATEST_WEEK,
+        cols_to_lag={'Air humidity (%)': 6},
+        lag_target=12,
+        norm_method='',
+        prediction_type="step-ahead",
+        record_score=True,
+        plot=True
+    )
 
 plt.show()
