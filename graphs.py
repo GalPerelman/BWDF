@@ -82,10 +82,11 @@ def plot_test(observed, predicted, ylabel='', ax=None):
         fig, ax = plt.subplots()
 
     mae = evaluation.mean_abs_error(observed, predicted)
-
+    i1, i2, i3 = evaluation.one_week_score(observed, predicted)
     ax.plot(observed.index, observed)
     ax.plot(predicted.index, predicted)
-    anchored_text = AnchoredText(f"MAE={mae:.3f}", loc=2)
+    anchored_text = AnchoredText(f"I1={i1:.3f}\nI2={i2:.3f}\nI3={i3:.3f}\nMAE={mae:.3f}", loc='upper right',
+                                 prop=dict(fontsize=8))
     ax.add_artist(anchored_text)
     ax.set_ylabel(f"{ylabel}")
     ax.grid()
@@ -145,10 +146,12 @@ def plot_pareto():
         rf = pd.read_csv(f"grid_search_output/short_{dma[:5]}_rf.csv") * -1
         xgb = pd.read_csv(f"grid_search_output/short_{dma[:5]}_xgb.csv") * -1
         prophet = pd.read_csv(f"grid_search_output/short_{dma[:5]}_prophet.csv") * -1
+        lstm = pd.read_csv(f"grid_search_output/short_{dma[:5]}_lstm.csv") * -1
 
         axes[i].scatter(rf['mean_test_MAE'], rf['mean_test_MAX_E'], label='RF', s=10, alpha=0.8)
         axes[i].scatter(xgb['mean_test_MAE'], xgb['mean_test_MAX_E'], label='XGB', s=10, alpha=0.8)
         axes[i].scatter(prophet['mean_test_MAE'], prophet['mean_test_MAX_E'], label='Prophet', s=10, alpha=0.8)
+        axes[i].scatter(lstm['mean_test_MAE'], lstm['mean_test_MAX_E'], label='LSTM', s=10, alpha=0.8)
         axes[i].set_axisbelow(True)
         axes[i].grid(zorder=0)
         axes[i].set_title(f"{dma[:5]}", fontsize=10)
@@ -157,9 +160,11 @@ def plot_pareto():
         rf = pd.read_csv(f"grid_search_output/long_{dma[:5]}_rf.csv")
         xgb = pd.read_csv(f"grid_search_output/long_{dma[:5]}_xgb.csv")
         prophet = pd.read_csv(f"grid_search_output/long_{dma[:5]}_prophet.csv")
+        lstm = pd.read_csv(f"grid_search_output/long_{dma[:5]}_lstm.csv")
         print(dma, 'RF:', rf['mean_test_MAE'].max(), rf.loc[rf['rank_test_MAE'].idxmin()]['params'])
         print(dma, 'XGB:', xgb['mean_test_MAE'].max(), xgb.loc[xgb['rank_test_MAE'].idxmin()]['params'])
         print(dma, 'Prophet:', prophet['mean_test_MAE'].max(), prophet.loc[prophet['rank_test_MAE'].idxmin()]['params'])
+        print(dma, 'LSTM:', lstm['mean_test_MAE'].max(), lstm.loc[lstm['rank_test_MAE'].idxmin()]['params'])
         print('=========================================================================================')
 
     fig.delaxes(axes[10])
@@ -168,7 +173,7 @@ def plot_pareto():
     fig.text(0.04, 0.5, 'Max Abs Error', va='center', rotation='vertical')
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='lower right', bbox_to_anchor=(0.5, 0.15), bbox_transform=fig.transFigure)
+    fig.legend(handles, labels, loc='lower right', bbox_to_anchor=(0.5, 0.12), bbox_transform=fig.transFigure)
     plt.subplots_adjust(bottom=0.1, top=0.95, left=0.1, right=0.9, hspace=0.4, wspace=0.3)
     plt.show()
 
