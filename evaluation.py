@@ -7,11 +7,19 @@ import utils
 
 
 def mean_abs_error(observed, predicted):
-    return mae(observed, predicted)
+    e = mae(observed, predicted, multioutput='raw_values')
+    if observed.shape[1] == 1:
+        return e.item()
+    else:
+        return e
 
 
 def max_abs_error(observed, predicted):
-    return np.max(np.abs(observed - predicted))
+    e = np.max(np.abs(observed - predicted), axis=0).values
+    if observed.shape[1] == 1:
+        return e.item()
+    else:
+        return e
 
 
 def one_week_score(observed: pd.DataFrame, predicted: pd.DataFrame):
@@ -34,4 +42,4 @@ if __name__ == "__main__":
     # usage example
     data = utils.import_preprocessed("resources/preprocessed_data.csv")[constants.DMA_NAMES]
     pred = utils.import_preprocessed("results.csv")
-    one_week_score(observed=data, predicted=pred)
+    print(one_week_score(observed=data, predicted=pred))
