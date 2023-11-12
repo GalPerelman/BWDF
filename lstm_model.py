@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
-from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
-from sklearn.metrics import make_scorer, mean_absolute_error
 from sklearn.base import BaseEstimator, RegressorMixin
 
 from keras.models import Sequential, load_model
@@ -41,6 +39,7 @@ class LSTMForecaster(BaseEstimator, RegressorMixin):
         self.build_model(n_features=x.shape[1])
         train_size = int(len(x) * 0.8)
 
+        # last `look_back` periods of the train data are saved to use in the predict method
         self.train_tail = x.iloc[-self.look_back:]
         x_train, x_valid = x.iloc[:train_size].values, x.iloc[train_size:].values
         y_train, y_valid = y.iloc[:train_size].values, y.iloc[train_size:].values
@@ -92,11 +91,8 @@ class LSTMForecaster(BaseEstimator, RegressorMixin):
         return final_train_x, final_train_y, future_exog
 
     def predict(self, x):
-        """
-        x is a pandas DataFrame contains the data features - exogenous and lagged target
-        x MUST INCLUDE THE LAST `look_back' PERIODS OF THE TRAIN DATA
-        x.shape = (len(test_data) + look_back, n_features)
-        """
+        # x is a pandas DataFrame contains the data features - exogenous and lagged target
+        # x is extended to include the last `look_back` periods of the train data
         x = pd.concat([self.train_tail, x], axis=0)
 
         n_periods = len(x) - self.look_back
@@ -141,9 +137,6 @@ def predict_all_dmas(data, start_train, start_test, end_test, cols_to_lag):
         look_back = 24
         lstm = LSTMForecaster(look_back=look_back, epochs=10, batch_size=24)
         lstm.fit(x_train, y_train)
-
-        # x_test MUST INCLUDE THE LAST `look_back` PERIODS OF THE TRAIN DATA
-        x_test = pd.concat([x_train.iloc[-look_back:], x_test])
 
         pred = lstm.predict(x_test)
         pred = np.array(pred).reshape(-1, 1)

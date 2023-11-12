@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import constants
 import graphs
@@ -43,13 +44,37 @@ def hourly_distribution():
 
 
 def correlation_analysis(data):
-    fig, axes = plt.subplots(nrows=2, ncols=5, figsize=(8, 5))
+    fig, axes = plt.subplots(nrows=2, ncols=5, figsize=(10, 5))
     axes = axes.ravel()
 
     for i, col in enumerate(constants.DMA_NAMES):
         axes[i].scatter(data[col], data[col].shift(), s=15, alpha=0.3)
         axes[i].grid()
+        axes[i].set_title(col[:5])
 
+    fig.suptitle(f"(t) - (t-1) correlation")
+    fig.text(0.5, 0.02, 'Value at time t', ha='center')
+    fig.text(0.04, 0.5, 'Value at time t-1', va='center', rotation='vertical')
+    fig.subplots_adjust(bottom=0.12, top=0.88, left=0.1, right=0.95, wspace=0.35, hspace=0.35)
+
+    # plot correlation between DMAs
+    fig, ax = plt.subplots()
+    corr = data[constants.DMA_NAMES].corr()
+    im = ax.imshow(corr, cmap='Blues')
+
+    n = len(data.columns)
+    for i in range(n):
+        for j in range(n):
+            label = corr.iloc[i, j]
+            ax.text(i, j, f"{label:.2f}", color='k', ha='center', va='center', fontsize=8)
+
+    ax.set_xticks(np.arange(-.5, len(constants.DMA_NAMES), 1), minor=True)
+    ax.set_yticks(np.arange(-.5, len(constants.DMA_NAMES), 1), minor=True)
+    ax.grid(which='minor', color='k')
+
+    plt.xticks(range(len(corr.columns)), corr.columns, rotation=90)
+    plt.yticks(range(len(corr.columns)), corr.columns)
+    plt.colorbar(im)
     plt.tight_layout()
 
 
@@ -130,6 +155,10 @@ if __name__ == "__main__":
     # data = preprocess.data
 
     data = utils.import_preprocessed("resources/preprocessed_not_cyclic.csv")
+
+    correlation_analysis(data.loc[constants.DATES_OF_LATEST_WEEK['start_train']:
+                                  constants.DATES_OF_LATEST_WEEK['end_test'],
+                         constants.DMA_NAMES])
     weather_features()
     hourly_distribution()
     portion_of_total()
