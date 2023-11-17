@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import datetime
 import xgboost as xgb
 import matplotlib.pyplot as plt
@@ -12,6 +13,7 @@ import evaluation
 import utils
 from preprocess import Preprocess
 from data_loader import Loader
+from params_grids import grids
 
 warnings.filterwarnings("ignore")
 
@@ -45,7 +47,17 @@ class MultiSeriesForecaster:
     def predict(self, test_exog):
         return self.model.predict(steps=len(test_exog), levels=self.y_labels, exog=test_exog)
 
-    def grid_search(self, data, exog, lags_grid, param_grid, steps, refit, initial_train_size):
+    def max_abs_error(self, y_true, y_pred):
+        """
+        This function is identical to the one in 'evaluation' module
+        The only differences are:
+         - the multi-series framework used here 'skforecast' requires specific arguments naming (y_true, y_pred)
+         - the framework is based on numpy arrays and not pd.DataFrames as in 'evaluation' module
+        """
+        metric = np.max(np.abs(y_true - y_pred), axis=0)
+        return metric
+
+    def grid_search(self, data, exog, dma, lags_grid, param_grid, steps, refit, initial_train_size):
         """
         https://joaquinamatrodrigo.github.io/skforecast/0.10.1/user_guides/backtesting.html
 
@@ -56,14 +68,14 @@ class MultiSeriesForecaster:
         """
         results = grid_search_forecaster_multiseries(
             forecaster=self.model,
-            series=data.loc[(data.index >= start_train) & (data.index < end_test), y_labels],
+            series=data.loc[(data.index >= start_train) & (data.index < end_test)],
             lags_grid=lags_grid,
             param_grid=param_grid,
             steps=steps,
-            metric=['mean_absolute_error', evaluation.max_abs_error],
+            metric=['mean_absolute_error', self.max_abs_error],
             initial_train_size=initial_train_size,
             fixed_train_size=True,
-            levels=y_labels,
+            levels=self.y_labels,
             exog=exog,
             refit=refit,
             return_best=False,
@@ -75,7 +87,7 @@ class MultiSeriesForecaster:
         elif steps == 168:
             pred_term = 'long'
 
-        results.to_csv(f'{pred_term}_{self.y_label[:5]}_multiseries.csv', index=False)
+        results.to_csv(f'{pred_term}_{dma[:5]}_multiseries.csv', index=False)
 
 
 def predict_all_dma(dates, models, plot=False, record_score=False):
@@ -88,10 +100,10 @@ def predict_all_dma(dates, models, plot=False, record_score=False):
     for i, dma in enumerate(constants.DMA_NAMES):
         y_labels = [dma] + clusters[dma]
 
-        short_model_name = models[dma[:5]]['short']['model_name']
-        short_model_params = models[dma[:5]]['short']['params']
-        long_model_name = models[dma[:5]]['long']['model_name']
-        long_model_params = models[dma[:5]]['long']['params']
+        short_model_name = grids[dma[:5]]['short']['model_name']
+        short_model_params = grids[dma[:5]]['short']['params']
+        long_model_name = grids[dma[:5]]['long']['model_name']
+        long_model_params = grids[dma[:5]]['long']['params']
 
         start_train = dates['start_train']
         start_test = dates['start_test']
@@ -137,15 +149,43 @@ def predict_all_dma(dates, models, plot=False, record_score=False):
     return results
 
 
+def tune_all_dmas(data, dates):
+    for i, dma in enumerate(constants.DMA_NAMES):
+        y_labels = [dma] + clusters[dma]
+
+        start_train = dates['start_train']
+        start_test = dates['start_test']
+        end_short_pred = start_test + datetime.timedelta(days=1)
+        end_long_pred = start_test + datetime.timedelta(days=7)
+        exog_columns = [col for col in data.columns if col not in constants.DMA_NAMES]
+
+        short_data = data.loc[(data.index >= start_train) & (data.index < end_short_pred), y_labels]
+        short_exog = data.loc[(data.index >= start_train) & (data.index < end_short_pred), exog_columns]
+        f = MultiSeriesForecaster(regressor=xgb.XGBRegressor, params={}, y_labels=y_labels)
+        f.grid_search(data=short_data, exog=short_exog, dma=dma, lags_grid=[6, 12],
+                      param_grid=grids['xgb']['params'], steps=24, refit=3,
+                      initial_train_size=len(short_data) - (24 * 3))
+
+        long_data = data.loc[(data.index >= start_train) & (data.index < end_long_pred), y_labels]
+        long_exog = data.loc[(data.index >= start_train) & (data.index < end_long_pred), exog_columns]
+        f = MultiSeriesForecaster(regressor=xgb.XGBRegressor, params={}, y_labels=y_labels)
+        f.grid_search(data=long_data, exog=long_exog, dma=dma, lags_grid=[6, 12],
+                      param_grid=grids['xgb']['params'], steps=168, refit=3,
+                      initial_train_size=len(long_data) - (168 * 3))
+
+
 if __name__ == "__main__":
     loader = Loader()
     dates = constants.DATES_OF_LATEST_WEEK
     data = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3).data
     data.index.freq = 'H'
 
+    cols_to_lag = {'Rainfall depth (mm)': 12, 'Air temperature (°C)': 12, 'Windspeed (km/h)': 12, 'Air humidity (%)': 12}
     start_train, start_test, end_test = dates['start_train'], dates['start_test'], dates['end_test']
-    data, lagged_cols = Preprocess.lag_features(data, {'Air humidity (%)': 6})
+    data, lagged_cols = Preprocess.lag_features(data, cols_to_lag=cols_to_lag)
 
-    xgb_params = utils.read_json("xgb_params.json")
-    predict_all_dma(dates=dates, models=xgb_params, plot=True, record_score=False)
-    plt.show()
+    # xgb_params = utils.read_json("xgb_params.json")
+    # predict_all_dma(dates=dates, models=xgb_params, plot=True, record_score=False)
+    # plt.show()
+
+    tune_all_dmas(data, dates)
