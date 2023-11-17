@@ -14,7 +14,7 @@ import utils
 import constants
 import evaluation
 from data_loader import Loader
-from params_grids import models
+from params_grids import grids
 from preprocess import Preprocess
 
 
@@ -120,7 +120,7 @@ class Searcher:
 
 def tune_dma(data, dma_name, models_names, start_train, start_test, end_test, cols_to_lag, norm_method, n_split):
     for model_name in models_names:
-        model_info = models[model_name]
+        model_info = grids[model_name]
         searcher = Searcher(model_name=model_name,
                             model_info=model_info,
                             data=data,

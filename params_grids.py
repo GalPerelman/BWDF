@@ -10,7 +10,7 @@ from lstm_model import LSTMForecaster
 
 xgb.set_config(verbosity=0)
 
-models = {
+grids = {
     'rf':
         {
             'model': RandomForestRegressor(),
@@ -41,12 +41,14 @@ models = {
             'params':
                 {
                     'bootstrap': [True, False],
-                    "max_depth": [4, 5, 6, 7, 8],
+                    "max_depth": [3, 5, 10, 15],
                     "learning_rate": [0.01, 0.05, 0.1, 0.2],
-                    "n_estimators": [25, 50, 100, 200, 500],
-                    "reg_alpha": [0, 0.1, 0.5],
-                    "min_sample_leaf": [2, 3, None],
-                    "min_sample_split": [2, 3, None]
+                    "n_estimators": [50, 100, 200, 300, 500],
+                    "reg_alpha": [0, 0.01, 0.1, 0.5, 5],
+                    "reg_lambda": [0, 0.01, 0.1, 0.5, 5],
+                    # "min_sample_leaf": [2, 3, None],
+                    # "min_sample_split": [2, 3, None],
+                    "min_child_weight": [1, 3, 5],
                 },
 
             'ga_params':
