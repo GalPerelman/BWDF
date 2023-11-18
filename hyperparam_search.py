@@ -50,13 +50,13 @@ class Searcher:
             standard_cols = None
 
         self.x_train, self.y_train, self.x_test, self.y_test, self.scalers = Preprocess.split_data(data=temp_data,
-                                                                                              y_label=self.y_label,
-                                                                                              start_train=self.start_train,
-                                                                                              start_test=self.start_test,
-                                                                                              end_test=self.end_test,
-                                                                                              norm_method=self.norm_method,
-                                                                                              standard_cols=standard_cols
-                                                                                              )
+                                                                                                   y_label=self.y_label,
+                                                                                                   start_train=self.start_train,
+                                                                                                   start_test=self.start_test,
+                                                                                                   end_test=self.end_test,
+                                                                                                   norm_method=self.norm_method,
+                                                                                                   norm_cols=standard_cols
+                                                                                                   )
 
         self.tscv = TimeSeriesSplit(n_splits=self.n_splits)
         self.results = pd.DataFrame()
