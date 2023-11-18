@@ -12,8 +12,8 @@ import evaluation
 
 def draw_test_periods(ax, y_min, y_max):
     for test_name, test_dates in constants.TEST_TIMES.items():
-        rect = patches.Rectangle((test_dates['start'], y_min),
-                                 pd.Timestamp(test_dates['end']) - pd.Timestamp(test_dates['start']),
+        rect = patches.Rectangle((test_dates['start_test'], y_min),
+                                 pd.Timestamp(test_dates['end_test']) - pd.Timestamp(test_dates['start_test']),
                                  y_max - y_min,
                                  linewidth=1,
                                  edgecolor='r',
