@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_absolute_error as mae
+from sklearn.metrics import mean_absolute_percentage_error as mape
 
 import constants
 import utils
@@ -16,6 +17,14 @@ def mean_abs_error(observed, predicted):
 
 def max_abs_error(observed, predicted):
     e = np.max(np.abs(observed - predicted), axis=0).values
+    if observed.shape[1] == 1:
+        return e.item()
+    else:
+        return e
+
+
+def mean_abs_percentage_error(observed, predicted):
+    e = mape(observed, predicted, multioutput='raw_values')
     if observed.shape[1] == 1:
         return e.item()
     else:
