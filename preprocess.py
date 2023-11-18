@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.impute import KNNImputer
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, PowerTransformer, QuantileTransformer, RobustScaler
 
 import constants
 
@@ -71,15 +71,15 @@ class Preprocess:
         return data, lagged_cols
 
     @staticmethod
-    def split_data(data, y_label, start_train, start_test, end_test, norm_method='', standard_cols=None):
+    def split_data(data, y_label, start_train, start_test, end_test, norm_method='', norm_cols=None):
         x_columns = list(data.columns)
         x_columns = list(set(x_columns) - set(constants.DMA_NAMES))
 
         train = data.loc[(data.index >= start_train) & (data.index < start_test)]
         test = data.loc[(data.index >= start_test) & (data.index < end_test)]
-        if norm_method and standard_cols is not None:
-            train, scalers = Preprocess.fit_transform(train, columns=standard_cols, method=norm_method)
-            test = Preprocess.transform(test, columns=standard_cols, scalers=scalers)
+        if norm_method and norm_cols is not None:
+            train, scalers = Preprocess.fit_transform(train, columns=norm_cols, method=norm_method)
+            test = Preprocess.transform(test, columns=norm_cols, scalers=scalers)
         else:
             scalers = None
 
@@ -99,6 +99,12 @@ class Preprocess:
                 scaler = StandardScaler()
             elif method == 'min_max':
                 scaler = MinMaxScaler(feature_range=(0, 1))
+            elif method == 'robust':
+                scaler = RobustScaler()
+            elif method == 'power':
+                scaler = PowerTransformer()
+            elif method == 'quantile':
+                scaler = QuantileTransformer()
 
             data.loc[:, col] = scaler.fit_transform(data[[col]])
             scalers[col] = scaler
