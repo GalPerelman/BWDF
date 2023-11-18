@@ -4,7 +4,7 @@ import pandas as pd
 import xgboost as xgb
 
 import constants
-from preprocess import Preprocess
+import multi_series
 from lstm_model import LSTMForecaster
 
 import utils
@@ -28,9 +28,9 @@ class Forecast:
         temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
         temp_data = utils.drop_other_dmas(temp_data, self.y_label)
         if self.norm_method:
-            standard_cols = constants.WEATHER_COLUMNS + lagged_cols + [self.y_label]
+            norm_cols = constants.WEATHER_COLUMNS + lagged_cols + [self.y_label]
         else:
-            standard_cols = None
+            norm_cols = None
 
         (self.x_train, self.y_train,
          self.x_test, self.y_test, self.scalers) = Preprocess.split_data(data=temp_data,
@@ -39,7 +39,7 @@ class Forecast:
                                                                          start_test=self.start_test,
                                                                          end_test=self.end_test,
                                                                          norm_method=self.norm_method,
-                                                                         standard_cols=standard_cols
+                                                                         norm_cols=norm_cols
                                                                          )
 
     def predict(self, model, params):
@@ -73,6 +73,29 @@ class Forecast:
             pred.loc[next_step_idx, self.y_label] = pred_value
             self.y_train.loc[next_step_idx] = pred_value
 
+        if self.scalers:
+            pred = self.format_forecast(pred)
+        return pred
+
+    def multi_series_predict(self, params):
+        temp_data = self.data.copy()
+        temp_data.index.freq = 'H'
+        temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
+
+        y_labels = [self.y_label] + multi_series.clusters[self.y_label]
+        exog_columns = [col for col in temp_data.columns if col not in constants.DMA_NAMES]
+
+        train = temp_data.loc[(temp_data.index >= self.start_train) & (temp_data.index < self.start_test)]
+        test = temp_data.loc[(temp_data.index >= self.start_test) & (temp_data.index < self.end_test)]
+
+        train_data = train[y_labels]
+        test_data = test[y_labels]
+        train_exog = train[exog_columns]
+        test_exog = test[exog_columns]
+
+        f = multi_series.MultiSeriesForecaster(regressor=xgb.XGBRegressor, params=params, y_labels=y_labels)
+        f.fit(train_data=train_data, train_exog=train_exog)
+        pred = f.predict(test_exog=test_exog)[[self.y_label]]
         return pred
 
     def format_forecast(self, pred):

@@ -97,13 +97,13 @@ def predict_all_dma(dates, models, plot=False, record_score=False):
         fig.align_ylabels()
         plt.subplots_adjust(bottom=0.05, top=0.95, left=0.1, right=0.9, hspace=0.2)
 
-    for i, dma in enumerate(constants.DMA_NAMES):
+    for i, dma in enumerate(constants.DMA_NAMES[:1]):
         y_labels = [dma] + clusters[dma]
 
-        short_model_name = grids[dma[:5]]['short']['model_name']
-        short_model_params = grids[dma[:5]]['short']['params']
-        long_model_name = grids[dma[:5]]['long']['model_name']
-        long_model_params = grids[dma[:5]]['long']['params']
+        short_model_name = models[dma[:5]]['short']['model_name']
+        short_model_params = models[dma[:5]]['short']['params']
+        long_model_name = models[dma[:5]]['long']['model_name']
+        long_model_params = models[dma[:5]]['long']['params']
 
         start_train = dates['start_train']
         start_test = dates['start_test']
