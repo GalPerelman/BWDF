@@ -91,10 +91,25 @@ TEST_TIMES = {
            'end_test': TZ.localize(datetime.datetime(2023, 3, 13, 0, 0))}
 }
 
+
+# Experiments
+
 DATES_TO_TEST_EXTREME_RAINFALL = {
     'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
     'start_test': TZ.localize(datetime.datetime(2021, 9, 17, 0, 0)),
     'end_test': TZ.localize(datetime.datetime(2021, 9, 24, 0, 0))
+}
+
+DATES_TO_TEST_NOV_HOLIDAYS = {
+    'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
+    'start_test': TZ.localize(datetime.datetime(2021, 11, 1, 0, 0)),
+    'end_test': TZ.localize(datetime.datetime(2021, 11, 8, 0, 0))
+}
+
+DATES_TO_TEST_MISSING_WEATHER = {
+    'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
+    'start_test': TZ.localize(datetime.datetime(2022, 6, 6, 0, 0)),
+    'end_test': TZ.localize(datetime.datetime(2022, 6, 13, 0, 0))
 }
 
 DATES_OF_LATEST_WEEK = {
