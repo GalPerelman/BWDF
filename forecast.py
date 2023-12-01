@@ -12,10 +12,14 @@ from preprocess import Preprocess
 
 
 class Forecast:
-    def __init__(self, data, y_label, cols_to_lag, norm_method, start_train, start_test, end_test):
+    def __init__(self, data, y_label, cols_to_lag, cols_to_move_stat, window_size, norm_method,
+                 start_train, start_test, end_test):
+
         self.data = data
         self.y_label = y_label
         self.cols_to_lag = cols_to_lag
+        self.cols_to_move_stat = cols_to_move_stat
+        self.window_size = window_size
         self.norm_method = norm_method
         self.start_train = start_train
         self.start_test = start_test
@@ -24,23 +28,24 @@ class Forecast:
         if not self.cols_to_lag:
             self.cols_to_lag = {self.y_label: 0}
 
-        temp_data = self.data.copy()
+        temp_data = data.copy(deep=True)
+        temp_data = Preprocess.drop_other_dmas(temp_data, self.y_label)
         temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
-        temp_data = utils.drop_other_dmas(temp_data, self.y_label)
+        temp_data, stat_cols = Preprocess.construct_moving_features(temp_data, cols_to_move_stat, window_size)
+        n_rows_to_drop = max(max(cols_to_lag.values(), default=0), self.window_size)
+        temp_data = Preprocess.drop_preprocess_nans(temp_data, n_rows=n_rows_to_drop)
         if self.norm_method:
-            norm_cols = constants.WEATHER_COLUMNS + lagged_cols + [self.y_label]
+            norm_cols = constants.WEATHER_COLUMNS + lagged_cols + stat_cols + [self.y_label]
         else:
             norm_cols = None
 
-        (self.x_train, self.y_train,
-         self.x_test, self.y_test, self.scalers) = Preprocess.split_data(data=temp_data,
-                                                                         y_label=self.y_label,
-                                                                         start_train=self.start_train,
-                                                                         start_test=self.start_test,
-                                                                         end_test=self.end_test,
-                                                                         norm_method=self.norm_method,
-                                                                         norm_cols=norm_cols
-                                                                         )
+        preprocessed = Preprocess.split_data(data=temp_data, y_label=self.y_label, start_train=self.start_train,
+                                             start_test=self.start_test, end_test=self.end_test,
+                                             norm_method=self.norm_method, norm_cols=norm_cols
+                                            )
+
+        # unpack preprocessed
+        self.x_train, self.y_train, self.x_test, self.y_test, self.scalers = preprocessed
 
     def predict(self, model, params):
         reg = model(**params)

@@ -58,17 +58,36 @@ class Preprocess:
         self.data['is_special'] = self.data.index.normalize().isin(constants.SPECIAL_DATES).astype(int)
 
     @staticmethod
+    def construct_moving_features(data, columns, window_size):
+        added_cols = []
+        for col in columns:
+            data[col + f'_mavg'] = data[col].rolling(window=window_size).mean()
+            data[col + f'_mstd'] = data[col].rolling(window=window_size).std()
+            added_cols += [col + f'_mavg', col + f'_mstd']
+
+        return data, added_cols
+
+    @staticmethod
     def lag_features(data: pd.DataFrame, cols_to_lag: dict):
         lagged_cols = []
         for label, lags in cols_to_lag.items():
-            for lag in range(1, lags+1):
+            for lag in range(1, lags + 1):
                 data[label + f'_{lag}'] = data[label].shift(lag)
                 lagged_cols.append(label + f'_{lag}')
 
-        # drop the n_lags first rows to clear Nans - according to col with max lags
-        max_n_lags = max(cols_to_lag.values(), default=0)
-        data = data.iloc[max_n_lags:]
         return data, lagged_cols
+
+    @staticmethod
+    def drop_preprocess_nans(data, n_rows):
+        """
+        Some preprocess functions result in rows with nan values in the first rows
+        For example, lagging features generate Nans since there are no previous values that can be lagged
+        Another example is the moving statistics features
+        The function looks for nans only in the first n_rows
+        In the data end there are nans where exogenous data exist and target values are missing
+        """
+        data = data.iloc[n_rows:]
+        return data
 
     @staticmethod
     def split_data(data, y_label, start_train, start_test, end_test, norm_method='', norm_cols=None):
@@ -112,7 +131,7 @@ class Preprocess:
         return data, scalers
 
     @staticmethod
-    def transform(data,  columns, scalers):
+    def transform(data, columns, scalers):
         for col in columns:
             scaler = scalers[col]
             data.loc[:, col] = scaler.transform(data[[col]])
