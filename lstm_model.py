@@ -115,7 +115,7 @@ class LSTMForecaster(BaseEstimator, RegressorMixin):
         return forecast
 
 
-def predict_all_dmas(data, start_train, start_test, end_test, cols_to_lag):
+def predict_all_dmas(data, start_train, start_test, end_test, cols_to_lag, norm_method):
     test_true = data.loc[(data.index >= start_test) & (data.index < end_test)]
     df = pd.DataFrame(index=pd.date_range(start=start_test, end=end_test - datetime.timedelta(hours=1), freq='1H'))
 
@@ -131,8 +131,8 @@ def predict_all_dmas(data, start_train, start_test, end_test, cols_to_lag):
                                                                           start_train=start_train,
                                                                           start_test=start_test,
                                                                           end_test=end_test,
-                                                                          norm_method='standard',
-                                                                          standard_cols=standard_cols)
+                                                                          norm_method=norm_method,
+                                                                          norm_cols=standard_cols)
 
         look_back = 24
         lstm = LSTMForecaster(look_back=look_back, epochs=10, batch_size=24)
@@ -142,8 +142,9 @@ def predict_all_dmas(data, start_train, start_test, end_test, cols_to_lag):
         pred = np.array(pred).reshape(-1, 1)
         pred = scalers[dma].inverse_transform(pred).flatten()
 
-        df[dma] = pred
-        axes[i] = graphs.plot_test(test_true[dma], df[dma], ax=axes[i])
+        period_dates = pd.date_range(start=start_test, end=end_test - datetime.timedelta(hours=1), freq='1H')
+        forecast = pd.DataFrame({dma: pred}, index=period_dates)
+        axes[i] = graphs.plot_test(test_true[[dma]], forecast, ax=axes[i])
         axes[i].set_ylabel(dma[:5])
 
     fig.align_ylabels()
@@ -157,9 +158,12 @@ if __name__ == "__main__":
     preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
     data = preprocess.data
 
+    norm_methods = ['standard', 'min_max', 'robust', 'power', 'quantile']
+
     start_train = constants.DATES_OF_LATEST_WEEK['start_train']
     start_test = constants.DATES_OF_LATEST_WEEK['start_test']
     end_test = start_test + datetime.timedelta(hours=168)
     cols_to_lag = {'Air humidity (%)': 12, 'Rainfall depth (mm)': 12, 'Air temperature (°C)': 12, 'Windspeed (km/h)': 12}
-    predict_all_dmas(data, start_train=start_train, start_test=start_test, end_test=end_test, cols_to_lag=cols_to_lag)
+    predict_all_dmas(data, start_train=start_train, start_test=start_test, end_test=end_test, cols_to_lag=cols_to_lag,
+                     norm_method='power')
     plt.show()
