@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, PowerTransformer, QuantileTransformer, RobustScaler
+from sklearn.base import BaseEstimator, TransformerMixin
 
 import constants
 
@@ -124,6 +125,10 @@ class Preprocess:
                 scaler = PowerTransformer()
             elif method == 'quantile':
                 scaler = QuantileTransformer()
+            elif method == 'moving_stat':
+                scaler = MovingWindowScaler()
+            elif method == 'fixed_window':
+                scaler = FixedWindowScaler()
 
             data.loc[:, col] = scaler.fit_transform(data[[col]])
             scalers[col] = scaler
@@ -146,5 +151,139 @@ class Preprocess:
 
     def export(self, path):
         self.data.to_csv(path)
+
+
+class MovingWindowScaler(BaseEstimator, TransformerMixin):
+    def __init__(self, window_size=168):
+        self.window_size = window_size
+        self.window_stats_ = []
+
+    def fit(self, X, y=None):
+        if isinstance(X, pd.DataFrame):
+            X = X.values
+
+        # Compute the rolling window statistics
+        rolling_windows = pd.DataFrame(X).rolling(window=self.window_size, min_periods=1)
+        means = rolling_windows.mean().values
+        stds = rolling_windows.std().values
+
+        # Shift the statistics to align with the 'future' values
+        shifted_means = np.roll(means, -self.window_size, axis=0)
+        shifted_stds = np.roll(stds, -self.window_size, axis=0)
+
+        # Handle the first few values where shifting results in NaNs (using first available stats)
+        for i in range(self.window_size):
+            shifted_means[i] = means[self.window_size]
+            shifted_stds[i] = stds[self.window_size]
+
+        # Store the shifted statistics
+        self.window_stats_ = {'mean': shifted_means, 'std': shifted_stds}
+
+        return self
+
+    def transform(self, X, y=None):
+        if isinstance(X, pd.DataFrame):
+            X = X.values
+
+        # Use the last window statistics for all the points in X
+        # These are the statistics of the last complete window from the training data
+        last_mean = self.window_stats_['mean'][-1]
+        last_std = self.window_stats_['std'][-1]
+
+        X_normalized = (X - last_mean) / last_std
+        X_normalized = np.nan_to_num(X_normalized)  # Handle cases where std is zero
+        return X_normalized
+
+    def inverse_transform(self, X, y=None):
+        if isinstance(X, pd.DataFrame):
+            X = X.values
+
+        # Use the last window statistics for all the points in X
+        # These are the statistics of the last complete window from the training data
+        last_mean = self.window_stats_['mean'][-1]
+        last_std = self.window_stats_['std'][-1]
+
+        X_reconstructed = X * last_std + last_mean
+        return X_reconstructed
+
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X, y)
+
+
+class FixedWindowScaler(BaseEstimator, TransformerMixin):
+    def __init__(self, window_size=168):
+        self.window_size = window_size
+        self.window_stats_ = []
+        self.last_window_stats_ = {'mean': None, 'std': None}
+
+    def fit(self, X, y=None):
+        if not isinstance(X, pd.DataFrame):
+            raise ValueError("X must be a pandas DataFrame with a datetime index.")
+
+        if not isinstance(X.index, pd.DatetimeIndex):
+            raise ValueError("X must have a datetime index.")
+
+        if X.empty:
+            raise ValueError("Input DataFrame is empty.")
+
+        num_features = X.shape[1]
+        data_len = len(X)
+
+        # Initialize arrays to store mean and std for each week and feature
+        means = np.zeros((data_len, num_features))
+        stds = np.zeros((data_len, num_features))
+
+        # Group by week and calculate mean and std for each week
+        for feature_idx in range(num_features):
+            feature_column = X.iloc[:, feature_idx]
+            weekly_groups = feature_column.groupby([X.index.isocalendar().year, X.index.isocalendar().week])
+
+            for (year, week), group in weekly_groups:
+                window_mean = group.mean()
+                window_std = group.std()
+
+                week_mask = (X.index.isocalendar().year == year) & (X.index.isocalendar().week == week)
+                indices = np.where(week_mask)[0]
+                means[indices, feature_idx] = window_mean
+                stds[indices, feature_idx] = window_std
+
+        self.window_stats_ = {'mean': means, 'std': stds}
+        self.last_window_stats_['mean'] = means[-self.window_size:]
+        self.last_window_stats_['std'] = stds[-self.window_size:]
+
+        return self
+
+    def transform(self, X, y=None):
+        if isinstance(X, pd.DataFrame):
+            X = X.values
+
+        # If the number of rows in X is less than or equal to the window size, use the last window stats
+        if len(X) <= self.window_size:
+            last_mean = np.nanmean(self.last_window_stats_['mean'], axis=0)
+            last_std = np.nanmean(self.last_window_stats_['std'], axis=0)
+            X_normalized = (X - last_mean) / last_std
+        else:
+            X_normalized = (X - self.window_stats_['mean']) / self.window_stats_['std']
+
+        X_normalized = np.nan_to_num(X_normalized)  # Handle cases where std is zero
+        return X_normalized
+
+    def fit_transform(self, X, y=None):
+        return self.fit(X, y).transform(X, y)
+
+    def inverse_transform(self, X, y=None):
+        if isinstance(X, pd.DataFrame):
+            X = X.values
+
+        # If the number of rows in X is less than or equal to the window size, use the last window stats
+        if len(X) <= self.window_size:
+            last_mean = np.nanmean(self.last_window_stats_['mean'], axis=0)
+            last_std = np.nanmean(self.last_window_stats_['std'], axis=0)
+            X_reconstructed = X * last_std + last_mean
+        else:
+            X_reconstructed = X * self.window_stats_['std'] + self.window_stats_['mean']
+
+        return X_reconstructed
+
 
 
