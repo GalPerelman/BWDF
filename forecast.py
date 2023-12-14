@@ -4,6 +4,7 @@ import pandas as pd
 import xgboost as xgb
 
 import constants
+import graphs
 import multi_series
 from lstm_model import LSTMForecaster
 
@@ -12,7 +13,7 @@ from preprocess import Preprocess
 
 
 class Forecast:
-    def __init__(self, data, y_label, cols_to_lag, cols_to_move_stat, window_size, norm_method,
+    def __init__(self, data, y_label, cols_to_lag, cols_to_move_stat, window_size, cols_to_decompose, norm_method,
                  start_train, start_test, end_test):
 
         self.data = data
@@ -20,6 +21,7 @@ class Forecast:
         self.cols_to_lag = cols_to_lag
         self.cols_to_move_stat = cols_to_move_stat
         self.window_size = window_size
+        self.cols_to_decompose = cols_to_decompose
         self.norm_method = norm_method
         self.start_train = start_train
         self.start_test = start_test
@@ -32,6 +34,7 @@ class Forecast:
         temp_data = Preprocess.drop_other_dmas(temp_data, self.y_label)
         temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
         temp_data, stat_cols = Preprocess.construct_moving_features(temp_data, cols_to_move_stat, window_size)
+        temp_data, decomposed_cols = Preprocess.construct_decomposed_features(temp_data, self.cols_to_decompose)
         n_rows_to_drop = max(max(cols_to_lag.values(), default=0), self.window_size)
         temp_data = Preprocess.drop_preprocess_nans(temp_data, n_rows=n_rows_to_drop)
         if self.norm_method:
