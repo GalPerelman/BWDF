@@ -172,7 +172,7 @@ class Preprocess:
 class MovingWindowScaler(BaseEstimator, TransformerMixin):
     def __init__(self, window_size=168):
         self.window_size = window_size
-        self.window_stats_ = []
+        self.window_stats_ = {}
 
     def fit(self, X, y=None):
         if isinstance(X, pd.DataFrame):
@@ -222,7 +222,7 @@ class MovingWindowScaler(BaseEstimator, TransformerMixin):
         X_reconstructed = X * last_std + last_mean
         return X_reconstructed
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X, y=None, **fit_params):
         return self.fit(X, y).transform(X, y)
 
 
@@ -284,7 +284,7 @@ class FixedWindowScaler(BaseEstimator, TransformerMixin):
         X_normalized = np.nan_to_num(X_normalized)  # Handle cases where std is zero
         return X_normalized
 
-    def fit_transform(self, X, y=None):
+    def fit_transform(self, X, y=None, **fit_params):
         return self.fit(X, y).transform(X, y)
 
     def inverse_transform(self, X, y=None):
