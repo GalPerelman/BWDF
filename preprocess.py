@@ -119,6 +119,7 @@ class Preprocess:
         else:
             scalers = None
 
+        train = train.dropna()  # this is to make sure there are no
         x_train = train.loc[:, x_columns]
         y_train = train.loc[:, y_label]
 
@@ -145,6 +146,8 @@ class Preprocess:
                 scaler = MovingWindowScaler()
             elif method == 'fixed_window':
                 scaler = FixedWindowScaler()
+            elif method == 'diff':
+                scaler = DifferencingScaler(method=method)
 
             data.loc[:, col] = scaler.fit_transform(data[[col]])
             scalers[col] = scaler
@@ -302,4 +305,62 @@ class FixedWindowScaler(BaseEstimator, TransformerMixin):
         return X_reconstructed
 
 
+class DifferencingScaler(BaseEstimator, TransformerMixin):
+    """
+    Scaling data based on differencing between sequence records
+    The class provide 3 differencing methods: standard diff, relative_diff, and log_diff
+    In this project the methods relative_diff, and log_diff are not used
+    Since they are highly sensitive to zeros and negatives values
 
+    https://stats.stackexchange.com/a/549967
+    """
+    def __init__(self, lag=1, method='diff'):
+        self.lag = lag
+        self.init_values = None
+        self.last_train_val = None
+        self.method = method
+
+    def fit(self, X, y=None):
+        # Store the initial values needed for the inverse transformation
+        self.init_values = X.iloc[:self.lag, :]
+        # Store the last value of the training set
+        self.last_train_val = X.iloc[-1]
+        return self
+
+    def transform(self, X, y=None):
+        if self.last_train_val is not None:
+            # Prepend the last value of the training set for proper differencing
+            X = pd.concat([self.last_train_val, X])
+
+        if self.method == 'diff':
+            # Standard differencing
+            X_transformed = X.diff(periods=self.lag)
+        elif self.method == 'relative_diff':
+            # Relative (percentage) differencing
+            X_transformed = X.pct_change(periods=self.lag)
+        elif self.method == 'log_diff':
+            # Logarithmic differencing
+            X_transformed = np.log(X / X.shift(self.lag))
+        else:
+            raise ValueError("Invalid method specified")
+
+        return X_transformed
+
+    def inverse_transform(self, X, y=None):
+        if self.method == 'diff':
+            # Inverse of standard differencing
+            restored = pd.concat([self.last_train_val, pd.DataFrame(X)]) + self.init_values.values[-1]
+        elif self.method == 'relative_diff':
+            # Inverse of relative differencing
+            restored = (1 + pd.concat([self.last_train_val, pd.DataFrame(X)])).cumprod() * self.init_values.values[-1]
+        elif self.method == 'log_diff':
+            # Inverse of logarithmic differencing
+            restored = np.exp(pd.concat([self.last_train_val, pd.DataFrame(X)]).cumsum()) * self.init_values.values[-1]
+        else:
+            raise ValueError("Invalid method specified")
+
+        return restored.values[1:]
+
+    def fit_transform(self, X, y=None, **fit_params):
+        self.fit(X)
+        return self.transform(X)
