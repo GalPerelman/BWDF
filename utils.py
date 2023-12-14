@@ -3,7 +3,7 @@ import json
 import pytz
 import pandas as pd
 import datetime
-from typing import Iterable
+from typing import Sequence
 
 import constants
 
@@ -70,9 +70,9 @@ def num_hours_between_timestamps(t1, t2):
     return hours
 
 
-def record_results(dma: str, short_model_name: str, long_model_name: str, dates: dict, lags: dict,
-                   pred_type: str, score: Iterable):
-    score = pd.DataFrame({
+def record_results(dma: str, short_model_name: str, long_model_name: str, dates: dict, lags: dict, norm_method: str,
+                   pred_type: str, score: Sequence):
+    result = pd.DataFrame({
         'dma': dma,
         'short_model_name': short_model_name,
         'long_model_name': long_model_name,
@@ -80,6 +80,7 @@ def record_results(dma: str, short_model_name: str, long_model_name: str, dates:
         'start_test': dates['start_test'],
         'end_test': dates['end_test'],
         'lags': [lags],
+        'norm': norm_method,
         'pred_type': pred_type,
         'i1': score[0],
         'i2': score[1],
@@ -87,5 +88,5 @@ def record_results(dma: str, short_model_name: str, long_model_name: str, dates:
     }, index=[datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")])
 
     df = pd.read_csv("models_scores.csv", index_col=0)
-    df = pd.concat([df, score])
+    df = pd.concat([df, result])
     df.to_csv("models_scores.csv", index=True)
