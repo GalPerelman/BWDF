@@ -178,5 +178,23 @@ def plot_pareto():
     plt.show()
 
 
+def visualize_nans(df):
+    """
+    Plot the df as matrix with white square where data exist and black square where Nan
+    Used mostly for debugging
+    """
+    nan_mask = df.isna()
+    fig = plt.figure(figsize=(15, 8))
+
+    plt.imshow(nan_mask, aspect='auto', cmap='gray_r', interpolation='none')
+    plt.xlabel('Columns')
+    plt.ylabel('Rows')
+    plt.xticks(ticks=np.arange(len(df.columns)), labels=df.columns, rotation=90)
+
+    plt.colorbar(label='NaN Values\nBlack: NaN\nWhite: Not NaN')
+    plt.subplots_adjust(bottom=0.35, top=0.95, left=0.1, right=0.95)
+    return fig
+
+
 if __name__ == "__main__":
     plot_pareto()
