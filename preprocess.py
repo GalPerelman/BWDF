@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from statsmodels.tsa.seasonal import seasonal_decompose
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, PowerTransformer, QuantileTransformer, RobustScaler
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -65,6 +66,21 @@ class Preprocess:
             data[col + f'_mavg'] = data[col].rolling(window=window_size).mean()
             data[col + f'_mstd'] = data[col].rolling(window=window_size).std()
             added_cols += [col + f'_mavg', col + f'_mstd']
+
+        return data, added_cols
+
+    @staticmethod
+    def construct_decomposed_features(data, columns, period=168):
+        added_cols = []
+        for col in columns:
+            decomposition = seasonal_decompose(data[col], model='additive')
+            trend = decomposition.trend.dropna()
+            seasonal = decomposition.seasonal.dropna()
+            residual = decomposition.resid.dropna()
+            data[col + f'_trend'] = trend
+            data[col + f'_seasonal'] = seasonal
+            data[col + f'_residual'] = residual
+            added_cols += [col + f'_trend', col + col + f'_seasonal', col + f'_residual']
 
         return data, added_cols
 
