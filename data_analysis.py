@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import constants
 import graphs
 import utils
+from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.tsa.stattools import adfuller
 
 from data_loader import Loader
 from preprocess import Preprocess
@@ -148,6 +150,49 @@ def covid_data():
     return covid
 
 
+def moving_stat(data, window_size):
+    fig, axes = plt.subplots(nrows=10, ncols=2, sharex=True, figsize=(8, 6))
+
+    for i, col in enumerate(constants.DMA_NAMES):
+        rolling_windows = data[col].rolling(window=window_size, min_periods=1)
+        axes[i, 0].plot(data.index, rolling_windows.mean().shift(window_size).values)
+        axes[i, 1].plot(data.index, rolling_windows.std().shift(window_size).values)
+        axes[i, 0].grid()
+        axes[i, 1].grid()
+
+        axes[i, 0].set_ylabel(col[:5])
+
+    axes[0, 0].set_title("Moving Average")
+    axes[0, 1].set_title("Moving STD")
+
+    fig.subplots_adjust(bottom=0.06, top=0.95, left=0.1, right=0.9, hspace=0.25)
+    fig.align_ylabels()
+    plt.gcf().autofmt_xdate()
+
+
+def stationary_test(data):
+    fig, axes = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True, figsize=(10, 6))
+    axes = axes.ravel()
+
+    for i, col in enumerate(constants.DMA_NAMES):
+        data_diff = data[col].dropna()
+        plot_acf(data_diff, lags=24, ax=axes[i])
+        axes[i].set_title(f"{col[:5]}")
+
+        adftest = adfuller(data[col].dropna(), autolag='AIC', regression='ct')
+        print("ADF Test Results")
+        print("Null Hypothesis: The series has a unit root (non-stationary)")
+        print("ADF-Statistic:", adftest[0])
+        print("P-Value:", adftest[1])
+        print("Number of lags:", adftest[2])
+        print("Number of observations:", adftest[3])
+        print("Critical Values:", adftest[4])
+        print("Note: If P-Value is smaller than 0.05, we reject the null hypothesis and the series is stationary")
+
+    fig.subplots_adjust(bottom=0.12, top=0.92, left=0.1, right=0.9, hspace=0.15)
+    fig.text(0.5, 0.02, 'Lags', ha='center')
+
+
 if __name__ == "__main__":
     # loader = Loader()
     # preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=False, n_neighbors=3)
@@ -156,12 +201,17 @@ if __name__ == "__main__":
 
     data = utils.import_preprocessed("resources/preprocessed_not_cyclic.csv")
 
-    correlation_analysis(data.loc[constants.DATES_OF_LATEST_WEEK['start_train']:
-                                  constants.DATES_OF_LATEST_WEEK['end_test'],
-                         constants.DMA_NAMES])
-    weather_features()
-    hourly_distribution()
-    portion_of_total()
-    specific_demand()
-    cluster_dmas()
+    # correlation_analysis(data.loc[constants.DATES_OF_LATEST_WEEK['start_train']:
+    #                               constants.DATES_OF_LATEST_WEEK['end_test'],
+    #                      constants.DMA_NAMES])
+    # weather_features()
+    # hourly_distribution()
+    # portion_of_total()
+    # specific_demand()
+    # cluster_dmas()
+    # moving_stat(data, window_size=24)
+    #
+
+    stationary_test(data)
+
     plt.show()
