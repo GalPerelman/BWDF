@@ -4,13 +4,16 @@ import datetime
 import matplotlib.pyplot as plt
 from sklearn.base import BaseEstimator, RegressorMixin
 
+from keras import backend as K
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation, Dropout, LSTM
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.regularizers import L1L2
 from keras.preprocessing.sequence import TimeseriesGenerator
+from keras.optimizers import Adam, RMSprop
 
 import constants
+import evaluation
 import utils
 import graphs
 from preprocess import Preprocess
@@ -18,22 +21,70 @@ from data_loader import Loader
 
 
 class LSTMForecaster(BaseEstimator, RegressorMixin):
-    def __init__(self, look_back=24, epochs=10, batch_size=24, units=100, dropout=0.2):
+    def __init__(self, look_back=24, epochs=10, batch_size=24, num_layers=2, units=100, dropout=0.2,
+                 recurrent_dropout=0.2, optimizer='adam', learning_rate=0.001, activation='tanh'):
+
         self.look_back = look_back
         self.epochs = epochs
         self.batch_size = batch_size
+        self.num_layers = num_layers
         self.units = units
         self.dropout = dropout
+        self.recurrent_dropout = recurrent_dropout
+        self.optimizer = optimizer
+        self.learning_rate = learning_rate
+        self.activation = activation
 
         self.model = None
 
+    def max_abs_error(self, y_true, y_pred):
+        """
+        This function is identical to the one in 'evaluation' module
+        The only differences is that it uses keras syntax to incorporate with the keras model training
+        """
+        return K.max(K.abs(y_true - y_pred))
+
     def build_model(self, n_features):
         self.model = Sequential()
-        self.model.add(LSTM(units=self.units, input_shape=(self.look_back, n_features), return_sequences=True))
-        self.model.add(LSTM(units=self.units, return_sequences=False))
-        self.model.add(Dropout(self.dropout))
+        for i in range(self.num_layers):
+            return_sequences = True if i < self.num_layers - 1 else False
+            if i == 0:
+                self.model.add(
+                    LSTM(self.units, input_shape=(self.look_back, n_features),
+                         return_sequences=return_sequences,
+                         dropout=self.dropout,
+                         recurrent_dropout=self.recurrent_dropout,
+                         activation=self.activation
+                         )
+                )
+            else:
+                self.model.add(LSTM(self.units,
+                               return_sequences=return_sequences,
+                               dropout=self.dropout,
+                               recurrent_dropout=self.recurrent_dropout,
+                               activation=self.activation
+                                    )
+                               )
+
+        self.model.add(Dense(self.units, activation=self.activation))
         self.model.add(Dense(1))
-        self.model.compile(optimizer='adam', loss='mse')
+
+        # Compile the model
+        if self.optimizer == 'adam':
+            opt = Adam(learning_rate=self.learning_rate)
+        elif self.optimizer == 'rmsprop':
+            opt = RMSprop(learning_rate=self.learning_rate)
+        # Include other optimizers as needed
+        self.model.compile(optimizer=opt,
+                           loss='mean_absolute_error',
+                           metrics=['mean_absolute_error', self.max_abs_error])
+
+    # simplified model build
+    # self.model.add(LSTM(units=self.units, input_shape=(self.look_back, n_features), return_sequences=True))
+    # self.model.add(LSTM(units=self.units, return_sequences=False))
+    # self.model.add(Dropout(self.dropout))
+    # self.model.add(Dense(1))
+    # self.model.compile(optimizer='adam', loss='mse')
 
     def fit(self, x, y):
         self.build_model(n_features=x.shape[1])
