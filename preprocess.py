@@ -70,13 +70,20 @@ class Preprocess:
         return data, added_cols
 
     @staticmethod
-    def construct_decomposed_features(data, columns, period=168):
+    def construct_decomposed_features(data, columns, period=24):
         added_cols = []
         for col in columns:
-            decomposition = seasonal_decompose(data[col], model='additive')
-            trend = decomposition.trend.dropna()
-            seasonal = decomposition.seasonal.dropna()
-            residual = decomposition.resid.dropna()
+            filled_col = data[col].fillna(method='ffill')
+            decomposition = seasonal_decompose(filled_col, model='additive', period=period)
+
+            trend = decomposition.trend
+            seasonal = decomposition.seasonal
+            residual = decomposition.resid
+
+            trend[data[col].isna()] = np.nan
+            seasonal[data[col].isna()] = np.nan
+            residual[data[col].isna()] = np.nan
+
             data[col + f'_trend'] = trend
             data[col + f'_seasonal'] = seasonal
             data[col + f'_residual'] = residual

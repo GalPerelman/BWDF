@@ -4,9 +4,7 @@ import pandas as pd
 import xgboost as xgb
 
 import constants
-import graphs
 import multi_series
-from lstm_model import LSTMForecaster
 
 import utils
 from preprocess import Preprocess
@@ -35,7 +33,9 @@ class Forecast:
         temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
         temp_data, stat_cols = Preprocess.construct_moving_features(temp_data, cols_to_move_stat, window_size)
         temp_data, decomposed_cols = Preprocess.construct_decomposed_features(temp_data, self.cols_to_decompose)
-        n_rows_to_drop = max(max(cols_to_lag.values(), default=0), self.window_size)
+
+        first_no_nan_idx = temp_data.apply(pd.Series.first_valid_index).max()
+        n_rows_to_drop = temp_data.index.get_loc(first_no_nan_idx)
         temp_data = Preprocess.drop_preprocess_nans(temp_data, n_rows=n_rows_to_drop)
         if self.norm_method:
             norm_cols = constants.WEATHER_COLUMNS + lagged_cols + stat_cols + [self.y_label]
@@ -45,7 +45,7 @@ class Forecast:
         preprocessed = Preprocess.split_data(data=temp_data, y_label=self.y_label, start_train=self.start_train,
                                              start_test=self.start_test, end_test=self.end_test,
                                              norm_method=self.norm_method, norm_cols=norm_cols
-                                            )
+                                             )
 
         # unpack preprocessed
         self.x_train, self.y_train, self.x_test, self.y_test, self.scalers = preprocessed
