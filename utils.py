@@ -90,3 +90,11 @@ def record_results(dma: str, short_model_name: str, long_model_name: str, dates:
     df = pd.read_csv("models_scores.csv", index_col=0)
     df = pd.concat([df, result])
     df.to_csv("models_scores.csv", index=True)
+
+
+def get_dfs_commons(df1, df2):
+    common_cols = df1.columns.intersection(df2.columns).to_list()
+    common_rows = pd.merge(df1, df2, left_index=True, right_index=True, how='right').index
+    df1 = df1.loc[common_rows, common_cols]
+    df2 = df2.loc[common_rows, common_cols]
+    return df1, df2
