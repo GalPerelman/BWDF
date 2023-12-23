@@ -7,6 +7,7 @@ from sklearn_genetic.space import Continuous, Categorical, Integer
 
 from prophet_model import ProphetForecaster
 from lstm_model import LSTMForecaster
+from ar_model import ARIMAWrap, SARIMAWrap
 
 xgb.set_config(verbosity=0)
 
@@ -41,11 +42,11 @@ grids = {
             'params':
                 {
                     'bootstrap': [True, False],
-                    "max_depth": [3, 5, 10, 15],
-                    "learning_rate": [0.01, 0.05, 0.1, 0.2],
-                    "n_estimators": [50, 100, 200, 300, 500],
-                    "reg_alpha": [0, 0.01, 0.1, 0.5, 5],
-                    "reg_lambda": [0, 0.01, 0.1, 0.5, 5],
+                    "max_depth": [3, 5, 10],
+                    "learning_rate": [0.01, 0.05, 0.1],
+                    "n_estimators": [50, 100, 200, 500],
+                    "reg_alpha": [0, 0.01, 0.1, 0.5],
+                    "reg_lambda": [0, 0.01, 0.1, 5],
                     # "min_sample_leaf": [2, 3, None],
                     # "min_sample_split": [2, 3, None],
                     "min_child_weight": [1, 3, 5],
@@ -79,11 +80,16 @@ grids = {
             'model': LSTMForecaster(),
             'params':
                 {
+                    "num_layers": [1, 2],
                     "look_back": [12, 24, 48],
                     "epochs": [10],
                     "batch_size": [24, 48],
                     "units": [50, 100, 150],
-                    "dropout": [0.1, 0.2, 0.3]
+                    "dropout": [0.1, 0.2, 0.3],
+                    'recurrent_dropout': [0.2, 0.5],
+                    'optimizer': ['rmsprop', 'adam'],
+                    'learning_rate': [0.001, 0.01],
+                    'activation': ['relu', 'tanh']
                 }
-        }
+        },
 }
