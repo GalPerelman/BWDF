@@ -16,8 +16,11 @@ def mean_abs_error(observed, predicted):
 
 
 def max_abs_error(observed, predicted):
-    e = np.max(np.abs(observed - predicted), axis=0).values
-    if observed.shape[1] == 1:
+    if isinstance(observed, pd.DataFrame):
+        e = np.max(np.abs(observed - predicted), axis=0).values
+    else:
+        e = np.max(np.abs(observed - predicted), axis=0)
+    if observed.ndim == 1 or (observed.ndim == 2 and observed.shape[1] == 1):
         return e.item()
     else:
         return e
