@@ -82,11 +82,12 @@ def plot_test(observed, predicted, ylabel='', ax=None):
         fig, ax = plt.subplots()
 
     mae = evaluation.mean_abs_error(observed, predicted)
+    mape = evaluation.mean_abs_percentage_error(observed, predicted)
     i1, i2, i3 = evaluation.one_week_score(observed, predicted)
     ax.plot(observed.index, observed)
     ax.plot(predicted.index, predicted)
-    anchored_text = AnchoredText(f"I1={i1:.3f}\nI2={i2:.3f}\nI3={i3:.3f}\nMAE={mae:.3f}", loc='upper right',
-                                 prop=dict(fontsize=8))
+    anchored_text = AnchoredText(f"I1={i1:.3f} I2={i2:.3f} I3={i3:.3f} MAE={mae:.3f} MAPE={mape:.2%}",
+                                 loc='upper right', prop=dict(fontsize=7))
     ax.add_artist(anchored_text)
     ax.set_ylabel(f"{ylabel}")
     ax.grid()
