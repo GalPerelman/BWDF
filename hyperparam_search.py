@@ -42,21 +42,20 @@ class Searcher:
         }
 
         temp_data = self.data.copy()
-        temp_data = utils.drop_other_dmas(temp_data, self.y_label)
+        temp_data = Preprocess.drop_other_dmas(temp_data, self.y_label)
         temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
         if self.norm_method:
-            standard_cols = constants.WEATHER_COLUMNS + lagged_cols + [self.y_label]
+            norm_cols = constants.WEATHER_COLUMNS + lagged_cols + [self.y_label]
         else:
-            standard_cols = None
+            norm_cols = None
 
-        self.x_train, self.y_train, self.x_test, self.y_test, self.scalers = Preprocess.split_data(data=temp_data,
-                                                                                                   y_label=self.y_label,
-                                                                                                   start_train=self.start_train,
-                                                                                                   start_test=self.start_test,
-                                                                                                   end_test=self.end_test,
-                                                                                                   norm_method=self.norm_method,
-                                                                                                   norm_cols=standard_cols
-                                                                                                   )
+        preprocessed = Preprocess.split_data(data=temp_data, y_label=self.y_label, start_train=self.start_train,
+                                             start_test=self.start_test, end_test=self.end_test,
+                                             norm_method=self.norm_method, norm_cols=norm_cols
+                                             )
+
+        # unpack preprocessed
+        self.x_train, self.y_train, self.x_test, self.y_test, self.scalers = preprocessed
 
         self.tscv = TimeSeriesSplit(n_splits=self.n_splits)
         self.results = pd.DataFrame()
@@ -118,64 +117,39 @@ class Searcher:
         print(f"Estimated search time {hours:.1f} hours")
 
 
-def tune_dma(data, dma_name, models_names, start_train, start_test, end_test, cols_to_lag, norm_method, n_split):
-    for model_name in models_names:
-        model_info = grids[model_name]
-        searcher = Searcher(model_name=model_name,
-                            model_info=model_info,
-                            data=data,
-                            y_label=dma_name,
-                            cols_to_lag=cols_to_lag,
-                            norm_method=norm_method,
-                            start_train=start_train,
-                            start_test=start_test,
-                            end_test=end_test,
-                            n_splits=n_split
-                            )
-
-        searcher.grid_search()
-
-
-def tune_all_dmas(models_names: list, start_train, start_test, cyclic_time_features, cols_to_lag, lag_target,
-                  norm_method, n_split):
+def tune_dma(dma, model_name: str, dates: dict, cols_to_lag, lag_target, norm_method, n_split):
     loader = Loader()
-    preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=cyclic_time_features, n_neighbors=3)
+    preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
     data = preprocess.data
 
-    for dma in constants.DMA_NAMES:
-        # tune for short term
-        tune_dma(data=data,
-                 dma_name=dma,
-                 models_names=models_names,
-                 start_train=start_train,
-                 start_test=start_test,
-                 end_test=start_test + datetime.timedelta(hours=24),
-                 cols_to_lag={**cols_to_lag, **{dma: lag_target}},
-                 norm_method=norm_method,
-                 n_split=n_split
-                 )
+    model_info = grids[model_name]
 
-        # tune for long term
-        tune_dma(data=data,
-                 dma_name=dma,
-                 models_names=models_names,
-                 start_train=start_train,
-                 start_test=start_test,
-                 end_test=start_test + datetime.timedelta(hours=168),
-                 cols_to_lag={**cols_to_lag, **{dma: lag_target}},
-                 norm_method=norm_method,
-                 n_split=n_split
-                 )
+    # tune for short term
+    searcher = Searcher(model_name=model_name,
+                        model_info=model_info,
+                        data=data,
+                        y_label=dma,
+                        cols_to_lag={**cols_to_lag, **{dma: lag_target}},
+                        norm_method=norm_method,
+                        start_train=dates['start_train'],
+                        start_test=dates['start_test'],
+                        end_test=dates['start_test'] + datetime.timedelta(hours=24),
+                        n_splits=n_split
+                        )
 
+    searcher.grid_search()
 
-if "__main__" == __name__:
-    tune_all_dmas(['lstm'],
-                  start_train=constants.DATES_OF_LATEST_WEEK['start_train'],
-                  start_test=constants.DATES_OF_LATEST_WEEK['start_test'],
-                  cyclic_time_features=True,
-                  cols_to_lag={'Air humidity (%)': 12, 'Rainfall depth (mm)': 12, 'Air temperature (°C)': 12,
-                               'Windspeed (km/h)': 12},
-                  lag_target=0,
-                  norm_method='standard',
-                  n_split=3
-                  )
+    # tune for long term
+    searcher = Searcher(model_name=model_name,
+                        model_info=model_info,
+                        data=data,
+                        y_label=dma,
+                        cols_to_lag={**cols_to_lag, **{dma: lag_target}},
+                        norm_method=norm_method,
+                        start_train=dates['start_train'],
+                        start_test=dates['start_test'],
+                        end_test=dates['start_test'] + datetime.timedelta(hours=24),
+                        n_splits=n_split
+                        )
+
+    searcher.grid_search()

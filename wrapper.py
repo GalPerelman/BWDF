@@ -12,6 +12,7 @@ import constants
 import utils
 import evaluation
 import multi_series
+import hyperparam_search
 from data_loader import Loader
 from preprocess import Preprocess
 from forecast import Forecast
@@ -107,13 +108,14 @@ def parse_args():
     parser.add_argument('--dates_idx', type=int, required=False)
     parser.add_argument('--horizon', type=str, required=False)
     parser.add_argument('--norm_method', type=str, required=False)
+    parser.add_argument('--lag_target', type=int, required=False)
     parser.add_argument('--output_dir', type=str, required=False)
     args = parser.parse_args()
 
     if args.do == 'experiment':
         run_experiment(args)
-    elif args.do == 'multi_series_tune':
-        multi_series.tune_dma(constants.DMA_NAMES[args.dma_idx])
+    elif args.do == 'hyperparam_opt':
+        run_hyperparam_opt(args)
 
     return args
 
@@ -164,7 +166,7 @@ def run_experiment(args):
 
     weather_cols_combs = list_elements_combinations(constants.WEATHER_COLUMNS)
 
-    for params in generate_parameter_sets(params):
+    for params_cfg in generate_parameter_sets(params):
         for rain_lags in [0, 6, 12]:
             for temp_lags in [0, 6, 12]:
                 for wind_lags in [0, 6, 12]:
@@ -182,7 +184,7 @@ def run_experiment(args):
                                     res = predict_dma(data=data,
                                                       dma_name=dma_name,
                                                       model_name=args.model_name,
-                                                      model_params=params,
+                                                      model_params=params_cfg,
                                                       dates_idx=args.dates_idx,
                                                       horizon=args.horizon,
                                                       cols_to_lag=cols_to_lag,
@@ -196,6 +198,22 @@ def run_experiment(args):
 
                                     results = pd.concat([results, res])
                                     results.to_csv(os.path.join(output_dir, output_file))
+
+
+def run_hyperparam_opt(args):
+    if args.model_name == 'multi_series':
+        multi_series.tune_dma(constants.DMA_NAMES[args.dma_idx])
+
+    elif args.model_name in ['rf', 'xgb', 'prophet', 'lstm']:
+        hyperparam_search.tune_dma(dma=constants.DMA_NAMES[args.dma_idx],
+                                   model_name=args.model_name,
+                                   dates=constants.EXPERIMENTS_DATES[args.dates_idx],
+                                   cols_to_lag={'Air humidity (%)': 6, 'Rainfall depth (mm)': 6,
+                                                'Air temperature (°C)': 6, 'Windspeed (km/h)': 6},
+                                   lag_target=args.lag_target,
+                                   norm_method=args.norm_method,
+                                   n_split=3
+                                   )
 
 
 if __name__ == "__main__":
