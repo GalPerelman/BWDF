@@ -86,7 +86,7 @@ class LSTMForecaster(BaseEstimator, RegressorMixin):
     # self.model.add(Dense(1))
     # self.model.compile(optimizer='adam', loss='mse')
 
-    def fit(self, x, y):
+    def fit(self, x, y, verbose=1):
         self.build_model(n_features=x.shape[1])
         train_size = int(len(x) * 0.8)
 
@@ -100,7 +100,7 @@ class LSTMForecaster(BaseEstimator, RegressorMixin):
         early_stopping_monitor = EarlyStopping(monitor='val_loss', min_delta=0, patience=0, verbose=0, mode='auto',
                                                baseline=None, restore_best_weights=True)
         history = self.model.fit(train_gen, epochs=self.epochs, batch_size=self.batch_size, validation_data=valid_gen,
-                                 callbacks=[early_stopping_monitor])
+                                 callbacks=[early_stopping_monitor], verbose=verbose)
 
         return history
 

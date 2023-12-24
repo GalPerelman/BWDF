@@ -77,7 +77,7 @@ grids = {
             'model': LSTMForecaster(),
             'params':
                 {
-                    "num_layers": [1, 2],
+                    "num_layers": [1, 2, 3],
                     "look_back": [12, 24, 48],
                     "epochs": [10],
                     "batch_size": [24, 48],
