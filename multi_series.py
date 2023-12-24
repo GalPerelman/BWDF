@@ -1,3 +1,5 @@
+import sys
+
 import pandas as pd
 import numpy as np
 import datetime
@@ -57,7 +59,7 @@ class MultiSeriesForecaster:
         metric = np.max(np.abs(y_true - y_pred), axis=0)
         return metric
 
-    def grid_search(self, data, exog, dma, lags_grid, param_grid, steps, refit, initial_train_size):
+    def grid_search(self, data, dates, exog, dma, lags_grid, param_grid, steps, refit, initial_train_size):
         """
         https://joaquinamatrodrigo.github.io/skforecast/0.10.1/user_guides/backtesting.html
 
@@ -66,9 +68,10 @@ class MultiSeriesForecaster:
         fixed_train_size (bool) - If True, train size doesn't increase but moves by `steps` in each iteration
         refit (bool, int) - Whether to re-fit the in each iteration. If int, train 'n' iterations.
         """
+
         results = grid_search_forecaster_multiseries(
             forecaster=self.model,
-            series=data.loc[(data.index >= start_train) & (data.index < end_test)],
+            series=data.loc[(data.index >= dates['start_train']) & (data.index < dates['end_test'])],
             lags_grid=lags_grid,
             param_grid=param_grid,
             steps=steps,
@@ -149,29 +152,36 @@ def predict_all_dma(dates, models, plot=False, record_score=False):
     return results
 
 
-def tune_all_dmas(data, dates):
-    for i, dma in enumerate(constants.DMA_NAMES):
-        y_labels = [dma] + clusters[dma]
+def tune_dma(dma):
+    loader = Loader()
+    dates = constants.DATES_OF_LATEST_WEEK
+    data = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3).data
+    data.index.freq = 'H'
 
-        start_train = dates['start_train']
-        start_test = dates['start_test']
-        end_short_pred = start_test + datetime.timedelta(days=1)
-        end_long_pred = start_test + datetime.timedelta(days=7)
-        exog_columns = [col for col in data.columns if col not in constants.DMA_NAMES]
+    cols_to_lag = {'Rainfall depth (mm)': 12, 'Air temperature (°C)': 12, 'Windspeed (km/h)': 12,
+                   'Air humidity (%)': 12}
+    data, lagged_cols = Preprocess.lag_features(data, cols_to_lag=cols_to_lag)
 
-        short_data = data.loc[(data.index >= start_train) & (data.index < end_short_pred), y_labels]
-        short_exog = data.loc[(data.index >= start_train) & (data.index < end_short_pred), exog_columns]
-        f = MultiSeriesForecaster(regressor=xgb.XGBRegressor, params={}, y_labels=y_labels)
-        f.grid_search(data=short_data, exog=short_exog, dma=dma, lags_grid=[6, 12],
-                      param_grid=grids['xgb']['params'], steps=24, refit=3,
-                      initial_train_size=len(short_data) - (24 * 3))
+    y_labels = [dma] + clusters[dma]
+    start_train = dates['start_train']
+    start_test = dates['start_test']
+    end_short_pred = start_test + datetime.timedelta(days=1)
+    end_long_pred = start_test + datetime.timedelta(days=7)
+    exog_columns = [col for col in data.columns if col not in constants.DMA_NAMES]
 
-        long_data = data.loc[(data.index >= start_train) & (data.index < end_long_pred), y_labels]
-        long_exog = data.loc[(data.index >= start_train) & (data.index < end_long_pred), exog_columns]
-        f = MultiSeriesForecaster(regressor=xgb.XGBRegressor, params={}, y_labels=y_labels)
-        f.grid_search(data=long_data, exog=long_exog, dma=dma, lags_grid=[6, 12],
-                      param_grid=grids['xgb']['params'], steps=168, refit=3,
-                      initial_train_size=len(long_data) - (168 * 3))
+    short_data = data.loc[(data.index >= start_train) & (data.index < end_short_pred), y_labels]
+    short_exog = data.loc[(data.index >= start_train) & (data.index < end_short_pred), exog_columns]
+    f = MultiSeriesForecaster(regressor=xgb.XGBRegressor, params={}, y_labels=y_labels)
+    f.grid_search(data=short_data, dates=dates, exog=short_exog, dma=dma, lags_grid=[6, 12],
+                  param_grid=grids['xgb']['params'], steps=24, refit=3,
+                  initial_train_size=len(short_data) - (24 * 3))
+
+    long_data = data.loc[(data.index >= start_train) & (data.index < end_long_pred), y_labels]
+    long_exog = data.loc[(data.index >= start_train) & (data.index < end_long_pred), exog_columns]
+    f = MultiSeriesForecaster(regressor=xgb.XGBRegressor, params={}, y_labels=y_labels)
+    f.grid_search(data=long_data, dates=dates, exog=long_exog, dma=dma, lags_grid=[6, 12],
+                  param_grid=grids['xgb']['params'], steps=168, refit=3,
+                  initial_train_size=len(long_data) - (168 * 3))
 
 
 if __name__ == "__main__":
@@ -187,5 +197,3 @@ if __name__ == "__main__":
     # xgb_params = utils.read_json("xgb_params.json")
     # predict_all_dma(dates=dates, models=xgb_params, plot=True, record_score=False)
     # plt.show()
-
-    tune_all_dmas(data, dates)
