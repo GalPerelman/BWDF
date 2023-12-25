@@ -326,28 +326,24 @@ class DifferencingScaler(BaseEstimator, TransformerMixin):
         self.init_values = None
         self.last_train_val = None
         self.method = method
+        self.is_fitted = False
 
     def fit(self, X, y=None):
         # Store the initial values needed for the inverse transformation
         self.init_values = X.iloc[:self.lag, :]
         # Store the last value of the training set
         self.last_train_val = X.iloc[-1]
+        self.is_fitted = True
         return self
 
-    def transform(self, X, y=None):
-        if self.last_train_val is not None:
-            # Prepend the last value of the training set for proper differencing
-            X = pd.concat([self.last_train_val, X])
+    def transform(self, X, y=None, is_train_data=True):
+        if self.is_fitted and self.last_train_val is not None:
+            # Concatenate the last train value with the test set if scaler is already fitted
+            last_value_df = pd.DataFrame(self.last_train_val).T
+            X = pd.concat([last_value_df, X], axis=0)
 
         if self.method == 'diff':
-            # Standard differencing
-            X_transformed = X.diff(periods=self.lag)
-        elif self.method == 'relative_diff':
-            # Relative (percentage) differencing
-            X_transformed = X.pct_change(periods=self.lag)
-        elif self.method == 'log_diff':
-            # Logarithmic differencing
-            X_transformed = np.log(X / X.shift(self.lag))
+            X_transformed = X.diff(periods=self.lag).dropna()
         else:
             raise ValueError("Invalid method specified")
 
@@ -356,7 +352,8 @@ class DifferencingScaler(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X, y=None):
         if self.method == 'diff':
             # Inverse of standard differencing
-            restored = pd.concat([self.last_train_val, pd.DataFrame(X)]) + self.init_values.values[-1]
+            last_value_df = pd.DataFrame(self.last_train_val).T
+            restored = np.concatenate([last_value_df.values, X], axis=0).cumsum()
         elif self.method == 'relative_diff':
             # Inverse of relative differencing
             restored = (1 + pd.concat([self.last_train_val, pd.DataFrame(X)])).cumprod() * self.init_values.values[-1]
@@ -365,8 +362,7 @@ class DifferencingScaler(BaseEstimator, TransformerMixin):
             restored = np.exp(pd.concat([self.last_train_val, pd.DataFrame(X)]).cumsum()) * self.init_values.values[-1]
         else:
             raise ValueError("Invalid method specified")
-
-        return restored.values[1:]
+        return restored[1:]
 
     def fit_transform(self, X, y=None, **fit_params):
         self.fit(X)
