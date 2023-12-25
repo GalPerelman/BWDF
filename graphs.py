@@ -86,7 +86,7 @@ def plot_test(observed, predicted, ylabel='', ax=None):
     i1, i2, i3 = evaluation.one_week_score(observed, predicted)
     ax.plot(observed.index, observed)
     ax.plot(predicted.index, predicted)
-    anchored_text = AnchoredText(f"I1={i1:.3f} I2={i2:.3f} I3={i3:.3f} MAE={mae:.3f} MAPE={mape:.2%}",
+    anchored_text = AnchoredText(f"I1={i1:.3f}\nI2={i2:.3f}\nI3={i3:.3f}\nMAE={mae:.3f}\nMAPE={mape:.2%}",
                                  loc='upper right', prop=dict(fontsize=7))
     ax.add_artist(anchored_text)
     ax.set_ylabel(f"{ylabel}")
@@ -148,11 +148,13 @@ def plot_pareto():
         xgb = pd.read_csv(f"grid_search_output/short_{dma[:5]}_xgb.csv") * -1
         prophet = pd.read_csv(f"grid_search_output/short_{dma[:5]}_prophet.csv") * -1
         lstm = pd.read_csv(f"grid_search_output/short_{dma[:5]}_lstm.csv") * -1
+        mulit = pd.read_csv(f"grid_search_output/short_{dma[:5]}_multiseries.csv")
 
         axes[i].scatter(rf['mean_test_MAE'], rf['mean_test_MAX_E'], label='RF', s=10, alpha=0.8)
         axes[i].scatter(xgb['mean_test_MAE'], xgb['mean_test_MAX_E'], label='XGB', s=10, alpha=0.8)
         axes[i].scatter(prophet['mean_test_MAE'], prophet['mean_test_MAX_E'], label='Prophet', s=10, alpha=0.8)
         axes[i].scatter(lstm['mean_test_MAE'], lstm['mean_test_MAX_E'], label='LSTM', s=10, alpha=0.8)
+        axes[i].scatter(mulit['mean_absolute_error'], mulit['max_abs_error'], label='MULTI', s=10, alpha=0.8)
         axes[i].set_axisbelow(True)
         axes[i].grid(zorder=0)
         axes[i].set_title(f"{dma[:5]}", fontsize=10)
@@ -162,10 +164,12 @@ def plot_pareto():
         xgb = pd.read_csv(f"grid_search_output/long_{dma[:5]}_xgb.csv")
         prophet = pd.read_csv(f"grid_search_output/long_{dma[:5]}_prophet.csv")
         lstm = pd.read_csv(f"grid_search_output/long_{dma[:5]}_lstm.csv")
+        mulit = pd.read_csv(f"grid_search_output/long_{dma[:5]}_multiseries.csv")
         print(dma, 'RF:', rf['mean_test_MAE'].max(), rf.loc[rf['rank_test_MAE'].idxmin()]['params'])
         print(dma, 'XGB:', xgb['mean_test_MAE'].max(), xgb.loc[xgb['rank_test_MAE'].idxmin()]['params'])
         print(dma, 'Prophet:', prophet['mean_test_MAE'].max(), prophet.loc[prophet['rank_test_MAE'].idxmin()]['params'])
         print(dma, 'LSTM:', lstm['mean_test_MAE'].max(), lstm.loc[lstm['rank_test_MAE'].idxmin()]['params'])
+        print(dma, 'MULTI:', mulit['mean_absolute_error'].min(), mulit.loc[mulit['max_abs_error'].idxmax()]['params'])
         print('=========================================================================================')
 
     fig.delaxes(axes[10])
