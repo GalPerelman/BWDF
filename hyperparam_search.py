@@ -35,6 +35,7 @@ class Searcher:
         self.n_splits = n_splits
 
         self.pred_term = self.is_short_or_long()
+        self.window_size = 24 if self.pred_term == 'short' else 168
 
         self.scoring = {
             'MAE': make_scorer(mean_absolute_error, greater_is_better=False),
@@ -51,7 +52,8 @@ class Searcher:
 
         preprocessed = Preprocess.split_data(data=temp_data, y_label=self.y_label, start_train=self.start_train,
                                              start_test=self.start_test, end_test=self.end_test,
-                                             norm_method=self.norm_method, norm_cols=norm_cols
+                                             norm_method=self.norm_method, norm_cols=norm_cols,
+                                             norm_param=self.window_size
                                              )
 
         # unpack preprocessed
@@ -148,7 +150,7 @@ def tune_dma(dma, model_name: str, dates: dict, cols_to_lag, lag_target, norm_me
                         norm_method=norm_method,
                         start_train=dates['start_train'],
                         start_test=dates['start_test'],
-                        end_test=dates['start_test'] + datetime.timedelta(hours=24),
+                        end_test=dates['start_test'] + datetime.timedelta(hours=168),
                         n_splits=n_split
                         )
 
