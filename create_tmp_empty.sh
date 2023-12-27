@@ -13,7 +13,7 @@ echo '#!/bin/bash
 
 # run the script according to OS
 if [[ "$(uname -s)" == "Linux" ]]; then
-    sbatch -c 8 $TMP_FILE
+    sbatch -c 1 $TMP_FILE
 elif [[ "$(uname -s)" == "CYGWIN"* ]] || [[ "$(uname -s)" == "MINGW"* ]] || [[ "$(uname -s)" == "MSYS"* ]]; then
     bash $TMP_FILE
 else
