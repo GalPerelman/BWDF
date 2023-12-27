@@ -114,14 +114,14 @@ class Preprocess:
         return data
 
     @staticmethod
-    def split_data(data, y_label, start_train, start_test, end_test, norm_method='', norm_cols=None):
+    def split_data(data, y_label, start_train, start_test, end_test, norm_method, norm_cols, norm_param):
         x_columns = list(data.columns)
         x_columns = list(set(x_columns) - set(constants.DMA_NAMES))
 
         train = data.loc[(data.index >= start_train) & (data.index < start_test)]
         test = data.loc[(data.index >= start_test) & (data.index < end_test)]
         if norm_method and norm_cols is not None:
-            train, scalers = Preprocess.fit_transform(train, columns=norm_cols, method=norm_method)
+            train, scalers = Preprocess.fit_transform(train, columns=norm_cols, method=norm_method, param=norm_param)
             test = Preprocess.transform(test, columns=norm_cols, scalers=scalers)
         else:
             scalers = None
@@ -136,7 +136,7 @@ class Preprocess:
         return x_train, y_train, x_test, y_test, scalers
 
     @staticmethod
-    def fit_transform(data, columns, method='standard'):
+    def fit_transform(data, columns, method, param):
         scalers = {}
         for col in columns:
             if method == 'standard':
@@ -150,7 +150,7 @@ class Preprocess:
             elif method == 'quantile':
                 scaler = QuantileTransformer()
             elif method == 'moving_stat':
-                scaler = MovingWindowScaler()
+                scaler = MovingWindowScaler(window_size=param)
             elif method == 'fixed_window':
                 scaler = FixedWindowScaler()
             elif method == 'diff':
@@ -353,7 +353,7 @@ class DifferencingScaler(BaseEstimator, TransformerMixin):
         if self.method == 'diff':
             # Inverse of standard differencing
             last_value_df = pd.DataFrame(self.last_train_val).T
-            restored = np.concatenate([last_value_df.values, X], axis=0).cumsum()
+            restored = np.concatenate([last_value_df.values, X], axis=0).cumsum(axis=0)
         elif self.method == 'relative_diff':
             # Inverse of relative differencing
             restored = (1 + pd.concat([self.last_train_val, pd.DataFrame(X)])).cumprod() * self.init_values.values[-1]

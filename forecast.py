@@ -42,9 +42,10 @@ class Forecast:
         else:
             norm_cols = None
 
+        p = self.window_size if self.norm_method == 'moving_stat' else None
         preprocessed = Preprocess.split_data(data=temp_data, y_label=self.y_label, start_train=self.start_train,
                                              start_test=self.start_test, end_test=self.end_test,
-                                             norm_method=self.norm_method, norm_cols=norm_cols
+                                             norm_method=self.norm_method, norm_cols=norm_cols, norm_param=p
                                              )
 
         # unpack preprocessed
@@ -61,8 +62,7 @@ class Forecast:
     def one_step_loop_predict(self, model, params):
         """
         Function to predict with lagged features
-
-        param n_periods:    int, number of periods to predict
+        param n_periods: int, number of periods to predict
         :return:
         """
         n_periods = utils.num_hours_between_timestamps(self.start_test, self.end_test)
@@ -123,7 +123,8 @@ class Forecast:
         test = temp_data.loc[(temp_data.index >= self.start_test) & (temp_data.index < self.end_test)]
 
         if norm_cols is not None:
-            train, self.scalers = Preprocess.fit_transform(train, columns=norm_cols, method=self.norm_method)
+            p = self.window_size if self.norm_method == 'moving_stat' else None
+            train, self.scalers = Preprocess.fit_transform(train, columns=norm_cols, method=self.norm_method, param=p)
             test = Preprocess.transform(test, columns=norm_cols, scalers=self.scalers)
 
         train_data = train[y_labels]
