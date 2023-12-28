@@ -237,7 +237,7 @@ def run_experiment(args):
                             results.to_csv(os.path.join(output_dir, output_file))
 
 
-def test_experiment(args):
+def test_experiment(args, n_tests=20):
     loader = Loader()
     p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
     data = p.data
@@ -247,24 +247,27 @@ def test_experiment(args):
     output_file = generate_filename(args)
 
     params = grids[args.model_name]['params']
+    for i, params_cfg in generate_parameter_sets(params):
+        res = predict_dma(data=data,
+                          dma_name=constants.DMA_NAMES[args.dma_idx],
+                          model_name=args.model_name,
+                          model_params=params_cfg,
+                          dates_idx=args.dates_idx,
+                          horizon=args.horizon,
+                          cols_to_lag={},
+                          lag_target=12,
+                          cols_to_move_stat=[],
+                          window_size=0,
+                          cols_to_decompose=[],
+                          decompose_target=False,
+                          norm_method='standard',
+                          )
 
-    res = predict_dma(data=data,
-                      dma_name=constants.DMA_NAMES[args.dma_idx],
-                      model_name=args.model_name,
-                      model_params=next(generate_parameter_sets(params)),
-                      dates_idx=args.dates_idx,
-                      horizon=args.horizon,
-                      cols_to_lag={},
-                      lag_target=12,
-                      cols_to_move_stat=[],
-                      window_size=0,
-                      cols_to_decompose=[],
-                      decompose_target=False,
-                      norm_method='standard',
-                      )
+        results = pd.concat([results, res])
+        results.to_csv(os.path.join(output_dir, output_file))
+        if i == n_tests:
+            break
 
-    results = pd.concat([results, res])
-    results.to_csv(os.path.join(output_dir, output_file))
 
 def run_hyperparam_opt(args):
     if args.model_name == 'multi_series':
