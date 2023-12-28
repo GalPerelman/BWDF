@@ -131,6 +131,8 @@ def parse_args():
     args = parser.parse_args()
     if args.do == 'experiment':
         run_experiment(args)
+    elif args.do == 'test_experiment':
+        test_experiment(args)
     elif args.do == 'hyperparam_opt':
         run_hyperparam_opt(args)
 
@@ -180,6 +182,8 @@ def run_experiment(args):
     output_dir = utils.validate_dir_path(args.output_dir)
     output_file = generate_filename(args)
 
+    norm_methods = ['standard', 'min_max', 'moving_stat', 'fixed_window']
+
     params = grids[args.model_name]['params']
     if args.horizon == 'short':
         window_size = 24
@@ -202,36 +206,65 @@ def run_experiment(args):
         _decompose_target = [False]
 
     for params_cfg in generate_parameter_sets(params):
-        for wl in weather_lags:
-            for tl in target_lags:
-                for ms in include_moving_stats_cols:
-                    for dt in _decompose_target:
-                        cols_to_lag = {'Rainfall depth (mm)': wl,
-                                       'Air temperature (°C)': wl,
-                                       'Windspeed (km/h)': wl,
-                                       'Air humidity (%)': wl,
-                                       }
+        for norm in norm_methods:
+            for wl in weather_lags:
+                for tl in target_lags:
+                    for ms in include_moving_stats_cols:
+                        for dt in _decompose_target:
+                            cols_to_lag = {'Rainfall depth (mm)': wl,
+                                           'Air temperature (°C)': wl,
+                                           'Windspeed (km/h)': wl,
+                                           'Air humidity (%)': wl,
+                                           }
 
-                        cols_to_move_stats = constants.WEATHER_COLUMNS if ms else []
+                            cols_to_move_stats = constants.WEATHER_COLUMNS if ms else []
+                            res = predict_dma(data=data,
+                                              dma_name=constants.DMA_NAMES[args.dma_idx],
+                                              model_name=args.model_name,
+                                              model_params=params_cfg,
+                                              dates_idx=args.dates_idx,
+                                              horizon=args.horizon,
+                                              cols_to_lag=cols_to_lag,
+                                              lag_target=tl,
+                                              cols_to_move_stat=cols_to_move_stats,
+                                              window_size=window_size,
+                                              cols_to_decompose=[],
+                                              decompose_target=dt,
+                                              norm_method=norm,
+                                              )
 
-                        res = predict_dma(data=data,
-                                          dma_name=constants.DMA_NAMES[args.dma_idx],
-                                          model_name=args.model_name,
-                                          model_params=params_cfg,
-                                          dates_idx=args.dates_idx,
-                                          horizon=args.horizon,
-                                          cols_to_lag=cols_to_lag,
-                                          lag_target=tl,
-                                          cols_to_move_stat=cols_to_move_stats,
-                                          window_size=window_size,
-                                          cols_to_decompose=[],
-                                          decompose_target=dt,
-                                          norm_method=args.norm_method,
-                                          )
+                            results = pd.concat([results, res])
+                            results.to_csv(os.path.join(output_dir, output_file))
 
-                        results = pd.concat([results, res])
-                        results.to_csv(os.path.join(output_dir, output_file))
 
+def test_experiment(args):
+    loader = Loader()
+    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
+    data = p.data
+
+    results = pd.DataFrame()
+    output_dir = utils.validate_dir_path(args.output_dir)
+    output_file = generate_filename(args)
+
+    params = grids[args.model_name]['params']
+
+    res = predict_dma(data=data,
+                      dma_name=constants.DMA_NAMES[args.dma_idx],
+                      model_name=args.model_name,
+                      model_params=next(generate_parameter_sets(params)),
+                      dates_idx=args.dates_idx,
+                      horizon=args.horizon,
+                      cols_to_lag={},
+                      lag_target=12,
+                      cols_to_move_stat=[],
+                      window_size=0,
+                      cols_to_decompose=[],
+                      decompose_target=False,
+                      norm_method='standard',
+                      )
+
+    results = pd.concat([results, res])
+    results.to_csv(os.path.join(output_dir, output_file))
 
 def run_hyperparam_opt(args):
     if args.model_name == 'multi_series':
