@@ -89,4 +89,22 @@ grids = {
                     'activation': ['relu', 'tanh']
                 }
         },
+
+    'multi':
+        {
+            'model': xgb.XGBRegressor(verbosity=0, silent=True),
+            'params':
+                {
+                    'bootstrap': [True, False],
+                    "max_depth": [3, 5, 10],
+                    "learning_rate": [0.01, 0.05, 0.1],
+                    "n_estimators": [50, 100, 200, 500],
+                    "reg_alpha": [0, 0.01, 0.1, 0.5],
+                    "reg_lambda": [0, 0.01, 0.1, 5],
+                    # "min_sample_leaf": [2, 3, None],
+                    # "min_sample_split": [2, 3, None],
+                    "min_child_weight": [1, 3, 5],
+                }
+
+        },
 }
