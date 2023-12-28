@@ -247,7 +247,7 @@ def test_experiment(args, n_tests=20):
     output_file = generate_filename(args)
 
     params = grids[args.model_name]['params']
-    for i, params_cfg in generate_parameter_sets(params):
+    for i, params_cfg in enumerate(generate_parameter_sets(params)):
         res = predict_dma(data=data,
                           dma_name=constants.DMA_NAMES[args.dma_idx],
                           model_name=args.model_name,
