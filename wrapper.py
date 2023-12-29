@@ -21,6 +21,7 @@ from forecast import Forecast
 from lstm_model import LSTMForecaster
 from prophet_model import ProphetForecaster
 from params_grids import grids
+from clusters import clusters
 
 
 def get_metrics(data, pred, horizon):
@@ -41,17 +42,18 @@ def get_metrics(data, pred, horizon):
 
 
 def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, cols_to_lag, lag_target, cols_to_move_stat,
-                window_size, cols_to_decompose, decompose_target, norm_method):
+                window_size, cols_to_decompose, decompose_target, norm_method, clusters_idx):
 
     models = {'xgb': xgb.XGBRegressor, 'rf': RandomForestRegressor, 'prophet': ProphetForecaster,
               'lstm': LSTMForecaster, 'multi': multi_series.MultiSeriesForecaster}
 
     def predict(data, dma_name, model_name, params, start_train, start_test, end_test,
-                cols_to_lag, cols_to_move_stat, window_size, cols_to_decompose, norm_method):
+                cols_to_lag, cols_to_move_stat, window_size, cols_to_decompose, norm_method, labels_cluster):
 
         f = Forecast(data=data, y_label=dma_name, cols_to_lag=cols_to_lag, cols_to_move_stat=cols_to_move_stat,
                      window_size=window_size, cols_to_decompose=cols_to_decompose, norm_method=norm_method,
-                     start_train=start_train, start_test=start_test, end_test=end_test)
+                     start_train=start_train, start_test=start_test, end_test=end_test,
+                     labels_cluster=labels_cluster)
 
         if model_name == 'lstm':
             return f.format_forecast(f.predict(model=LSTMForecaster, params=params))
@@ -98,6 +100,7 @@ def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, co
         'window_size': window_size,
         'cols_to_decompose': [_cols_to_decompose],
         'norm': norm_method,
+        'clusters_idx': clusters_idx,
         'i1': i1,
         'i2': i2,
         'i3': i3,
@@ -205,36 +208,43 @@ def run_experiment(args):
     else:
         _decompose_target = [False]
 
+    if not args.model_name == "multi":
+        clusters_set = [0]  # arbitrary select one set of clusters, will not be used
+    else:
+        clusters_set = list(clusters.keys())
+
     for params_cfg in generate_parameter_sets(params):
         for norm in norm_methods:
             for wl in weather_lags:
                 for tl in target_lags:
                     for ms in include_moving_stats_cols:
                         for dt in _decompose_target:
-                            cols_to_lag = {'Rainfall depth (mm)': wl,
-                                           'Air temperature (°C)': wl,
-                                           'Windspeed (km/h)': wl,
-                                           'Air humidity (%)': wl,
-                                           }
+                            for cluster_idx in clusters_set:
+                                cols_to_lag = {'Rainfall depth (mm)': wl,
+                                               'Air temperature (°C)': wl,
+                                               'Windspeed (km/h)': wl,
+                                               'Air humidity (%)': wl,
+                                               }
 
-                            cols_to_move_stats = constants.WEATHER_COLUMNS if ms else []
-                            res = predict_dma(data=data,
-                                              dma_name=constants.DMA_NAMES[args.dma_idx],
-                                              model_name=args.model_name,
-                                              model_params=params_cfg,
-                                              dates_idx=args.dates_idx,
-                                              horizon=args.horizon,
-                                              cols_to_lag=cols_to_lag,
-                                              lag_target=tl,
-                                              cols_to_move_stat=cols_to_move_stats,
-                                              window_size=window_size,
-                                              cols_to_decompose=[],
-                                              decompose_target=dt,
-                                              norm_method=norm,
-                                              )
+                                cols_to_move_stats = constants.WEATHER_COLUMNS if ms else []
+                                res = predict_dma(data=data,
+                                                  dma_name=constants.DMA_NAMES[args.dma_idx],
+                                                  model_name=args.model_name,
+                                                  model_params=params_cfg,
+                                                  dates_idx=args.dates_idx,
+                                                  horizon=args.horizon,
+                                                  cols_to_lag=cols_to_lag,
+                                                  lag_target=tl,
+                                                  cols_to_move_stat=cols_to_move_stats,
+                                                  window_size=window_size,
+                                                  cols_to_decompose=[],
+                                                  decompose_target=dt,
+                                                  norm_method=norm,
+                                                  clusters_idx=cluster_idx
+                                                  )
 
-                            results = pd.concat([results, res])
-                            results.to_csv(os.path.join(output_dir, output_file))
+                                results = pd.concat([results, res])
+                                results.to_csv(os.path.join(output_dir, output_file))
 
 
 def test_experiment(args, n_tests=20):
@@ -261,6 +271,7 @@ def test_experiment(args, n_tests=20):
                           cols_to_decompose=[],
                           decompose_target=False,
                           norm_method='standard',
+                          clusters_idx=0
                           )
 
         results = pd.concat([results, res])
