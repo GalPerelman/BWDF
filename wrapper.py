@@ -23,6 +23,9 @@ from prophet_model import ProphetForecaster
 from params_grids import grids
 from clusters import clusters
 
+from logger import Logger
+logger = Logger(name='experiment', LOGGING_DIR='logging').get()
+
 
 def get_metrics(data, pred, horizon):
     observed, predicted = utils.get_dfs_commons(data, pred)
@@ -77,13 +80,24 @@ def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, co
     else:
         _cols_to_decompose = cols_to_decompose
 
+    labels_cluster = clusters[clusters_idx][dma_name] if model_name == "multi" else []
+
     predictions = predict(data=data, dma_name=dma_name, model_name=model_name, params=model_params,
                           start_train=start_train, start_test=start_test, end_test=end_test,
                           cols_to_lag={**cols_to_lag, **{dma_name: lag_target}}, cols_to_move_stat=cols_to_move_stat,
-                          window_size=window_size, cols_to_decompose=_cols_to_decompose, norm_method=norm_method)
+                          window_size=window_size, cols_to_decompose=_cols_to_decompose, norm_method=norm_method,
+                          labels_cluster=labels_cluster)
 
     predictions.columns = [dma_name]
-    i1, i2, i3, mape = get_metrics(data, predictions, horizon=horizon)
+    try:
+        i1, i2, i3, mape = get_metrics(data, predictions, horizon=horizon)
+    except Exception as e:
+        logger.debug(f"dma_name: {dma_name}\nmodel_name: {model_name}\nparams: {model_params}\ndates_idx: {dates_idx}\n"
+                    f"horizon: {horizon}\ncols_to_lag: {cols_to_lag}\nlag_target: {lag_target}\n"
+                    f"cols_to_move_stat: {cols_to_move_stat}\nwindow_size: {window_size}\n"
+                    f"cols_to_decompose: {cols_to_decompose}\n decompose_target: {decompose_target}\n"
+                    f"norm_method: {norm_method}\nclusters_idx: {clusters_idx}")
+        logger.debug(str(e))
     run_time = time.time() - t0
 
     result = pd.DataFrame({
