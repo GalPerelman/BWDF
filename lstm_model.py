@@ -86,7 +86,7 @@ class LSTMForecaster(BaseEstimator, RegressorMixin):
     # self.model.add(Dense(1))
     # self.model.compile(optimizer='adam', loss='mse')
 
-    def fit(self, x, y, verbose=1):
+    def fit(self, x, y, verbose=0):
         self.build_model(n_features=x.shape[1])
         train_size = int(len(x) * 0.8)
 
