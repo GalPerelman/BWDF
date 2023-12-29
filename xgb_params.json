@@ -15,6 +15,7 @@
                                 "n_estimators": 100,
                                 "reg_alpha": 0.1
                               },
+                    "cluster": [],
                     "mae": 0.893867165311848,
                     "max_e": 15.4322935549418
                   },
@@ -31,7 +32,7 @@
                                 "min_sample_split": 2,
                                 "n_estimators": 100,
                                 "reg_alpha": 0},
-
+                  "cluster": [],
                   "mae": 0.869542030724747
                   }
         },
@@ -53,6 +54,7 @@
                                 "n_estimators": 50,
                                 "reg_alpha": 0.1
                               },
+                      "cluster": [],
                       "mae": 0.418188423854724,
                       "max_e": 3.40177427927653
                       },
@@ -69,7 +71,7 @@
                                 "min_sample_split": 2,
                                 "n_estimators": 100,
                                 "reg_alpha": 0},
-
+                  "cluster": [],
                   "mae": 0.531280633224709
                 }
           },
@@ -90,6 +92,7 @@
                                 "n_estimators": 500,
                                 "reg_alpha": 0
                               },
+                      "cluster": [],
                       "mae": 0.539753744043884,
                       "max_e": 4.78636325836181
                     },
@@ -106,7 +109,7 @@
                                 "min_sample_split": 2,
                                 "n_estimators": 200,
                                 "reg_alpha": 0.1},
-
+                  "cluster": [],
                   "mae": 0.4061460548690964
                 }
           },
@@ -127,6 +130,7 @@
                               "n_estimators": 100,
                               "reg_alpha": 0.5
                             },
+                      "cluster": [],
                       "mae": 2.12631933732876,
                       "max_e": 20.1882768419053
                     },
@@ -143,7 +147,7 @@
                                 "min_sample_split": 2,
                                 "n_estimators": 200,
                                 "reg_alpha": 0.1},
-
+                  "cluster": [],
                   "mae": 2.095205652456408
                 }
           },
@@ -164,6 +168,7 @@
                               "n_estimators": 500,
                               "reg_alpha": 0
                             },
+                      "cluster": [],
                       "mae": 2.06940415914596,
                       "max_e": 20.4473389689127
                     },
@@ -180,7 +185,7 @@
                                 "min_sample_split": 2,
                                 "n_estimators": 500,
                                 "reg_alpha": 0.5},
-
+                  "cluster": [],
                   "mae": 2.067483192433756
                 }
           },
@@ -201,6 +206,7 @@
                               "n_estimators": 50,
                               "reg_alpha": 0.1
                             },
+                      "cluster": [],
                       "mae": 1.11650524676963,
                       "max_e": 7.24354487525091
                     },
@@ -217,7 +223,7 @@
                                 "min_sample_split": 2,
                                 "n_estimators": 100,
                                 "reg_alpha": 0.5},
-
+                  "cluster": [],
                   "mae": 1.0968827832553802
                 }
           },
@@ -238,6 +244,7 @@
                               "n_estimators": 200,
                               "reg_alpha": 0
                             },
+                      "cluster": [],
                       "mae": 1.45142898103501,
                       "max_e": 11.8643874104817
                     },
@@ -254,7 +261,7 @@
                                 "min_sample_split": 2,
                                 "n_estimators": 200,
                                 "reg_alpha": 0.1},
-
+                  "cluster": [],
                   "mae": 1.4301411582437034
                 }
           },
@@ -275,6 +282,7 @@
                               "n_estimators": 200,
                               "reg_alpha": 0.5
                             },
+                      "cluster": [],
                       "mae": 1.070005725,
                       "max_e": 29.91595683
                     },
@@ -291,7 +299,7 @@
                                 "min_sample_split": 2,
                                 "n_estimators": 200,
                                 "reg_alpha": 0.5},
-
+                  "cluster": [],
                   "mae": 1.0744846489040876
                 }
           },
@@ -312,6 +320,7 @@
                               "n_estimators": 100,
                               "reg_alpha": 0.5
                             },
+                      "cluster": [],
                       "mae": 1.11255048902696,
                       "max_e": 11.3277545928955
                     },
@@ -328,7 +337,7 @@
                                 "min_sample_split": 2,
                                 "n_estimators": 100,
                                 "reg_alpha": 0.1},
-
+                  "cluster": [],
                   "mae": 1.1006337585055057
                 }
           },
@@ -349,6 +358,7 @@
                               "n_estimators": 100,
                               "reg_alpha": 0.5
                             },
+                      "cluster": [],
                       "mae": 1.18665584073172,
                       "max_e": 13.0016275787353
                     },
@@ -365,7 +375,7 @@
                                 "min_sample_split": 2,
                                 "n_estimators": 100,
                                 "reg_alpha": 0},
-
+                  "cluster": [],
                   "mae": 1.1869817983942
                 }
           }
