@@ -12,7 +12,7 @@ from preprocess import Preprocess
 
 class Forecast:
     def __init__(self, data, y_label, cols_to_lag, cols_to_move_stat, window_size, cols_to_decompose, norm_method,
-                 start_train, start_test, end_test):
+                 start_train, start_test, end_test, labels_cluster):
 
         self.data = data
         self.y_label = y_label
@@ -24,32 +24,21 @@ class Forecast:
         self.start_train = start_train
         self.start_test = start_test
         self.end_test = end_test
+        self.labels_cluster = labels_cluster
 
-        if not self.cols_to_lag:
-            self.cols_to_lag = {self.y_label: 0}
+        preprocessed = Preprocess.run(data=self.data.copy(deep=True),
+                                      y_label=self.y_label,
+                                      start_train=self.start_train,
+                                      start_test=self.start_test,
+                                      end_test=self.end_test,
+                                      cols_to_lag=self.cols_to_lag,
+                                      cols_to_move_stat=self.cols_to_move_stat,
+                                      window_size=self.window_size,
+                                      cols_to_decompose=self.cols_to_decompose,
+                                      norm_method=self.norm_method,
+                                      labels_cluster=self.labels_cluster)
 
-        temp_data = data.copy(deep=True)
-        temp_data = Preprocess.drop_other_dmas(temp_data, self.y_label)
-        temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
-        temp_data, stat_cols = Preprocess.construct_moving_features(temp_data, self.cols_to_move_stat, self.window_size)
-        temp_data, decomposed_cols = Preprocess.construct_decomposed_features(temp_data, self.cols_to_decompose)
-
-        first_no_nan_idx = temp_data.apply(pd.Series.first_valid_index).max()
-        n_rows_to_drop = temp_data.index.get_loc(first_no_nan_idx)
-        temp_data = Preprocess.drop_preprocess_nans(temp_data, n_rows=n_rows_to_drop)
-        if self.norm_method:
-            norm_cols = constants.WEATHER_COLUMNS + lagged_cols + stat_cols + [self.y_label]
-        else:
-            norm_cols = None
-
-        p = self.window_size if self.norm_method == 'moving_stat' else None
-        preprocessed = Preprocess.split_data(data=temp_data, y_label=self.y_label, start_train=self.start_train,
-                                             start_test=self.start_test, end_test=self.end_test,
-                                             norm_method=self.norm_method, norm_cols=norm_cols, norm_param=p
-                                             )
-
-        # unpack preprocessed
-        self.x_train, self.y_train, self.x_test, self.y_test, self.scalers = preprocessed
+        self.x_train, self.y_train, self.x_test, self.y_test, self.scalers, self.norm_cols, self.y_labels = preprocessed
 
     def predict(self, model, params):
         reg = model(**params)
@@ -86,57 +75,13 @@ class Forecast:
         return pred
 
     def multi_series_predict(self, params):
-        """
-        Not using the class preprocess - starts with a new copy of self.data
-        Preprocess is done differently from other methods
-        - if target is lagged than all labels in the cluster are lagged
-        - norm columns should include all targets in the cluster
-        - train test split is adjusted with exog data set generation
-        """
-        temp_data = self.data.copy(deep=True)
-        temp_data.index.freq = 'H'
-        y_labels = [self.y_label] + multi_series.clusters[self.y_label]
+        # multi_series requires y_train will be pd.DataFrame and not pd.Series
+        # the arguments to fit and predict methods are passed to ensure this requirement
+        f = multi_series.MultiSeriesForecaster(regressor=xgb.XGBRegressor, params=params, y_labels=self.y_labels)
+        f.fit(train_data=pd.DataFrame(self.y_train), train_exog=pd.DataFrame(self.x_train))
+        pred = f.predict(test_exog=pd.DataFrame(self.x_test))[[self.y_label]]
 
-        # if target is lagged - add the cluster dmas to be lagged
-        if self.y_label in self.cols_to_lag.keys():
-            for label in multi_series.clusters[self.y_label]:
-                self.cols_to_lag[label] = self.cols_to_lag[self.y_label]
-
-        temp_data, lagged_cols = Preprocess.lag_features(temp_data, cols_to_lag=self.cols_to_lag)
-        temp_data, stat_cols = Preprocess.construct_moving_features(temp_data, self.cols_to_move_stat, self.window_size)
-        temp_data, decomposed_cols = Preprocess.construct_decomposed_features(temp_data, self.cols_to_decompose)
-
-        first_no_nan_idx = temp_data.apply(pd.Series.first_valid_index).max()
-        n_rows_to_drop = temp_data.index.get_loc(first_no_nan_idx)
-
-        temp_data = Preprocess.drop_preprocess_nans(temp_data, n_rows=n_rows_to_drop)
-        if self.norm_method:
-            # norm columns include all y_labels and not just the predicted label
-            norm_cols = constants.WEATHER_COLUMNS + lagged_cols + stat_cols + y_labels
-            # make sure that no column is normalized more than once (specially targets)
-            norm_cols = set(norm_cols)
-        else:
-            norm_cols = None
-
-        exog_columns = [col for col in temp_data.columns if col not in constants.DMA_NAMES]
-        train = temp_data.loc[(temp_data.index >= self.start_train) & (temp_data.index < self.start_test)]
-        test = temp_data.loc[(temp_data.index >= self.start_test) & (temp_data.index < self.end_test)]
-
-        if norm_cols is not None:
-            p = self.window_size if self.norm_method == 'moving_stat' else None
-            train, self.scalers = Preprocess.fit_transform(train, columns=norm_cols, method=self.norm_method, param=p)
-            test = Preprocess.transform(test, columns=norm_cols, scalers=self.scalers)
-
-        train_data = train[y_labels]
-        test_data = test[y_labels]
-        train_exog = train[exog_columns]
-        test_exog = test[exog_columns]
-
-        f = multi_series.MultiSeriesForecaster(regressor=xgb.XGBRegressor, params=params, y_labels=y_labels)
-        f.fit(train_data=train_data, train_exog=train_exog)
-        pred = f.predict(test_exog=test_exog)[[self.y_label]]
-
-        if norm_cols is not None:
+        if self.norm_cols is not None:
             pred = self.format_forecast(pred)
 
         return pred
