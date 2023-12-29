@@ -87,7 +87,7 @@ class Preprocess:
             data[col + f'_trend'] = trend
             data[col + f'_seasonal'] = seasonal
             data[col + f'_residual'] = residual
-            added_cols += [col + f'_trend', col + col + f'_seasonal', col + f'_residual']
+            added_cols += [col + f'_trend', col + f'_seasonal', col + f'_residual']
 
         return data, added_cols
 
@@ -114,6 +114,12 @@ class Preprocess:
         return data
 
     @staticmethod
+    def train_test_split(data, start_train, start_test, end_test):
+        train = data.loc[(data.index >= start_train) & (data.index < start_test)]
+        test = data.loc[(data.index >= start_test) & (data.index < end_test)]
+        return train, test
+
+    @staticmethod
     def split_data(data, y_label, start_train, start_test, end_test, norm_method, norm_cols, norm_param):
         x_columns = list(data.columns)
         x_columns = list(set(x_columns) - set(constants.DMA_NAMES))
@@ -126,7 +132,7 @@ class Preprocess:
         else:
             scalers = None
 
-        train = train.dropna()  # this is to make sure there are no
+        train = train.dropna()  # this is to make sure there are no nans
         x_train = train.loc[:, x_columns]
         y_train = train.loc[:, y_label]
 
@@ -139,6 +145,8 @@ class Preprocess:
     def fit_transform(data, columns, method, param):
         scalers = {}
         for col in columns:
+            if method == '':
+                continue
             if method == 'standard':
                 scaler = StandardScaler()
             elif method == 'min_max':
@@ -177,6 +185,53 @@ class Preprocess:
 
     def export(self, path):
         self.data.to_csv(path)
+
+    @staticmethod
+    def run(data, y_label, start_train, start_test, end_test, cols_to_lag, cols_to_move_stat, window_size,
+            cols_to_decompose, norm_method='', labels_cluster=None):
+
+        data.index.freq = 'H'
+
+        if not labels_cluster:
+            labels_cluster = None
+
+        # if single target drop other dmas (cannot be used in train since will not be available for future periods)
+        if labels_cluster is None:
+            data = Preprocess.drop_other_dmas(data, y_label)
+            y_labels = [y_label]  # for uniformity with the multi_series case
+        else:
+            y_labels = [y_label] + labels_cluster
+
+        # if multi target y_labels is a list of all predicted labels and if target is lagged lag all targets
+        if labels_cluster is not None and y_label in cols_to_lag.keys():
+            for label in labels_cluster:
+                cols_to_lag[label] = cols_to_lag[y_label]
+
+        data, lagged_cols = Preprocess.lag_features(data, cols_to_lag=cols_to_lag)
+        data, stat_cols = Preprocess.construct_moving_features(data, cols_to_move_stat, window_size)
+        data, decomposed_cols = Preprocess.construct_decomposed_features(data, cols_to_decompose)
+
+        # drop nans before scaling - scalers will not be able to handle nans
+        first_no_nan_idx = data.apply(pd.Series.first_valid_index).max()
+        n_rows_to_drop = data.index.get_loc(first_no_nan_idx)
+        data = Preprocess.drop_preprocess_nans(data, n_rows=n_rows_to_drop)
+
+        train, test = Preprocess.train_test_split(data, start_train, start_test, end_test)
+
+        norm_cols = constants.WEATHER_COLUMNS + lagged_cols + stat_cols + decomposed_cols + y_labels
+        p = window_size if norm_method == 'moving_stat' else None
+        if norm_method:
+            train, scalers = Preprocess.fit_transform(train, columns=norm_cols, method=norm_method, param=p)
+            test = Preprocess.transform(test, columns=norm_cols, scalers=scalers)
+        else:
+            scalers = None
+
+        x_columns = [col for col in data.columns if col not in constants.DMA_NAMES]
+        x_train = train.loc[:, x_columns]
+        y_train = train.loc[:, y_labels].squeeze()  # squeeze y to series if one dimensional - support forecast models
+        x_test = test.loc[:, x_columns]
+        y_test = test.loc[:, y_labels].squeeze()  # squeeze y to series if one dimensional - support forecast models
+        return x_train, y_train, x_test, y_test, scalers, norm_cols, y_labels
 
 
 class MovingWindowScaler(BaseEstimator, TransformerMixin):
