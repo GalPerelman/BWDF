@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from statsmodels.tsa.seasonal import seasonal_decompose
@@ -332,6 +333,9 @@ class FixedWindowScaler(BaseEstimator, TransformerMixin):
         self.last_window_stats_['mean'] = means[-self.window_size:]
         self.last_window_stats_['std'] = stds[-self.window_size:]
 
+        # Make sure no zeros in the std - to avoid division by zero z = (x- mu) / std
+        # This caused an issue mainly when to many lagged columns were used
+        self.window_stats_['std'][self.window_stats_['std'] < 10 ** -6] = 10 ** - 6
         return self
 
     def transform(self, X, y=None):
