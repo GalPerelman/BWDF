@@ -181,7 +181,7 @@ def generate_filename(args):
     args_dict = vars(args)
     filename = time.strftime("%Y%m%d%H%M%S")
     filename += "".join(f"--{key}-{value}" for key, value in args_dict.items()
-                        if key in ['dma_idx', 'model_name', 'dates_idx', 'horizon', 'norm_method'])
+                        if key in ['dma_idx', 'model_name', 'dates_idx', 'horizon'])
     filename += '.csv'
     return filename
 
