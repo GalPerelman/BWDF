@@ -1,14 +1,19 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import constants
-import graphs
-import utils
+import textwrap
+from scipy import stats
+from sklearn.ensemble import IsolationForest
+from sklearn.neighbors import NearestNeighbors
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.tsa.stattools import adfuller
 
+import preprocess
 from data_loader import Loader
 from preprocess import Preprocess
+import constants
+import graphs
+import utils
 
 
 def weather_features():
@@ -22,19 +27,23 @@ def weather_features():
     fig.align_ylabels()
 
 
-def hourly_distribution():
-    fig_box, axes_box = plt.subplots(nrows=len(constants.DMA_NAMES), sharex=True, figsize=(10, 8))
-    fig_lines, axes_lines = plt.subplots(nrows=len(constants.DMA_NAMES), sharex=True,  figsize=(10, 8))
+def hourly_distribution(data, columns):
+    fig_box, axes_box = plt.subplots(nrows=len(columns), sharex=True, figsize=(10, 8))
+    fig_lines, axes_lines = plt.subplots(nrows=len(columns), sharex=True,  figsize=(10, 8))
+    fig_hist, axes_hist = plt.subplots(nrows=len(columns), sharex=True,  figsize=(10, 8))
 
-    for i, dma in enumerate(constants.DMA_NAMES):
-        temp = data[[dma]]
-        pivot_temp = temp.pivot_table(values=dma, index=temp.index.date, columns=temp.index.hour)
+    for i, col in enumerate(data[columns].columns):
+        temp = data[[col]]
+        pivot_temp = temp.pivot_table(values=col, index=temp.index.date, columns=temp.index.hour)
         axes_box[i].boxplot(pivot_temp.values, positions=range(24))
-        axes_box[i].set_ylabel(dma[:5])
+        axes_box[i].set_ylabel(textwrap.fill(f"{col}", 15))
 
         axes_lines[i].plot(pivot_temp.values.T, c='C0', alpha=0.2)
-        axes_lines[i].set_ylabel(dma[:5])
+        axes_lines[i].set_ylabel(textwrap.fill(f"{col}", 15))
         axes_lines[i].grid()
+
+        axes_hist[i].hist(data[col], bins=25)
+        axes_hist[i].set_ylabel(textwrap.fill(f"{col}", 15))
 
     fig_box.align_ylabels()
     fig_box.subplots_adjust(bottom=0.05, top=0.95, left=0.1, right=0.9, hspace=0.1)
@@ -44,14 +53,24 @@ def hourly_distribution():
     fig_lines.subplots_adjust(bottom=0.1, top=0.98, left=0.1, right=0.9, hspace=0.1)
     fig_lines.text(0.5, 0.02, 'Hour of the day', ha='center')
 
+    fig_hist.align_ylabels()
+    fig_hist.subplots_adjust(bottom=0.1, top=0.98, left=0.1, right=0.9, hspace=0.1)
 
-def correlation_analysis(data):
+
+def correlation_analysis(data, norm_method=''):
+    data = data.loc[(data.index >= constants.DATES_OF_LATEST_WEEK['start_train'])
+                    & (data.index < constants.DATES_OF_LATEST_WEEK['end_test']), constants.DMA_NAMES]
+
+    if norm_method:
+        data, scalers = Preprocess.fit_transform(data, columns=constants.DMA_NAMES, method=norm_method)
+
     fig, axes = plt.subplots(nrows=2, ncols=5, figsize=(10, 5))
     axes = axes.ravel()
 
     for i, col in enumerate(constants.DMA_NAMES):
-        axes[i].scatter(data[col], data[col].shift(), s=15, alpha=0.3)
-        axes[i].grid()
+        # axes[i].scatter(data[col], data[col].shift(), s=15, alpha=0.3, zorder=5)
+        axes[i].plot(data[col])
+        axes[i].grid(zorder=0)
         axes[i].set_title(col[:5])
 
     fig.suptitle(f"(t) - (t-1) correlation")
@@ -193,25 +212,112 @@ def stationary_test(data):
     fig.text(0.5, 0.02, 'Lags', ha='center')
 
 
+def outliers_analysis(data, method, z=3.0):
+    df = data[constants.DMA_NAMES]
+    df = df.dropna(axis=0)
+
+    numeric_columns = df.select_dtypes(include=np.number).columns
+    n_cols = len(numeric_columns)
+    fig, axes = plt.subplots(n_cols, 2, figsize=(10, 1.8 * n_cols), sharex='col',
+                             gridspec_kw={'width_ratios': [4, 1]})
+
+    for i, column in enumerate(numeric_columns):
+        if method == 'isolation_forest':
+            iso_forest = IsolationForest(contamination=0.05)  # Adjust contamination as needed
+            df[column + '_outlier'] = iso_forest.fit_predict(df[[column]])
+            colors = np.where(df[column + '_outlier'] == -1, 'red', 'C0')
+            axes[i, 0].scatter(df.index, df[column], c=colors, s=15, alpha=0.6, zorder=5)
+
+        elif method == 'z_score':
+            z_scores = stats.zscore(df[column].dropna())
+            outliers = z_scores > z  # You can adjust this threshold
+            axes[i, 0].scatter(df[column].index, df[column], c='C0', s=15, alpha=0.6, zorder=5)
+            axes[i, 0].scatter(df[column].index[outliers], df[column][outliers], c='red', s=15, alpha=0.6, zorder=5)
+
+        elif method =='iqr':
+            q1 = df[column].quantile(0.25)
+            q3 = df[column].quantile(0.75)
+            iqr = q3 - q1
+            lower_bound = q1 - 1.5 * iqr
+            upper_bound = q3 + 1.5 * iqr
+            outliers = (df[column] < lower_bound) | (df[column] > upper_bound)
+
+            axes[i, 0].scatter(df[column].index, df[column], c='C0', s=15, alpha=0.6, zorder=5)
+            axes[i, 0].scatter(df[column].index[outliers], df[column][outliers], c='red', s=15, alpha=0.6, zorder=5)
+
+        axes[i, 1].hist(df[column], bins=20, edgecolor='k', linewidth=0.1, alpha=0.8, zorder=5)
+        axes[i, 0].set_ylabel(column[:5])
+        axes[i, 0].grid(zorder=0)
+        axes[i, 1].grid(zorder=0)
+
+    fig.suptitle(f"outliers according to {z} STDs from mean")
+    fig.subplots_adjust(bottom=0.08, top=0.92, left=0.1, right=0.95, hspace=0.2)
+    fig.align_ylabels()
+    plt.show()
+
+
+def knn_outlier_detection(df, n_neighbors=5, outlier_fraction=0.05):
+    df = df.dropna(axis=0)
+    nbrs = NearestNeighbors(n_neighbors=n_neighbors).fit(df)
+    distances, indices = nbrs.kneighbors(df)
+
+    outlier_scores = distances.mean(axis=1)
+    threshold = np.percentile(outlier_scores, 100 * (1 - outlier_fraction))
+    outliers = outlier_scores > threshold
+
+    fig, axes = plt.subplots(len(df.columns), 1, figsize=(10, 1.8 * len(df.columns)), sharex=True)
+    for i, column in enumerate(df.columns):
+        axes[i].scatter(df[column].index, df[column], c='C0', s=15, alpha=0.6, zorder=5)
+        axes[i].scatter(df.index[outliers], df[column][outliers], c='red', s=15, alpha=0.6, zorder=5)
+        axes[i].grid()
+
+    fig.legend()
+    plt.tight_layout()
+    plt.show()
+    return outliers
+
+
+def check_scalers(scaler):
+    """
+    Plot the original data, normalized data, and the restored data to check that scalers are working as expected
+    """
+    fig, axes = plt.subplots(nrows=2, ncols=len(constants.WEATHER_COLUMNS), sharex=True, figsize=(8, 6))
+    for i, col in enumerate(constants.WEATHER_COLUMNS):
+        axes[0, i].plot(data[col])
+
+    data[constants.WEATHER_COLUMNS] = scaler.fit_transform(data[constants.WEATHER_COLUMNS])
+    for i, col in enumerate(constants.WEATHER_COLUMNS):
+        axes[1, i].plot(data[col])
+        axes[1, i].grid()
+
+    data[constants.WEATHER_COLUMNS] = scaler.inverse_transform(data[constants.WEATHER_COLUMNS])
+    for i, col in enumerate(constants.WEATHER_COLUMNS):
+        axes[0, i].plot(data[col], linestyle='--')
+        axes[0, i].grid()
+    plt.tight_layout()
+
+
 if __name__ == "__main__":
-    # loader = Loader()
+    loader = Loader()
     # preprocess = Preprocess(loader.inflow, loader.weather, cyclic_time_features=False, n_neighbors=3)
     # preprocess.export("resources/preprocessed_not_cyclic.csv")
     # data = preprocess.data
-
     data = utils.import_preprocessed("resources/preprocessed_not_cyclic.csv")
 
-    # correlation_analysis(data.loc[constants.DATES_OF_LATEST_WEEK['start_train']:
-    #                               constants.DATES_OF_LATEST_WEEK['end_test'],
-    #                      constants.DMA_NAMES])
+    # hourly_distribution(data, columns=constants.DMA_NAMES)
+    # correlation_analysis(data)
+    # correlation_analysis(data, norm_method='diff')
     # weather_features()
     # hourly_distribution()
     # portion_of_total()
     # specific_demand()
     # cluster_dmas()
     # moving_stat(data, window_size=24)
-    #
+    # stationary_test(data)
 
-    stationary_test(data)
-
+    # outliers_analysis(data=loader.inflow, method='z_score', z=4)
+    # knn_outlier_detection(data[constants.DMA_NAMES])
+    # graphs.plot_time_series(loader.inflow, columns=constants.DMA_NAMES, shade_missing=True)
+    # graphs.plot_time_series(loader.weather, columns=constants.WEATHER_COLUMNS, shade_missing=True)
+    check_scalers(scaler=preprocess.FixedWindowScaler())
     plt.show()
