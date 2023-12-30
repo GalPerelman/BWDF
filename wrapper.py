@@ -50,22 +50,18 @@ def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, co
     models = {'xgb': xgb.XGBRegressor, 'rf': RandomForestRegressor, 'prophet': ProphetForecaster,
               'lstm': LSTMForecaster, 'multi': multi_series.MultiSeriesForecaster}
 
-    def predict(data, dma_name, model_name, params, start_train, start_test, end_test,
-                cols_to_lag, cols_to_move_stat, window_size, cols_to_decompose, norm_method, labels_cluster):
-
-        f = Forecast(data=data, y_label=dma_name, cols_to_lag=cols_to_lag, cols_to_move_stat=cols_to_move_stat,
-                     window_size=window_size, cols_to_decompose=cols_to_decompose, norm_method=norm_method,
-                     start_train=start_train, start_test=start_test, end_test=end_test,
-                     labels_cluster=labels_cluster)
-
-        if model_name == 'lstm':
-            return f.format_forecast(f.predict(model=LSTMForecaster, params=params))
-
-        elif model_name == 'multi':
-            return f.multi_series_predict(params=params)
-
-        elif model_name in ['xgb', 'rf', 'prophet']:
-            return f.one_step_loop_predict(model=models[model_name], params=params)
+    def predict(_data, _dma_name, _model_name, _params, _start_train, _start_test, _end_test,
+                _cols_to_lag, _cols_to_move_stat, _window_size, _cols_to_decompose, _norm_method, _labels_cluster):
+        f = Forecast(data=_data, y_label=_dma_name, cols_to_lag=_cols_to_lag, cols_to_move_stat=_cols_to_move_stat,
+                     window_size=_window_size, cols_to_decompose=_cols_to_decompose, norm_method=_norm_method,
+                     start_train=_start_train, start_test=_start_test, end_test=_end_test,
+                     labels_cluster=_labels_cluster)
+        if _model_name == 'lstm':
+            return f.format_forecast(f.predict(model=LSTMForecaster, params=_params))
+        elif _model_name == 'multi':
+            return f.multi_series_predict(params=_params)
+        elif _model_name in ['xgb', 'rf', 'prophet']:
+            return f.one_step_loop_predict(model=models[_model_name], params=_params)
 
     t0 = time.time()
     dates = constants.EXPERIMENTS_DATES[dates_idx]
@@ -82,11 +78,11 @@ def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, co
 
     labels_cluster = clusters[clusters_idx][dma_name] if model_name == "multi" else []
 
-    predictions = predict(data=data, dma_name=dma_name, model_name=model_name, params=model_params,
-                          start_train=start_train, start_test=start_test, end_test=end_test,
-                          cols_to_lag={**cols_to_lag, **{dma_name: lag_target}}, cols_to_move_stat=cols_to_move_stat,
-                          window_size=window_size, cols_to_decompose=_cols_to_decompose, norm_method=norm_method,
-                          labels_cluster=labels_cluster)
+    predictions = predict(_data=data, _dma_name=dma_name, _model_name=model_name, _params=model_params,
+                          _start_train=start_train, _start_test=start_test, _end_test=end_test,
+                          _cols_to_lag={**cols_to_lag, **{dma_name: lag_target}}, _cols_to_move_stat=cols_to_move_stat,
+                          _window_size=window_size, _cols_to_decompose=_cols_to_decompose, _norm_method=norm_method,
+                          _labels_cluster=labels_cluster)
 
     predictions.columns = [dma_name]
     try:
