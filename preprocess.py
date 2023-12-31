@@ -75,7 +75,7 @@ class Preprocess:
         added_cols = []
         for col in columns:
             filled_col = data[col].fillna(method='ffill')
-            decomposition = seasonal_decompose(filled_col, model='additive', period=period)
+            decomposition = seasonal_decompose(filled_col, model='additive', period=period, two_sided=False)
 
             trend = decomposition.trend
             seasonal = decomposition.seasonal
