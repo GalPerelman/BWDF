@@ -71,7 +71,8 @@ def num_hours_between_timestamps(t1, t2):
 
 
 def record_results(dma: str, short_model_name: str, long_model_name: str, dates: dict, lags: dict, norm_method: str,
-                   pred_type: str, cols_to_move_stat: list, cols_to_decompose: list, score: Sequence):
+                   pred_type: str, cols_to_move_stat: list, cols_to_decompose: list, clusters_idx: int,
+                   score: Sequence):
 
     # WINDOW_SIZE IS ACCORDING TO PREDICTION HORIZON
     result = pd.DataFrame({
@@ -86,6 +87,7 @@ def record_results(dma: str, short_model_name: str, long_model_name: str, dates:
         'pred_type': pred_type,
         'cols_to_move_stat': [cols_to_move_stat],
         'cols_to_decompose': [cols_to_decompose],
+        'clusters_idx': clusters_idx,
         'i1': score[0],
         'i2': score[1],
         'i3': score[2],
