@@ -24,7 +24,11 @@ from params_grids import grids
 from clusters import clusters
 
 from logger import Logger
-logger = Logger(name='experiment', LOGGING_DIR='logging').get()
+
+slurm_job_id = os.environ.get('SLURM_JOB_ID')
+if slurm_job_id is None:
+    slurm_job_id = ''
+logger = Logger(name=f'experiment_{slurm_job_id}', LOGGING_DIR='logging').get()
 
 
 def get_metrics(data, pred, horizon):
@@ -182,6 +186,7 @@ def generate_filename(args):
     filename = time.strftime("%Y%m%d%H%M%S")
     filename += "".join(f"--{key}-{value}" for key, value in args_dict.items()
                         if key in ['dma_idx', 'model_name', 'dates_idx', 'horizon'])
+    filename += f'--{slurm_job_id}'
     filename += '.csv'
     return filename
 
@@ -237,24 +242,31 @@ def run_experiment(args):
                                                }
 
                                 cols_to_move_stats = constants.WEATHER_COLUMNS if ms else []
-                                res = predict_dma(data=data,
-                                                  dma_name=constants.DMA_NAMES[args.dma_idx],
-                                                  model_name=args.model_name,
-                                                  model_params=params_cfg,
-                                                  dates_idx=args.dates_idx,
-                                                  horizon=args.horizon,
-                                                  cols_to_lag=cols_to_lag,
-                                                  lag_target=tl,
-                                                  cols_to_move_stat=cols_to_move_stats,
-                                                  window_size=window_size,
-                                                  cols_to_decompose=[],
-                                                  decompose_target=dt,
-                                                  norm_method=norm,
-                                                  clusters_idx=cluster_idx
-                                                  )
+                                try:
+                                    res = predict_dma(data=data,
+                                                      dma_name=constants.DMA_NAMES[args.dma_idx],
+                                                      model_name=args.model_name,
+                                                      model_params=params_cfg,
+                                                      dates_idx=args.dates_idx,
+                                                      horizon=args.horizon,
+                                                      cols_to_lag=cols_to_lag,
+                                                      lag_target=tl,
+                                                      cols_to_move_stat=cols_to_move_stats,
+                                                      window_size=window_size,
+                                                      cols_to_decompose=[],
+                                                      decompose_target=dt,
+                                                      norm_method=norm,
+                                                      clusters_idx=cluster_idx
+                                                      )
 
-                                results = pd.concat([results, res])
-                                results.to_csv(os.path.join(output_dir, output_file))
+                                    results = pd.concat([results, res])
+                                    results.to_csv(os.path.join(output_dir, output_file))
+                                except Exception as e:
+                                    logger.debug(
+                                        f"args: {vars(args)}\nparams: {params_cfg}\ncols_to_lag: {cols_to_lag}"
+                                        f"\nlag_target: {tl}\ncols_to_move_stat: {cols_to_move_stats}\n"
+                                        f"window_size: {window_size}\nnorm_method: {norm}\nclusters_idx: {cluster_idx}")
+                                    logger.debug(str(e))
 
 
 def test_experiment(args, n_tests=20):

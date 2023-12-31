@@ -9,7 +9,7 @@ class Logger(object):
         logger.setLevel(logging.DEBUG)
 
         if not os.path.exists(LOGGING_DIR):
-            os.makedirs(LOGGING_DIR)
+            os.makedirs(LOGGING_DIR, exist_ok=True)
 
         file_name = os.path.join(LOGGING_DIR, '%s.log' % name)
         handler = logging.FileHandler(file_name)
