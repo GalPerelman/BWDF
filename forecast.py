@@ -1,4 +1,6 @@
 import datetime
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -70,7 +72,7 @@ class Forecast:
             pred.loc[next_step_idx, self.y_label] = pred_value
             self.y_train.loc[next_step_idx] = pred_value
 
-        if self.scalers:
+        if self.scalers is not None:
             pred = self.format_forecast(pred)
         return pred
 
@@ -96,3 +98,26 @@ class Forecast:
         period_dates = pd.date_range(start=self.start_test, end=self.end_test - datetime.timedelta(hours=1), freq='1H')
         forecast = pd.DataFrame({self.y_label: pred}, index=period_dates)
         return forecast
+
+
+def folding_forecast(data, dma_name, cols_to_lag, cols_to_move_stat, window_size, cols_to_decompose, norm_method,
+                     start_train, start_test, labels_cluster, model, params, horizon=24, folds=7):
+
+    pred = pd.DataFrame()
+    _data = data.copy(deep=True)
+    _data = data.loc[data.index < start_test + datetime.timedelta(hours=horizon * folds)]
+
+    for fold in range(folds):
+        end_test = start_test + datetime.timedelta(hours=horizon)
+        f = Forecast(data=_data, y_label=dma_name, cols_to_lag=cols_to_lag, cols_to_move_stat=cols_to_move_stat,
+                     window_size=window_size, cols_to_decompose=cols_to_decompose, norm_method=norm_method,
+                     start_train=start_train, start_test=start_test, end_test=end_test,
+                     labels_cluster=labels_cluster)
+
+        fold_pred = f.one_step_loop_predict(model=model, params=params)
+        pred = pd.concat([pred, fold_pred])
+        _data.loc[(_data.index >= start_test) & (_data.index < end_test), dma_name] = fold_pred
+
+        start_test = start_test + datetime.timedelta(hours=horizon)
+
+    return pred
