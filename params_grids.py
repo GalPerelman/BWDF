@@ -38,7 +38,6 @@ grids = {
             'model': xgb.XGBRegressor(verbosity=0, silent=True),
             'params':
                 {
-                    'bootstrap': [True, False],
                     "max_depth": [3, 5, 10],
                     "learning_rate": [0.01, 0.05, 0.1],
                     "n_estimators": [50, 100, 200, 500],
@@ -95,7 +94,6 @@ grids = {
             'model': xgb.XGBRegressor(verbosity=0, silent=True),
             'params':
                 {
-                    'bootstrap': [True, False],
                     "max_depth": [3, 5, 10],
                     "learning_rate": [0.01, 0.05, 0.1],
                     "n_estimators": [50, 100, 200, 500],
