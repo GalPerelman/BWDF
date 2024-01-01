@@ -12,7 +12,6 @@ weather_lags_step=0
 weather_lags_steps=1
 move_stats=0  # int to represent bool - 1 will include moving avg and moving std columns, 0 will not
 decompose_target=0  # int to represent bool - 1 will decompose target to trend, seasonality and noise, 0 will not
-clusters_idx=(0 1 2)
 
 for a in ${dma[@]}; do
 	for b in ${models[@]}; do

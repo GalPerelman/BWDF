@@ -27,7 +27,7 @@ from logger import Logger
 
 slurm_job_id = os.environ.get('SLURM_JOB_ID')
 if slurm_job_id is None:
-    slurm_job_id = ''
+    slurm_job_id = 'slurm_id'
 logger = Logger(name=f'experiment_{slurm_job_id}', LOGGING_DIR='logging').get()
 
 
@@ -224,7 +224,7 @@ def run_experiment(args):
         _decompose_target = [False]
 
     if not args.model_name == "multi":
-        clusters_set = [0]  # arbitrary select one set of clusters, will not be used
+        clusters_set = 0   # arbitrary select one set of clusters, will not be used
     else:
         clusters_set = list(clusters.keys())
 
