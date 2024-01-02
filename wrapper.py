@@ -7,6 +7,7 @@ import random
 import datetime
 import argparse
 import itertools
+import logging
 import xgboost as xgb
 from sklearn.ensemble import RandomForestRegressor
 
@@ -29,6 +30,10 @@ slurm_job_id = os.environ.get('SLURM_JOB_ID')
 if slurm_job_id is None:
     slurm_job_id = 'slurm_id'
 logger = Logger(name=f'experiment_{slurm_job_id}', LOGGING_DIR='logging').get()
+logging.getLogger("prophet").setLevel(logging.ERROR)
+logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
+logging.getLogger("cmdstanpy").disabled=True
+logging.getLogger('tensorflow').setLevel(logging.ERROR)
 
 
 def get_metrics(data, pred, horizon):
@@ -131,15 +136,10 @@ def parse_args():
     parser.add_argument('--model_name', type=str, required=False)
     parser.add_argument('--dates_idx', type=int, required=False)
     parser.add_argument('--horizon', type=str, required=False)
-    parser.add_argument('--norm_method', type=str, required=False)
+    parser.add_argument('--norm_methods', nargs='+', type=str, required=True)
 
-    parser.add_argument('--target_lags_min', type=int, required=False)
-    parser.add_argument('--target_lags_step', type=int, required=False)
-    parser.add_argument('--target_lags_steps', type=int, required=False)
-
-    parser.add_argument('--weather_lags_min', type=int, required=False)
-    parser.add_argument('--weather_lags_step', type=int, required=False)
-    parser.add_argument('--weather_lags_steps', type=int, required=False)
+    parser.add_argument('--target_lags', nargs='+', type=int, required=True)
+    parser.add_argument('--weather_lags', nargs='+', type=int, required=False)
 
     parser.add_argument('--move_stats', type=int, required=False)
     parser.add_argument('--decompose_target', type=int, required=False)
@@ -200,8 +200,6 @@ def run_experiment(args):
     output_dir = utils.validate_dir_path(args.output_dir)
     output_file = generate_filename(args)
 
-    norm_methods = ['standard', 'min_max', 'moving_stat', 'fixed_window']
-
     params = grids[args.model_name]['params']
     if args.horizon == 'short':
         window_size = 24
@@ -209,9 +207,6 @@ def run_experiment(args):
         window_size = 168
     else:
         window_size = 0
-
-    target_lags = [args.target_lags_min + args.target_lags_step * _ for _ in range(args.target_lags_steps + 1)]
-    weather_lags = [args.weather_lags_min + args.weather_lags_step * _ for _ in range(args.weather_lags_steps + 1)]
 
     if args.move_stats:
         include_moving_stats_cols = [True, False]
@@ -224,17 +219,17 @@ def run_experiment(args):
         _decompose_target = [False]
 
     if not args.model_name == "multi":
-        clusters_set = 0   # arbitrary select one set of clusters, will not be used
+        clusters_set = [0]   # arbitrary select one set of clusters, will not be used
     else:
         clusters_set = list(clusters.keys())
 
     for params_cfg in generate_parameter_sets(params):
-        for norm in norm_methods:
-            for wl in weather_lags:
-                for tl in target_lags:
+        for norm in args.norm_methods:
+            for wl in args.weather_lags:
+                for tl in args.target_lags:
                     for ms in include_moving_stats_cols:
                         for dt in _decompose_target:
-                            for cluster_idx in clusters_set:
+                            for clusters_idx in clusters_set:
                                 cols_to_lag = {'Rainfall depth (mm)': wl,
                                                'Air temperature (°C)': wl,
                                                'Windspeed (km/h)': wl,
@@ -256,7 +251,7 @@ def run_experiment(args):
                                                       cols_to_decompose=[],
                                                       decompose_target=dt,
                                                       norm_method=norm,
-                                                      clusters_idx=cluster_idx
+                                                      clusters_idx=clusters_idx
                                                       )
 
                                     results = pd.concat([results, res])
@@ -265,7 +260,7 @@ def run_experiment(args):
                                     logger.debug(
                                         f"args: {vars(args)}\nparams: {params_cfg}\ncols_to_lag: {cols_to_lag}"
                                         f"\nlag_target: {tl}\ncols_to_move_stat: {cols_to_move_stats}\n"
-                                        f"window_size: {window_size}\nnorm_method: {norm}\nclusters_idx: {cluster_idx}")
+                                        f"window_size: {window_size}\nnorm_method: {norm}\nclusters_idx: {clusters_idx}")
                                     logger.debug(str(e))
 
 
