@@ -211,6 +211,10 @@ class Preprocess:
         data, lagged_cols = Preprocess.lag_features(data, cols_to_lag=cols_to_lag)
         data, stat_cols = Preprocess.construct_moving_features(data, cols_to_move_stat, window_size)
         data, decomposed_cols = Preprocess.construct_decomposed_features(data, cols_to_decompose)
+        # target is not available in future periods - decomposed components are lagged with window size
+        if y_label in cols_to_decompose:
+            for col in [y_label + f'_trend', y_label + f'_seasonal', y_label + f'_residual']:
+                data[col] = data[col].shift(window_size)
 
         # drop nans before scaling - scalers will not be able to handle nans
         first_no_nan_idx = data.apply(pd.Series.first_valid_index).max()
