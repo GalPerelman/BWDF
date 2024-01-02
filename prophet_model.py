@@ -78,16 +78,22 @@ if __name__ == "__main__":
               'seasonality_prior_scale': 1, 'holidays_prior_scale': 2, 'changepoint_prior_scale': 0.01,
               }
 
-    x_train, y_train, x_test, y_test, scalers = Preprocess.split_data(data=data,
-                                                                      y_label=constants.DMA_NAMES[0],
-                                                                      start_train=start_train,
-                                                                      start_test=start_test,
-                                                                      end_test=end_short_pred
-                                                                      )
+    preprocessed = Preprocess.run(data=data.copy(deep=True),
+                                  y_label=constants.DMA_NAMES[1],
+                                  start_train=start_train,
+                                  start_test=start_test,
+                                  end_test=end_long_pred,
+                                  cols_to_lag={'Rainfall depth (mm)': 12, constants.DMA_NAMES[1]: 24},
+                                  cols_to_move_stat=[],
+                                  window_size=24,
+                                  cols_to_decompose=[],
+                                  norm_method='fixed_window',
+                                  labels_cluster=[])
+
+    x_train, y_train, x_test, y_test, scalers, norm_cols, y_labels = preprocessed
 
     p.fit(x_train, y_train)
     y = p.predict(x_test)
-
     plt.plot(y_test.index, y_test.values)
     plt.plot(y_test.index, y)
     plt.show()
