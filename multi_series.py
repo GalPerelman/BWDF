@@ -69,6 +69,14 @@ class MultiSeriesForecaster:
         refit (bool, int) - Whether to re-fit the in each iteration. If int, train 'n' iterations.
         """
 
+        """
+        ***
+        THE METHOD YIELDS BAD RESULTS
+        PREDICTIONS MADE WITH HYPERPARAMETERS RESULTS FROM THIS METHOD SUFFERS FROM POOR PERFORMANCE
+        HYPERPARAMETERS FOR THIS MODEL TUNED WITH EXTENSIVE EXPERIMENT, SEE EXPERIMENTS SCRIPTS AND wrapper.py
+        *** 
+        """
+
         results = grid_search_forecaster_multiseries(
             forecaster=self.model,
             series=data.loc[(data.index >= dates['start_train']) & (data.index < dates['end_test'])],
@@ -100,7 +108,7 @@ def predict_all_dma(dates, models, plot=False, record_score=False):
         fig.align_ylabels()
         plt.subplots_adjust(bottom=0.05, top=0.95, left=0.1, right=0.9, hspace=0.2)
 
-    for i, dma in enumerate(constants.DMA_NAMES[:1]):
+    for i, dma in enumerate(constants.DMA_NAMES):
         y_labels = [dma] + clusters[dma]
 
         short_model_name = models[dma[:5]]['short']['model_name']
@@ -194,6 +202,6 @@ if __name__ == "__main__":
     start_train, start_test, end_test = dates['start_train'], dates['start_test'], dates['end_test']
     data, lagged_cols = Preprocess.lag_features(data, cols_to_lag=cols_to_lag)
 
-    # xgb_params = utils.read_json("xgb_params.json")
-    # predict_all_dma(dates=dates, models=xgb_params, plot=True, record_score=False)
-    # plt.show()
+    xgb_params = utils.read_json("xgb_params.json")
+    predict_all_dma(dates=dates, models=xgb_params, plot=True, record_score=False)
+    plt.show()
