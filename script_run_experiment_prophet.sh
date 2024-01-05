@@ -17,7 +17,7 @@ for a in ${dma[@]}; do
                                       --model_name $b
                                       --dates_idx $c
                                       --horizon $d
-                                      --norm_methods standard 'moving_stat' 'fixed_window'
+                                      --norm_methods standard moving_stat fixed_window
                                       --target_lags 12 24
                                       --weather_lags 0 6
                                       --move_stats $move_stats
