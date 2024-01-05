@@ -8,6 +8,7 @@ import datetime
 import argparse
 import itertools
 import logging
+import traceback
 import xgboost as xgb
 from sklearn.ensemble import RandomForestRegressor
 
@@ -262,6 +263,11 @@ def run_experiment(args):
                                         f"\nlag_target: {tl}\ncols_to_move_stat: {cols_to_move_stats}\n"
                                         f"window_size: {window_size}\nnorm_method: {norm}\nclusters_idx: {clusters_idx}")
                                     logger.debug(str(e))
+                                    logging.error("Exception occurred", exc_info=True)
+
+                                    # Alternatively, you can format the traceback yourself
+                                    tb_info = traceback.format_exc()
+                                    logging.error(f"Traceback info: {tb_info}")
 
 
 def test_experiment(args, n_tests=20):

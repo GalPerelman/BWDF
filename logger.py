@@ -13,7 +13,11 @@ class Logger(object):
 
         file_name = os.path.join(LOGGING_DIR, '%s.log' % name)
         handler = logging.FileHandler(file_name)
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)s'
+                                      'p%(process)s {%(pathname)s:%(lineno)d} function %(funcName)s'
+                                      '%(levelname)s - %(message)s',
+                                      '%m-%d %H:%M:%S')
+
         handler.setFormatter(formatter)
         handler.setLevel(logging.DEBUG)
         logger.addHandler(handler)
