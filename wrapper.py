@@ -133,6 +133,7 @@ def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, co
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--do', type=str, required=True)
+    parser.add_argument('--search_params', type=int, required=True)
     parser.add_argument('--dma_idx', type=int, required=False)
     parser.add_argument('--model_name', type=str, required=False)
     parser.add_argument('--dates_idx', type=int, required=False)
@@ -201,7 +202,6 @@ def run_experiment(args):
     output_dir = utils.validate_dir_path(args.output_dir)
     output_file = generate_filename(args)
 
-    params = grids[args.model_name]['params']
     if args.horizon == 'short':
         window_size = 24
     elif args.horizon == 'long':
@@ -224,7 +224,14 @@ def run_experiment(args):
     else:
         clusters_set = list(clusters.keys())
 
-    for params_cfg in generate_parameter_sets(params):
+    if args.search_params == 1:
+        params = grids[args.model_name]['params']
+        parameter_sets = list(generate_parameter_sets(params))
+    else:
+        dma = constants.DMA_NAMES[args.dma_idx]
+        parameter_sets = [utils.read_json("multi_series_params.json")[dma[:5]][args.horizon]['params']]
+
+    for params_cfg in parameter_sets:
         for norm in args.norm_methods:
             for wl in args.weather_lags:
                 for tl in args.target_lags:
