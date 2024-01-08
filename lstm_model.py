@@ -177,13 +177,20 @@ def predict_all_dmas(data, start_train, start_test, end_test, cols_to_lag, norm_
         temp_data = utils.drop_other_dmas(temp_data, dma)
         temp_data, lagged_cols = preprocess.lag_features(temp_data, cols_to_lag=cols_to_lag)
         standard_cols = constants.WEATHER_COLUMNS + lagged_cols + [dma]
-        x_train, y_train, x_test, y_test, scalers = Preprocess.split_data(data=temp_data,
-                                                                          y_label=dma,
-                                                                          start_train=start_train,
-                                                                          start_test=start_test,
-                                                                          end_test=end_test,
-                                                                          norm_method=norm_method,
-                                                                          norm_cols=standard_cols)
+
+        preprocessed = Preprocess.run(data=data.copy(deep=True),
+                                      y_label=dma,
+                                      start_train=start_train,
+                                      start_test=start_test,
+                                      end_test=end_test,
+                                      cols_to_lag={'Rainfall depth (mm)': 12, dma: 24},
+                                      cols_to_move_stat=[],
+                                      window_size=24,
+                                      cols_to_decompose=[],
+                                      norm_method='fixed_window',
+                                      labels_cluster=[])
+
+        x_train, y_train, x_test, y_test, scalers, norm_cols, y_labels = preprocessed
 
         look_back = 24
         lstm = LSTMForecaster(look_back=look_back, epochs=10, batch_size=24)
