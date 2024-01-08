@@ -9,6 +9,7 @@ import argparse
 import itertools
 import logging
 import traceback
+import gc
 import xgboost as xgb
 from sklearn.ensemble import RandomForestRegressor
 
@@ -264,6 +265,8 @@ def run_experiment(args):
 
                                     results = pd.concat([results, res])
                                     results.to_csv(os.path.join(output_dir, output_file))
+                                    del res  # Free up memory
+                                    gc.collect()  # Collect garbage after each combination of parameters
                                 except Exception as e:
                                     logger.debug(
                                         f"args: {vars(args)}\nparams: {params_cfg}\ncols_to_lag: {cols_to_lag}"
