@@ -13,6 +13,7 @@ for a in ${dma[@]}; do
 	    for d in ${horizon[@]}; do
           bash ./create_tmp_empty.sh "python ./wrapper.py
                                       --do experiment
+                                      --search_params 1
                                       --dma_idx $a
                                       --model_name $b
                                       --dates_idx $c
