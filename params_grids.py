@@ -76,14 +76,14 @@ grids = {
             'model': LSTMForecaster(),
             'params':
                 {
-                    "num_layers": [1, 2],
+                    "num_layers": [1, 2, 3],
                     "look_back": [12, 24, 48],
                     "epochs": [10],
                     "batch_size": [24, 48],
                     "units": [50, 100, 150],
-                    "dropout": [0.2, 0.3],
+                    "dropout": [0.1, 0.2, 0.3],
                     'recurrent_dropout': [0.2, 0.5],
-                    # 'optimizer': ['rmsprop', 'adam'],
+                    'optimizer': ['rmsprop', 'adam'],
                     'learning_rate': [0.001, 0.01],
                     'activation': ['relu', 'tanh']
                 }
