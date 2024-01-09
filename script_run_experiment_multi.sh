@@ -23,6 +23,7 @@ for a in ${dma[@]}; do
                                       --weather_lags 0 6
                                       --move_stats $move_stats
                                       --decompose_target $decompose_target
+                                      --clusters_idx 3
                                       --output_dir exp_output"
 
 	    done
