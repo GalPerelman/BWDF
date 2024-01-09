@@ -34,7 +34,7 @@ if slurm_job_id is None:
 logger = Logger(name=f'experiment_{slurm_job_id}', LOGGING_DIR='logging').get()
 logging.getLogger("prophet").setLevel(logging.ERROR)
 logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
-logging.getLogger("cmdstanpy").disabled=True
+logging.getLogger("cmdstanpy").disabled = True
 logging.getLogger('tensorflow').setLevel(logging.ERROR)
 
 
@@ -96,39 +96,38 @@ def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, co
                           _labels_cluster=labels_cluster)
 
     predictions.columns = [dma_name]
+    run_time = time.time() - t0
     try:
         i1, i2, i3, mape = get_metrics(data, predictions, horizon=horizon)
+        result = pd.DataFrame({
+            'dma': dma_name,
+            'model_name': model_name,
+            'model_params': [model_params],
+            'dates_idx': dates_idx,
+            'start_train': dates['start_train'],
+            'start_test': dates['start_test'],
+            'end_test': dates['end_test'],
+            'horizon': horizon,
+            'lags': [{**cols_to_lag, **{dma_name: lag_target}}],
+            'cols_to_move_stat': [cols_to_move_stat],
+            'window_size': window_size,
+            'cols_to_decompose': [_cols_to_decompose],
+            'norm': norm_method,
+            'clusters_idx': clusters_idx,
+            'i1': i1,
+            'i2': i2,
+            'i3': i3,
+            'mape': mape,
+            'run_time': round(run_time, 3)
+        })
+        return result
     except Exception as e:
         logger.debug(f"dma_name: {dma_name}\nmodel_name: {model_name}\nparams: {model_params}\ndates_idx: {dates_idx}\n"
-                    f"horizon: {horizon}\ncols_to_lag: {cols_to_lag}\nlag_target: {lag_target}\n"
-                    f"cols_to_move_stat: {cols_to_move_stat}\nwindow_size: {window_size}\n"
-                    f"cols_to_decompose: {cols_to_decompose}\n decompose_target: {decompose_target}\n"
-                    f"norm_method: {norm_method}\nclusters_idx: {clusters_idx}")
+                     f"horizon: {horizon}\ncols_to_lag: {cols_to_lag}\nlag_target: {lag_target}\n"
+                     f"cols_to_move_stat: {cols_to_move_stat}\nwindow_size: {window_size}\n"
+                     f"cols_to_decompose: {cols_to_decompose}\n decompose_target: {decompose_target}\n"
+                     f"norm_method: {norm_method}\nclusters_idx: {clusters_idx}")
         logger.debug(str(e))
-    run_time = time.time() - t0
-
-    result = pd.DataFrame({
-        'dma': dma_name,
-        'model_name': model_name,
-        'model_params': [model_params],
-        'dates_idx': dates_idx,
-        'start_train': dates['start_train'],
-        'start_test': dates['start_test'],
-        'end_test': dates['end_test'],
-        'horizon': horizon,
-        'lags': [{**cols_to_lag, **{dma_name: lag_target}}],
-        'cols_to_move_stat': [cols_to_move_stat],
-        'window_size': window_size,
-        'cols_to_decompose': [_cols_to_decompose],
-        'norm': norm_method,
-        'clusters_idx': clusters_idx,
-        'i1': i1,
-        'i2': i2,
-        'i3': i3,
-        'mape': mape,
-        'run_time': round(run_time,3)
-    })
-    return result
 
 
 def parse_args():
@@ -143,6 +142,7 @@ def parse_args():
 
     parser.add_argument('--target_lags', nargs='+', type=int, required=True)
     parser.add_argument('--weather_lags', nargs='+', type=int, required=False)
+    parser.add_argument('--clusters_idx', nargs='+', type=int, required=False)
 
     parser.add_argument('--move_stats', type=int, required=False)
     parser.add_argument('--decompose_target', type=int, required=False)
@@ -222,11 +222,6 @@ def run_experiment(args):
     else:
         _decompose_target = [False]
 
-    if not args.model_name == "multi":
-        clusters_set = [0]   # arbitrary select one set of clusters, will not be used
-    else:
-        clusters_set = list(clusters.keys())
-
     if args.search_params == 1:
         params = grids[args.model_name]['params']
         parameter_sets = list(generate_parameter_sets(params))
@@ -240,7 +235,7 @@ def run_experiment(args):
                 for tl in args.target_lags:
                     for ms in include_moving_stats_cols:
                         for dt in _decompose_target:
-                            for clusters_idx in clusters_set:
+                            for c_idx in args.clusters_idx:
                                 cols_to_lag = {'Rainfall depth (mm)': wl,
                                                'Air temperature (°C)': wl,
                                                'Windspeed (km/h)': wl,
@@ -262,7 +257,7 @@ def run_experiment(args):
                                                       cols_to_decompose=[],
                                                       decompose_target=dt,
                                                       norm_method=norm,
-                                                      clusters_idx=clusters_idx
+                                                      clusters_idx=c_idx
                                                       )
 
                                     results = pd.concat([results, res])
@@ -355,7 +350,7 @@ def random_search(args, n=5000):
         parameter_sets = [utils.read_json("multi_series_params.json")[dma[:5]][args.horizon]['params']]
 
     if not args.model_name == "multi":
-        clusters_set = [0]   # arbitrary select one set of clusters, will not be used
+        clusters_set = [0]  # arbitrary select one set of clusters, will not be used
     else:
         clusters_set = list(clusters.keys())
 
