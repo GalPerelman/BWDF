@@ -40,6 +40,20 @@ clusters = {
         "DMA I (L/s)": ["DMA E (L/s)", "DMA G (L/s)", "DMA H (L/s)", "DMA J (L/s)"],
         "DMA J (L/s)": ["DMA D (L/s)", "DMA E (L/s)", "DMA G (L/s)", "DMA H (L/s)", "DMA I (L/s)"]
 
+    },
+
+    3: {
+        "DMA A (L/s)": ["DMA J (L/s)"],
+        "DMA B (L/s)": ["DMA C (L/s)"],
+        "DMA C (L/s)": ["DMA B (L/s)"],
+        "DMA D (L/s)": ["DMA E (L/s)"],
+        "DMA E (L/s)": ["DMA H (L/s)"],
+        "DMA F (L/s)": ["DMA H (L/s)"],
+        "DMA G (L/s)": ["DMA E (L/s)"],
+        "DMA H (L/s)": ["DMA E (L/s)"],
+        "DMA I (L/s)": ["DMA E (L/s)", "DMA H (L/s)", "DMA J (L/s)"],
+        "DMA J (L/s)": ["DMA I (L/s)"]
+
     }
 
 }
