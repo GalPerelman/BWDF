@@ -155,6 +155,8 @@ def parse_args():
         test_experiment(args)
     elif args.do == 'hyperparam_opt':
         run_hyperparam_opt(args)
+    elif args.do == 'random_search':
+        random_search(args)
 
     return args
 
@@ -327,6 +329,80 @@ def run_hyperparam_opt(args):
                                    norm_method=args.norm_method,
                                    n_split=3
                                    )
+
+
+def random_search(args, n=5000):
+    loader = Loader()
+    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
+    data = p.data
+
+    results = pd.DataFrame()
+    output_dir = utils.validate_dir_path(args.output_dir)
+    output_file = generate_filename(args)
+
+    if args.horizon == 'short':
+        window_size = 24
+    elif args.horizon == 'long':
+        window_size = 168
+    else:
+        window_size = 0
+
+    if args.search_params == 1:
+        params = grids[args.model_name]['params']
+        parameter_sets = list(generate_parameter_sets(params))
+    else:
+        dma = constants.DMA_NAMES[args.dma_idx]
+        parameter_sets = [utils.read_json("multi_series_params.json")[dma[:5]][args.horizon]['params']]
+
+    if not args.model_name == "multi":
+        clusters_set = [0]   # arbitrary select one set of clusters, will not be used
+    else:
+        clusters_set = list(clusters.keys())
+
+    for i in range(n):
+        params_cfg = parameter_sets[np.random.randint(low=0, high=len(parameter_sets))]
+        norm = args.norm_methods[np.random.randint(low=0, high=len(args.norm_methods))]
+        wl = args.weather_lags[np.random.randint(low=0, high=len(args.weather_lags))]
+        tl = args.target_lags[np.random.randint(low=0, high=len(args.target_lags))]
+        dt = bool(random.getrandbits(1))
+        clusters_idx = clusters_set[np.random.randint(low=0, high=len(clusters_set))]
+
+        cols_to_lag = {'Rainfall depth (mm)': wl,
+                       'Air temperature (°C)': wl,
+                       'Windspeed (km/h)': wl,
+                       'Air humidity (%)': wl,
+                       }
+
+        try:
+            res = predict_dma(data=data,
+                              dma_name=constants.DMA_NAMES[args.dma_idx],
+                              model_name=args.model_name,
+                              model_params=params_cfg,
+                              dates_idx=args.dates_idx,
+                              horizon=args.horizon,
+                              cols_to_lag=cols_to_lag,
+                              lag_target=tl,
+                              cols_to_move_stat=[],
+                              window_size=window_size,
+                              cols_to_decompose=[],
+                              decompose_target=dt,
+                              norm_method=norm,
+                              clusters_idx=clusters_idx
+                              )
+
+            results = pd.concat([results, res])
+            results.to_csv(os.path.join(output_dir, output_file))
+        except Exception as e:
+            logger.debug(
+                f"args: {vars(args)}\nparams: {params_cfg}\ncols_to_lag: {cols_to_lag}"
+                f"\nlag_target: {tl}\ncols_to_move_stat: {[]}\n"
+                f"window_size: {window_size}\nnorm_method: {norm}\nclusters_idx: {clusters_idx}")
+            logger.debug(str(e))
+            logging.error("Exception occurred", exc_info=True)
+
+            # Alternatively, you can format the traceback yourself
+            tb_info = traceback.format_exc()
+            logging.error(f"Traceback info: {tb_info}")
 
 
 if __name__ == "__main__":
