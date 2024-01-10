@@ -2,7 +2,7 @@
 
 dma=(0 1 2 3 4 5 6 7 8 9)
 models=('multi')
-dates_idx=(3)
+dates_idx=(4)
 horizon=('short' 'long')
 move_stats=1  # int to represent bool - 1 will include moving avg and moving std columns, 0 will not
 decompose_target=1  # int to represent bool - 1 will decompose target to trend, seasonality and noise, 0 will not
@@ -23,7 +23,7 @@ for a in ${dma[@]}; do
                                       --weather_lags 0 6
                                       --move_stats $move_stats
                                       --decompose_target $decompose_target
-                                      --clusters_idx 3
+                                      --clusters_idx 0 1 2 3
                                       --output_dir exp_output"
 
 	    done
