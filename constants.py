@@ -16,6 +16,9 @@ EXOG_COLUMNS = ['is_dst', 'is_special', 'day', 'month', 'Rainfall depth (mm)', '
 
 WEATHER_COLUMNS = ['Rainfall depth (mm)', 'Air temperature (°C)', 'Windspeed (km/h)', 'Air humidity (%)']
 
+TIME_COLUMNS = ['hour_sin', 'hour_cos', 'day_sin', 'day_cos', 'weekday_sin', 'weekday_cos', 'month_sin', 'month_cos',
+                'weeknum_sin', 'weeknum_cos', 'is_dst', 'is_special']
+
 DMA_DATA = pd.DataFrame(index=DMA_NAMES,
                         data={'type': ['Hospital district',
                                        'Residential-countryside',
@@ -91,7 +94,6 @@ TEST_TIMES = {
            'end_test': TZ.localize(datetime.datetime(2023, 3, 13, 0, 0))}
 }
 
-
 # Experiments
 DATES_TO_TEST_EXTREME_RAINFALL = {
     'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
@@ -117,9 +119,16 @@ DATES_OF_LATEST_WEEK = {
     'end_test': TZ.localize(datetime.datetime(2022, 7, 25, 0, 0))
 }
 
+DATES_JULY = {
+    'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
+    'start_test': TZ.localize(datetime.datetime(2021, 7, 25, 0, 0)),
+    'end_test': TZ.localize(datetime.datetime(2021, 8, 1, 0, 0))
+}
+
 EXPERIMENTS_DATES = {
     0: DATES_TO_TEST_EXTREME_RAINFALL,
     1: DATES_TO_TEST_NOV_HOLIDAYS,
     2: DATES_TO_TEST_MISSING_WEATHER,
-    3: DATES_OF_LATEST_WEEK
+    3: DATES_OF_LATEST_WEEK,
+    4: DATES_JULY
 }
