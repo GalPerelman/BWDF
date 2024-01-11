@@ -23,6 +23,8 @@ from preprocess import Preprocess
 from forecast import Forecast
 from lstm_model import LSTMForecaster
 from prophet_model import ProphetForecaster
+from ar_model import SARIMAWrap, StatsModels
+from patch_model import PatchTransformer
 from params_grids import grids
 from clusters import clusters
 
@@ -59,7 +61,7 @@ def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, co
                 window_size, cols_to_decompose, decompose_target, norm_method, clusters_idx):
 
     models = {'xgb': xgb.XGBRegressor, 'rf': RandomForestRegressor, 'prophet': ProphetForecaster,
-              'lstm': LSTMForecaster, 'multi': multi_series.MultiSeriesForecaster}
+              'lstm': LSTMForecaster, 'multi': multi_series.MultiSeriesForecaster, 'sarima': SARIMAWrap}
 
     def predict(_data, _dma_name, _model_name, _params, _start_train, _start_test, _end_test,
                 _cols_to_lag, _cols_to_move_stat, _window_size, _cols_to_decompose, _norm_method, _labels_cluster):
@@ -73,6 +75,8 @@ def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, co
             return f.multi_series_predict(params=_params)
         elif _model_name in ['xgb', 'rf', 'prophet']:
             return f.one_step_loop_predict(model=models[_model_name], params=_params)
+        elif _model_name == 'sarima':
+            return f.predict(model=SARIMAWrap, params=_params)
 
     t0 = time.time()
     dates = constants.EXPERIMENTS_DATES[dates_idx]
@@ -138,7 +142,7 @@ def parse_args():
     parser.add_argument('--model_name', type=str, required=False)
     parser.add_argument('--dates_idx', type=int, required=False)
     parser.add_argument('--horizon', type=str, required=False)
-    parser.add_argument('--norm_methods', nargs='+', type=str, required=True)
+    parser.add_argument('--norm_methods', nargs='+', type=str, required=False, default=[''])
 
     parser.add_argument('--target_lags', nargs='+', type=int, required=True)
     parser.add_argument('--weather_lags', nargs='+', type=int, required=False)
@@ -157,6 +161,8 @@ def parse_args():
         run_hyperparam_opt(args)
     elif args.do == 'random_search':
         random_search(args)
+    elif args.do == 'nixtla':
+        search_nixtla_models(args)
 
     return args
 
@@ -222,6 +228,9 @@ def run_experiment(args):
     else:
         _decompose_target = [False]
 
+    if args.clusters_idx is None:
+        args.clusters_idx = [None]
+
     if args.search_params == 1:
         params = grids[args.model_name]['params']
         parameter_sets = list(generate_parameter_sets(params))
@@ -268,7 +277,7 @@ def run_experiment(args):
                                     logger.debug(
                                         f"args: {vars(args)}\nparams: {params_cfg}\ncols_to_lag: {cols_to_lag}"
                                         f"\nlag_target: {tl}\ncols_to_move_stat: {cols_to_move_stats}\n"
-                                        f"window_size: {window_size}\nnorm_method: {norm}\nclusters_idx: {clusters_idx}")
+                                        f"window_size: {window_size}\nnorm_method: {norm}\nclusters_idx: {c_idx}")
                                     logger.debug(str(e))
                                     logging.error("Exception occurred", exc_info=True)
 
@@ -398,6 +407,73 @@ def random_search(args, n=5000):
             # Alternatively, you can format the traceback yourself
             tb_info = traceback.format_exc()
             logging.error(f"Traceback info: {tb_info}")
+
+
+def search_nixtla_models(args):
+    loader = Loader()
+    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
+    data = p.data
+
+    output_dir = utils.validate_dir_path(args.output_dir)
+    results = {}
+    output_files = {}
+    for i, dma in enumerate(constants.DMA_NAMES):
+        args.dma_idx = i
+        output_files[dma] = generate_filename(args)
+        results[dma] = pd.DataFrame()
+
+    if args.horizon == 'short':
+        window_size = 24
+    elif args.horizon == 'long':
+        window_size = 168
+    else:
+        window_size = 0
+
+    if args.search_params == 1:
+        params = grids[args.model_name]['params']
+        parameter_sets = list(generate_parameter_sets(params))
+    else:
+        dma = constants.DMA_NAMES[args.dma_idx]
+        parameter_sets = [utils.read_json("multi_series_params.json")[dma[:5]][args.horizon]['params']]
+
+    dates = constants.EXPERIMENTS_DATES[args.dates_idx]
+    start_train = dates['start_train']
+    start_test = dates['start_test']
+    end_test = start_test + datetime.timedelta(days=window_size)
+    train, test = Preprocess.train_test_split(data, start_train, start_test, end_test)
+    optional_models = {'patch': PatchTransformer}
+    for params_cfg in parameter_sets:
+        t0 = time.time()
+        reg = optional_models[args.model_name](**params_cfg)
+        reg.horizon = window_size
+        reg.fit(x=train, y=test)
+        pred = reg.predict()
+
+        run_time = time.time() - t0
+        _pred = reg.format_pred(pred)
+        i1, i2, i3, mape = reg.get_metrics(test, _pred)
+        metrics = pd.DataFrame({'i1': i1, 'i2': i2, 'i3': i3, 'mape': mape}, index=constants.DMA_NAMES)
+
+        for dma_name, dma_results in results.items():
+            temp = pd.DataFrame({
+                'dma': dma_name,
+                'model_name': args.model_name, 'model_params': [params_cfg],
+                'dates_idx': args.dates_idx, 'start_train': start_train, 'start_test': start_test, 'end_test': end_test,
+                'horizon': args.horizon,
+                'lags': [None],
+                'cols_to_move_stat': [None],
+                'window_size': window_size,
+                'cols_to_decompose': [None],
+                'clusters_idx': None,
+                'i1': metrics.loc[dma_name, 'i1'],
+                'i2': metrics.loc[dma_name, 'i2'],
+                'i3': metrics.loc[dma_name, 'i3'],
+                'mape': metrics.loc[dma_name, 'mape'],
+                'run_time': round(run_time, 3)
+            })
+            dma_results = pd.concat([dma_results, temp])
+            results[dma_name] = dma_results
+            results[dma_name].to_csv(os.path.join(output_dir, output_files[dma_name]))
 
 
 if __name__ == "__main__":
