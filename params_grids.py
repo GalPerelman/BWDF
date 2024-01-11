@@ -3,6 +3,8 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 import xgboost as xgb
 from sklearn_genetic.space import Continuous, Categorical, Integer
 
+import ar_model
+import patch_model
 from prophet_model import ProphetForecaster
 from lstm_model import LSTMForecaster
 
@@ -109,14 +111,32 @@ grids = {
 
     'patch':
         {
+            'model': patch_model.PatchTransformer(),
+            'params':
+                {
                     "input_size": [1, 2],
                     "encoder_layers": [2,4],
                     "learning_rate": [0.0001, 0.01],
                     "n_heads": [8, 16, 24],
                     "patch_len": [8, 16, 24],
-                    "activation": ['tanh', 'relu', 'gelu'],
+                    "activation": ['relu', 'gelu'],
                     "scaler_type": ['standard', 'minmax'],
-                    "max_steps": [50, 100],
-                    "batch_size": [1, 2, 4],
+                    "max_steps": [100, 300, 500],
+                    "batch_size": [1, 2, 4]
+                }
+        },
+
+    'sarima':
+        {
+            'model': ar_model.SARIMAWrap(),
+            'params':
+                {
+                    "p": [0, 1],
+                    "d": [0, 1],
+                    "q": [0, 1],
+                    "P": [0, 1, 2],
+                    "D": [0, 1, 2],
+                    "Q": [0, 1, 2],
+                }
         }
 }
