@@ -1,13 +1,28 @@
+import math
+import ast
+import glob
+import os
+
 import pandas as pd
 import numpy as np
+import warnings
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredText
 import matplotlib.patches as patches
+from matplotlib import colors as mcolors
 import textwrap
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 import constants
 import evaluation
+import utils
+
+warnings.filterwarnings("ignore")
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
 
 
 def draw_test_periods(ax, y_min, y_max):
@@ -25,7 +40,6 @@ def draw_test_periods(ax, y_min, y_max):
 
 def plot_time_series(data, columns, downscale=0, shade_missing: bool = False, test_periods: bool = False, fig=None,
                      linestyle=None):
-
     if downscale > 0:
         data = data.iloc[::downscale]
 
@@ -158,6 +172,8 @@ def plot_pareto():
         axes[i].set_axisbelow(True)
         axes[i].grid(zorder=0)
         axes[i].set_title(f"{dma[:5]}", fontsize=10)
+        axes[i].set_xlim(0, 5)
+        axes[i].set_ylim(0, 12)
 
         # print long term best params
         rf = pd.read_csv(f"grid_search_output/long_{dma[:5]}_rf.csv")
@@ -201,5 +217,187 @@ def visualize_nans(df):
     return fig
 
 
+def select_models(df, subplots_col, hover_cols, colors_col, markers_col, x_col, y_col, file_name):
+    df[x_col] = df[x_col].astype(float).abs()
+    df[y_col] = df[y_col].astype(float).abs()
+    colors_map = {"xgb": "#0077b8", "prophet": "#aa341c", "lstm": "#4ab85e", "multi": "#faa80f", "rf": "#fb8500",
+                  "patch": "#94D2BD", "sarima": "#001219"}
+
+    markers = ["circle", "square", "diamond", "x", "triangle-up"]
+    columns = ['i1', 'i2', 'i3', 'mape', 'model_name', 'short_model_name', 'dates_idx', 'start_test', 'horizon',
+               'cols_to_move_stat', 'window_size', 'cols_to_decompose', 'norm', 'clusters_idx']
+
+    _hover_cols = columns + hover_cols
+    hover_cols = list(set(_hover_cols) & set(df.columns))
+
+    index_map = {value: index for index, value in enumerate(_hover_cols)}
+    hover_cols = sorted(hover_cols, key=lambda x: index_map[x])
+
+    if subplots_col is not None:
+        n_subplots = df[subplots_col].nunique()
+        nrows = math.ceil(n_subplots / 3)
+        ncols = 3
+    else:
+        n_subplots = 1
+        nrows = 1
+        ncols = 1
+
+    fig = make_subplots(rows=nrows, cols=ncols, subplot_titles=constants.DMA_NAMES,
+                        vertical_spacing=0.07, horizontal_spacing=0.04)
+
+    for i in range(n_subplots):
+        if n_subplots > 1:
+            subplots_title = df[subplots_col].unique()[i]
+            temp = df.loc[df[subplots_col] == subplots_title]
+            temp['colors'] = temp[colors_col].map(colors_map)
+        else:
+            subplots_title = ''
+            temp = df.copy()
+            temp['colors'] = "#1f91ad"
+
+        markers_map = {}
+        if markers_col:
+            for _, element in enumerate(df[markers_col].unique()):
+                markers_map[element] = markers[_]
+
+            temp['markers'] = temp[markers_col].map(markers_map)
+        else:
+            temp['markers'] = "circle"
+
+        row, col = divmod(i, 3)
+        row += 1
+        col += 1
+
+        hover_text = [
+            "".join(f"{col}: {temp.iloc[j][col]}<br>" for col in hover_cols if not pd.isnull(temp.iloc[j][col]))
+            for j in range(len(temp))]
+        temp = temp.dropna(axis=1, how='all')
+        fig.add_trace(go.Scatter(x=temp[x_col], y=temp[y_col], mode='markers', name=subplots_title, showlegend=False,
+                                 hoverinfo='text',
+                                 text=hover_text,
+                                 marker=dict(color=temp['colors'], symbol=temp['markers'], line_color="black",
+                                             line_width=0.5)),
+                      row=row, col=col)
+
+        if temp[x_col].max() > 50:
+            fig.update_xaxes(range=[0, 10], row=row, col=col)
+        if temp[y_col].max() > 50:
+            fig.update_yaxes(range=[0, 10], row=row, col=col)
+
+        row = row,
+        col = col + 1
+
+    fig.show()
+    if file_name:
+        fig.write_html(f"{file_name}.html")
+
+
+def collect_gridsearch(dir_path, dmas, horizon, model):
+    df = pd.DataFrame()
+    for fname in glob.glob(dir_path + "/*.csv"):
+        spitedname = os.path.basename(fname).split('_')
+        _horizon, _dma, _model = spitedname[0], spitedname[1], spitedname[2][:-4]
+
+        if _horizon == horizon and _dma + ' (L/s)' in dmas and _model == model:
+            temp = pd.read_csv(fname, index_col=0)
+            temp['dma'] = _dma
+            temp['model_name'] = _model
+            df = pd.concat([df, temp])
+
+    df.reset_index(inplace=True)
+    return df
+
+
+def analyze_hyperparameters(dir_path, dma_idx, horizon, dates_idx, models):
+    df = utils.collect_experiments(dir_path, p=10, dmas=[dma_idx], horizon=horizon, dates_idx=dates_idx, models=models)
+    df = df.drop(['level_0', 'index'], axis=1)
+    df = df.dropna(how='all', axis=1)
+
+    param_cols = [col for col in df.columns if col.startswith("param_") and
+                  col not in ['param_bootstrap', 'param_min_sample_leaf', 'param_min_sample_split']]
+    n_params = len(param_cols)
+
+    colors = ["#f8da76", "#34b680", "#105f90", "#5f097a", "#c7f9cc"]
+    markers = ["o", "*", "s", "d", "^", "+"]
+    norm_methods = list(df['norm'].unique())
+
+    fig, axes = plt.subplots(nrows=2, ncols=n_params, figsize=(14, 7))
+    for i, col in enumerate(param_cols):
+        param_values = list(df[col].unique())
+        temp_color_map = {param_values[_]: colors[_] for _ in range(len(param_values))}
+
+        for val, color in temp_color_map.items():
+            for j, norm in enumerate(norm_methods):
+                temp = df.loc[(df[col] == val) & (df['norm'] == norm)]
+                label = f"{col[6:]}={val} | {norm}"
+                axes[0, i].scatter(temp['i1'], temp['i2'], c=color, marker=markers[j], alpha=0.5, label=label, zorder=3)
+
+        axes[0, i].grid(zorder=0)
+        axes[1, i].axis('off')
+        handles, labels = axes[0, i].get_legend_handles_labels()
+        axes[1, i].legend(handles, labels, fontsize=7)
+        axes[0, i].set_title(col[6:])
+
+    fig.suptitle(f"Model: {models} | Dates idx: {dates_idx}")
+    plt.subplots_adjust(bottom=0.1, top=0.9, left=0.06, right=0.96, wspace=0.28)
+
+    lag_cols = [col for col in df.columns if col.startswith("lags_") or col.startswith("cols_to")]
+    n = len(lag_cols)
+    fig, axes = plt.subplots(nrows=2, ncols=n, figsize=(14, 7))
+    for i, col in enumerate(lag_cols):
+        param_values = list(df[col].unique())
+        temp_color_map = {param_values[_]: colors[_] for _ in range(len(param_values))}
+
+        for val, color in temp_color_map.items():
+            for j, norm in enumerate(norm_methods):
+                temp = df.loc[(df[col] == val) & (df['norm'] == norm)]
+                label = f"{col}={val}\n{norm}"
+                axes[0, i].scatter(temp['i1'], temp['i2'], c=color, marker=markers[j], alpha=0.5, label=label, zorder=3)
+
+        axes[0, i].grid(zorder=0)
+        axes[1, i].axis('off')
+        handles, labels = axes[0, i].get_legend_handles_labels()
+        axes[1, i].legend(handles, labels, fontsize=7)
+        axes[0, i].set_title(col[6:])
+
+    fig.suptitle(f"Model: {models} | Dates idx: {dates_idx}")
+    plt.subplots_adjust(bottom=0.1, top=0.9, left=0.06, right=0.96, wspace=0.28)
+
+
+def plot_all_experiments(p):
+    df = utils.collect_experiments("exp_output/v3", p=p, dmas=[_ for _ in range(10)], horizon='short',
+                                   dates_idx=[0, 2, 3, 4],
+                                   models=['multi', 'xgb', 'lstm', 'prophet', 'patch', 'sarima'])
+
+    select_models(df=df,
+                  subplots_col='dma',
+                  hover_cols=[_ for _ in df.columns if (_.startswith('param_')) or (_.startswith('lags_'))],
+                  colors_col='model_name',
+                  markers_col='start_test',
+                  x_col='i1',
+                  y_col='i2',
+                  file_name='short')
+
+    df = utils.collect_experiments("exp_output/v3", p=p, dmas=[_ for _ in range(10)], horizon='long',
+                                   dates_idx=[0, 2, 3, 4],
+                                   models=['multi', 'xgb', 'lstm', 'prophet', 'patch', 'sarima'])
+
+    select_models(df=df,
+                  subplots_col='dma',
+                  hover_cols=[_ for _ in df.columns if (_.startswith('param_')) or (_.startswith('lags_'))],
+                  colors_col='model_name',
+                  markers_col='start_test',
+                  x_col='i3',
+                  y_col='mape',
+                  file_name='long')
+
+
 if __name__ == "__main__":
-    plot_pareto()
+    # plot_pareto()
+    # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[0, 1, 2, 3],
+    #                         models=['multi', 'xgb', 'lstm', 'prophet'], p=5)
+    # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[0], models=['multi'])
+    # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[3], models=['multi'])
+    # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[4], models=['multi'])
+    plot_all_experiments(p=0.2)
+    plt.show()
