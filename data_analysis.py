@@ -8,7 +8,6 @@ from sklearn.neighbors import NearestNeighbors
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.tsa.stattools import adfuller
 
-import preprocess
 from data_loader import Loader
 from preprocess import Preprocess
 import constants
@@ -198,14 +197,14 @@ def stationary_test(data):
         plot_acf(data_diff, lags=24, ax=axes[i])
         axes[i].set_title(f"{col[:5]}")
 
-        adftest = adfuller(data[col].dropna(), autolag='AIC', regression='ct')
+        adfstat, pval, usedlag, nobs, critvalues, icbest = adfuller(data[col].dropna(), autolag='AIC', regression='ct')
         print("ADF Test Results")
         print("Null Hypothesis: The series has a unit root (non-stationary)")
-        print("ADF-Statistic:", adftest[0])
-        print("P-Value:", adftest[1])
-        print("Number of lags:", adftest[2])
-        print("Number of observations:", adftest[3])
-        print("Critical Values:", adftest[4])
+        print("ADF-Statistic:", adfstat[0])
+        print("P-Value:", pval[1])
+        print("Number of lags:", usedlag[2])
+        print("Number of observations:", nobs[3])
+        print("Critical Values:", critvalues[4])
         print("Note: If P-Value is smaller than 0.05, we reject the null hypothesis and the series is stationary")
 
     fig.subplots_adjust(bottom=0.12, top=0.92, left=0.1, right=0.9, hspace=0.15)
@@ -319,5 +318,5 @@ if __name__ == "__main__":
     # knn_outlier_detection(data[constants.DMA_NAMES])
     # graphs.plot_time_series(loader.inflow, columns=constants.DMA_NAMES, shade_missing=True)
     # graphs.plot_time_series(loader.weather, columns=constants.WEATHER_COLUMNS, shade_missing=True)
-    check_scalers(scaler=preprocess.FixedWindowScaler())
+    # check_scalers(scaler=preprocess.FixedWindowScaler())
     plt.show()
