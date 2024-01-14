@@ -4,12 +4,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xgboost as xgb
+from sklearn.ensemble import RandomForestRegressor
 
 import constants
-import multi_series
-
 import utils
+from ar_model import SARIMAWrap
+from lstm_model import LSTMForecaster
 from preprocess import Preprocess
+from prophet_model import ProphetForecaster
+from multi_series import MultiSeriesForecaster
 
 
 class Forecast:
@@ -79,7 +82,7 @@ class Forecast:
     def multi_series_predict(self, params):
         # multi_series requires y_train will be pd.DataFrame and not pd.Series
         # the arguments to fit and predict methods are passed to ensure this requirement
-        f = multi_series.MultiSeriesForecaster(regressor=xgb.XGBRegressor, params=params, y_labels=self.y_labels)
+        f = MultiSeriesForecaster(regressor=xgb.XGBRegressor, params=params, y_labels=self.y_labels)
         f.fit(train_data=pd.DataFrame(self.y_train), train_exog=pd.DataFrame(self.x_train))
         pred = f.predict(test_exog=pd.DataFrame(self.x_test))[[self.y_label]]
 
@@ -119,5 +122,32 @@ def folding_forecast(data, dma_name, cols_to_lag, cols_to_move_stat, window_size
         _data.loc[(_data.index >= start_test) & (_data.index < end_test), dma_name] = fold_pred
 
         start_test = start_test + datetime.timedelta(hours=horizon)
+
+    return pred
+
+
+def predict_dma(data, dma_name, model_name, params, start_train, start_test, end_test, cols_to_lag,
+                cols_to_move_stat, window_size, cols_to_decompose, norm_method, labels_cluster, pred_type):
+    f = Forecast(data=data, y_label=dma_name, cols_to_lag=cols_to_lag,
+                 cols_to_move_stat=cols_to_move_stat, window_size=window_size, cols_to_decompose=cols_to_decompose,
+                 norm_method=norm_method, start_train=start_train, start_test=start_test, end_test=end_test,
+                 labels_cluster=labels_cluster)
+
+    models = {'xgb': xgb.XGBRegressor, 'rf': RandomForestRegressor, 'prophet': ProphetForecaster,
+              'lstm': LSTMForecaster, 'multi': MultiSeriesForecaster, 'sarima': SARIMAWrap}
+
+    if model_name == 'lstm':
+        pred = f.format_forecast(f.predict(model=LSTMForecaster, params=params))
+
+    if model_name == 'multi':
+        pred = f.multi_series_predict(params=params)
+
+    if model_name in ['xgb', 'rf', 'prophet', 'arima', 'sarima']:
+        # only if target label is not lagged, found to be less recommended
+        if pred_type == 'multi-step':
+            pred = f.predict(model=models[model_name], params=params)
+               
+        elif pred_type == 'step-ahead':
+            pred = f.one_step_loop_predict(model=models[model_name], params=params)
 
     return pred
