@@ -9,7 +9,7 @@ import utils
 
 def mean_abs_error(observed, predicted):
     e = mae(observed, predicted, multioutput='raw_values')
-    if observed.shape[1] == 1:
+    if observed.ndim == 1 or (observed.ndim == 2 and observed.shape[1] == 1):
         return e.item()
     else:
         return e
@@ -28,7 +28,7 @@ def max_abs_error(observed, predicted):
 
 def mean_abs_percentage_error(observed, predicted):
     e = mape(observed, predicted, multioutput='raw_values')
-    if observed.shape[1] == 1:
+    if observed.ndim == 1 or (observed.ndim == 2 and observed.shape[1] == 1):
         return e.item()
     else:
         return e
@@ -48,6 +48,23 @@ def one_week_score(observed: pd.DataFrame, predicted: pd.DataFrame):
     i2 = max_abs_error(observed.iloc[:24], predicted.iloc[:24])
     i3 = mean_abs_error(observed.iloc[24:], predicted.iloc[24:])
     return i1, i2, i3
+
+
+def get_metrics(data, pred, horizon):
+    observed, predicted = utils.get_dfs_commons(data, pred)
+    i1, i2, i3, mape = None, None, None, None
+    if horizon == 'short':
+        i1 = mean_abs_error(observed.iloc[:24], predicted.iloc[:24])
+        i2 = max_abs_error(observed.iloc[:24], predicted.iloc[:24])
+        mape = mean_abs_percentage_error(observed.iloc[:24], predicted.iloc[:24])
+
+    elif horizon == 'long':
+        i1 = mean_abs_error(observed.iloc[:24], predicted.iloc[:24])
+        i2 = max_abs_error(observed.iloc[:24], predicted.iloc[:24])
+        i3 = mean_abs_error(observed.iloc[24:], predicted.iloc[24:])
+        mape = mean_abs_percentage_error(observed.iloc[24:], predicted.iloc[24:])
+
+    return i1, i2, i3, mape
 
 
 if __name__ == "__main__":
