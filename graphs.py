@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import warnings
 import matplotlib as mpl
+import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.offsetbox import AnchoredText
@@ -23,6 +24,9 @@ import utils
 warnings.filterwarnings("ignore")
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
+
+MODELS_COLORS = {"xgb": "#0077b8", "prophet": "#aa341c", "lstm": "#4ab85e", "multi": "#faa80f", "rf": "#fb8500",
+                 "patch": "#94D2BD", "sarima": "#001219"}
 
 
 def draw_test_periods(ax, y_min, y_max):
@@ -220,8 +224,6 @@ def visualize_nans(df):
 def select_models(df, subplots_col, hover_cols, colors_col, markers_col, x_col, y_col, file_name):
     df[x_col] = df[x_col].astype(float).abs()
     df[y_col] = df[y_col].astype(float).abs()
-    colors_map = {"xgb": "#0077b8", "prophet": "#aa341c", "lstm": "#4ab85e", "multi": "#faa80f", "rf": "#fb8500",
-                  "patch": "#94D2BD", "sarima": "#001219"}
 
     markers = ["circle", "square", "diamond", "x", "triangle-up"]
     columns = ['i1', 'i2', 'i3', 'mape', 'model_name', 'short_model_name', 'dates_idx', 'start_test', 'horizon',
@@ -249,7 +251,7 @@ def select_models(df, subplots_col, hover_cols, colors_col, markers_col, x_col, 
         if n_subplots > 1:
             subplots_title = df[subplots_col].unique()[i]
             temp = df.loc[df[subplots_col] == subplots_title]
-            temp['colors'] = temp[colors_col].map(colors_map)
+            temp['colors'] = temp[colors_col].map(MODELS_COLORS)
         else:
             subplots_title = ''
             temp = df.copy()
@@ -323,7 +325,7 @@ def analyze_hyperparameters(dir_path, dma_idx, horizon, dates_idx, models):
 
     fig, axes = plt.subplots(nrows=2, ncols=n_params, figsize=(14, 7))
     for i, col in enumerate(param_cols):
-        param_values = list(df[col].unique())
+        param_values = list(df[col].dropna().unique())
         temp_color_map = {param_values[_]: colors[_] for _ in range(len(param_values))}
 
         for val, color in temp_color_map.items():
@@ -333,6 +335,8 @@ def analyze_hyperparameters(dir_path, dma_idx, horizon, dates_idx, models):
                 axes[0, i].scatter(temp['i1'], temp['i2'], c=color, marker=markers[j], alpha=0.5, label=label, zorder=3)
 
         axes[0, i].grid(zorder=0)
+        axes[0, i].set_xlabel('i1')
+        axes[0, i].set_ylabel('i2')
         axes[1, i].axis('off')
         handles, labels = axes[0, i].get_legend_handles_labels()
         axes[1, i].legend(handles, labels, fontsize=7)
@@ -392,12 +396,49 @@ def plot_all_experiments(p):
                   file_name='long')
 
 
+def analyze_cv(cv_path, ranking_cols):
+    df = pd.read_csv(cv_path)
+    # df = df[df[ranking_cols[0]] <= 100]
+    # df = df[df[ranking_cols[0]] <= df['i1'].mean() + df['i1'].std() * 5]
+
+    fig, axes = plt.subplots(nrows=len(ranking_cols), figsize=(10, 3*len(ranking_cols)))
+    axes = np.atleast_2d(axes).ravel()
+
+    category_color_map = {str(category): MODELS_COLORS[label] for
+                          category, label in zip(df['model_idx'], df['model_name'])}
+
+    for i, col in enumerate(ranking_cols):
+        sns.boxplot(x='model_idx', y=col, data=df, ax=axes[i], palette=category_color_map, showfliers=False)
+
+        means = df.groupby('model_idx')[col].mean().reset_index()
+        axes[i].scatter(x=means['model_idx'], y=means[col], color='black', marker='o', s=10, zorder=10)
+
+        axes[i].grid()
+        axes[i].set_ylim(axes[i].get_ylim()[0], axes[i].get_ylim()[1] + 1)
+
+        categories = df['model_idx'].unique()
+        for j, category in enumerate(categories):
+            label = df[df['model_idx'] == category]['model_name'].iloc[0]
+            axes[i].text(j, axes[i].get_ylim()[1] * 0.8, label, horizontalalignment='center', rotation=45)
+
+    plt.subplots_adjust(bottom=0.1, top=0.93, left=0.08, right=0.95, hspace=0.28)
+    fig.suptitle(cv_path.split('-')[1].split('_')[0] + ' - ' + cv_path.split('-')[1].split('_')[1].split('.')[0])
+
+
+def analyze_all_cv():
+    for dma in constants.DMA_NAMES:
+        analyze_cv(f"experiments_analysis/cv/cv_dma-{dma[:5]}_short.csv", ranking_cols=['i1', 'i2'])
+        analyze_cv(f"experiments_analysis/cv/cv_dma-{dma[:5]}_long.csv", ranking_cols=['i3'])
+
+
 if __name__ == "__main__":
     # plot_pareto()
     # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[0, 1, 2, 3],
     #                         models=['multi', 'xgb', 'lstm', 'prophet'], p=5)
-    # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[0], models=['multi'])
+    # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[0, 3, 4], models=['multi'])
     # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[3], models=['multi'])
     # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[4], models=['multi'])
-    plot_all_experiments(p=0.2)
+    # plot_all_experiments(p=0.2)
+    analyze_all_cv()
+
     plt.show()
