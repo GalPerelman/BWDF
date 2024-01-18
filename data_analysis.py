@@ -211,48 +211,75 @@ def stationary_test(data):
     fig.text(0.5, 0.02, 'Lags', ha='center')
 
 
-def outliers_analysis(data, method, z=3.0):
-    df = data[constants.DMA_NAMES]
-    df = df.dropna(axis=0)
-
-    numeric_columns = df.select_dtypes(include=np.number).columns
+def outliers_analysis(data, method, param, window_size, stuck_threshold):
+    """
+    Use before configuring forecast to identify preprocess parameters
+    """
+    numeric_columns = data.select_dtypes(include=np.number).columns
     n_cols = len(numeric_columns)
-    fig, axes = plt.subplots(n_cols, 2, figsize=(10, 1.8 * n_cols), sharex='col',
+    fig, axes = plt.subplots(n_cols, 2, figsize=(10, 1.4 * n_cols), sharex='col',
                              gridspec_kw={'width_ratios': [4, 1]})
 
     for i, column in enumerate(numeric_columns):
         if method == 'isolation_forest':
             iso_forest = IsolationForest(contamination=0.05)  # Adjust contamination as needed
-            df[column + '_outlier'] = iso_forest.fit_predict(df[[column]])
-            colors = np.where(df[column + '_outlier'] == -1, 'red', 'C0')
-            axes[i, 0].scatter(df.index, df[column], c=colors, s=15, alpha=0.6, zorder=5)
+            data[column + '_outlier'] = iso_forest.fit_predict(data[[column]])
+            colors = np.where(data[column + '_outlier'] == -1, 'red', 'C0')
+            axes[i, 0].scatter(data.index, data[column], c=colors, s=15, alpha=0.6, zorder=5)
 
         elif method == 'z_score':
-            z_scores = stats.zscore(df[column].dropna())
-            outliers = z_scores > z  # You can adjust this threshold
-            axes[i, 0].scatter(df[column].index, df[column], c='C0', s=15, alpha=0.6, zorder=5)
-            axes[i, 0].scatter(df[column].index[outliers], df[column][outliers], c='red', s=15, alpha=0.6, zorder=5)
+            z_scores = stats.zscore(data[column].dropna())
+            outliers = z_scores > param  # You can adjust this threshold
+            axes[i, 0].scatter(data[column].index, data[column], c='C0', s=15, alpha=0.6, zorder=5)
+            axes[i, 0].scatter(data[column].index[outliers], data[column][outliers], c='red', s=15, alpha=0.6, zorder=5)
 
         elif method =='iqr':
-            q1 = df[column].quantile(0.25)
-            q3 = df[column].quantile(0.75)
+            q1 = data[column].quantile(0.25)
+            q3 = data[column].quantile(0.75)
             iqr = q3 - q1
-            lower_bound = q1 - 1.5 * iqr
-            upper_bound = q3 + 1.5 * iqr
-            outliers = (df[column] < lower_bound) | (df[column] > upper_bound)
+            lower_bound = q1 - param * iqr
+            upper_bound = q3 + param * iqr
+            outliers = (data[column] < lower_bound) | (data[column] > upper_bound)
 
-            axes[i, 0].scatter(df[column].index, df[column], c='C0', s=15, alpha=0.6, zorder=5)
-            axes[i, 0].scatter(df[column].index[outliers], df[column][outliers], c='red', s=15, alpha=0.6, zorder=5)
+            axes[i, 0].scatter(data[column].index, data[column], c='C0', s=15, alpha=0.6, zorder=5)
+            axes[i, 0].scatter(data[column].index[outliers], data[column][outliers], c='red', s=15, alpha=0.6, zorder=5)
 
-        axes[i, 1].hist(df[column], bins=20, edgecolor='k', linewidth=0.1, alpha=0.8, zorder=5)
-        axes[i, 0].set_ylabel(column[:5])
+        elif method == "rolling_iqr":
+            rolling_q1 = data[column].rolling(window=window_size, min_periods=1).quantile(0.25)
+            rolling_q3 = data[column].rolling(window=window_size, min_periods=1).quantile(0.75)
+
+            # Calculate the rolling IQR
+            rolling_iqr = rolling_q3 - rolling_q1
+            data['rolling_q1'] = rolling_q1
+            data['rolling_q3'] = rolling_q3
+            data['rolling_iqr'] = rolling_iqr
+
+            # Calculate lower and upper bounds for outlier detection
+            data['lower_bound'] = data['rolling_q1'] - param * data['rolling_iqr']
+            data['upper_bound'] = data['rolling_q3'] + param * data['rolling_iqr']
+
+            # Identify outliers
+            outliers = (data[column] < data['lower_bound']) | (data[column] > data['upper_bound'])
+
+            # outliers = (df[column] < lower_bound) | (df[column] > upper_bound)
+            axes[i, 0].scatter(data[column].index, data[column], c='C0', s=15, alpha=0.6, zorder=5)
+            axes[i, 0].scatter(data[column].index[outliers], data[column][outliers], c='red', s=15, alpha=0.6, zorder=5)
+
+        # for all methods identify stuck data streams
+        diff = data[column].diff().ne(0)
+        groups = diff.cumsum()
+        group_sizes = data.groupby(groups)[column].transform('size')
+        outliers = group_sizes >= stuck_threshold
+        axes[i, 0].scatter(data[column].index[outliers], data[column][outliers], c='purple', s=15, alpha=0.6, zorder=5)
+
+        axes[i, 1].hist(data[column], bins=20, edgecolor='k', linewidth=0.1, alpha=0.8, zorder=5)
+        axes[i, 0].set_ylabel(column)
         axes[i, 0].grid(zorder=0)
         axes[i, 1].grid(zorder=0)
 
-    fig.suptitle(f"outliers according to {z} STDs from mean")
+    fig.suptitle(f"outliers according to {param} STDs from mean")
     fig.subplots_adjust(bottom=0.08, top=0.92, left=0.1, right=0.95, hspace=0.2)
     fig.align_ylabels()
-    plt.show()
 
 
 def knn_outlier_detection(df, n_neighbors=5, outlier_fraction=0.05):
@@ -314,7 +341,8 @@ if __name__ == "__main__":
     # moving_stat(data, window_size=24)
     # stationary_test(data)
 
-    # outliers_analysis(data=loader.inflow, method='z_score', z=4)
+    outliers_analysis(data=loader.inflow, method='rolling_iqr', param=3, window_size=168*4, stuck_threshold=5)
+    outliers_analysis(data=loader.weather, method='iqr', param=5, window_size=None, stuck_threshold=24)
     # knn_outlier_detection(data[constants.DMA_NAMES])
     # graphs.plot_time_series(loader.inflow, columns=constants.DMA_NAMES, shade_missing=True)
     # graphs.plot_time_series(loader.weather, columns=constants.WEATHER_COLUMNS, shade_missing=True)

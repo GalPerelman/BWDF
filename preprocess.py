@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from scipy import stats
 from statsmodels.tsa.seasonal import seasonal_decompose
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, PowerTransformer, QuantileTransformer, RobustScaler
@@ -59,6 +60,64 @@ class Preprocess:
 
         self.data['is_dst'] = self.data.index.map(is_dst).astype(int)
         self.data['is_special'] = self.data.index.normalize().isin(constants.SPECIAL_DATES).astype(int)
+
+    @staticmethod
+    def outliers_cleaning(data, method, z_threshold, iqr_param, window_size):
+        """
+        Detects outliers in a pandas DataFrame column and replaces them with NaN.
+
+        """
+        df = data.copy()
+        non_negative_columns = constants.DMA_NAMES + ['Rainfall depth (mm)', 'Windspeed (km/h)', 'Air humidity (%)']
+        non_negative_columns = list(set(non_negative_columns) & set(list(data.columns)))
+        for i, col in enumerate(non_negative_columns):
+            df.loc[df[col] < 0, col] = np.nan
+
+        numeric_columns = df.select_dtypes(include=np.number).columns
+        for i, col in enumerate(numeric_columns):
+            if method == 'z_score':
+                z_scores = stats.zscore(df[col])
+                outliers = (z_scores > z_threshold) | (z_scores < -z_threshold)
+
+            elif method == 'iqr':
+                q1 = df[col].quantile(0.25)
+                q3 = df[col].quantile(0.75)
+                iqr = q3 - q1
+                lower_bound = q1 - iqr_param * iqr
+                upper_bound = q3 + iqr_param * iqr
+                outliers = (df[col] < lower_bound) | (df[col] > upper_bound)
+
+            elif method == "rolling_iqr":
+                rolling_q1 = data[col].rolling(window=window_size).quantile(0.25)
+                rolling_q3 = data[col].rolling(window=window_size).quantile(0.75)
+
+                # Calculate the rolling IQR
+                rolling_iqr = rolling_q3 - rolling_q1
+                lower_bound = rolling_q1 - (iqr_param * rolling_iqr)
+                upper_bound = rolling_q3 + (iqr_param * rolling_iqr)
+                outliers = (df[col] < lower_bound) | (df[col] > upper_bound)
+
+            else:
+                outliers = []
+
+            df.loc[outliers, col] = np.nan
+
+        return df
+
+    @staticmethod
+    def detect_stuck_data_consecutive(data, consecutive_threshold):
+        """
+        Detects stuck data in a time series based on consecutive values being the same.
+        """
+        df = data.copy()
+        for col in df.columns:
+            diff = df[col].diff().ne(0)
+            groups = diff.cumsum()
+            group_sizes = df.groupby(groups)[col].transform('size')
+            outliers = group_sizes >= consecutive_threshold
+            df.loc[outliers, col] = np.nan
+
+        return df
 
     @staticmethod
     def construct_moving_features(data, columns, window_size):
@@ -148,7 +207,7 @@ class Preprocess:
         for col in columns:
             if method == '':
                 continue
-            if method == 'standard':
+            elif method == 'standard':
                 scaler = StandardScaler()
             elif method == 'min_max':
                 scaler = MinMaxScaler(feature_range=(0, 1))
