@@ -79,7 +79,6 @@ def num_hours_between_timestamps(t1, t2):
 def record_results(dma: str, short_model_name: str, long_model_name: str, dates: dict, lags: dict, norm_method: str,
                    pred_type: str, cols_to_move_stat: list, cols_to_decompose: list, clusters_idx: int,
                    score: Sequence):
-
     # WINDOW_SIZE IS ACCORDING TO PREDICTION HORIZON
     result = pd.DataFrame({
         'dma': dma,
@@ -162,13 +161,14 @@ def collect_experiments(dir_path, p, dmas, horizon, dates_idx, models, abs_n=Non
         return group.nsmallest(n, target_col)
 
     df = df.drop_duplicates()
+    print(df.shape)
     target_col = 'i1' if horizon == 'short' else 'i3'
     df = df.groupby(['dma', 'model_name', 'dates_idx'], group_keys=False).apply(
         lambda x: select_smallest_n_percent(x, n_percent=p, target_col=target_col))
     return df
 
 
-def experiment_to_json(csv_path, horizon, models, export_path):
+def experiment_to_json(csv_path, horizon, models, export_path, constant_lags=None):
     """
     Nested parsing of experiments csv files to construct final candidates
     The csv files are generated with the select_models function in graphs where the number of models in each category
@@ -188,30 +188,40 @@ def experiment_to_json(csv_path, horizon, models, export_path):
         temp = df.loc[df['dma'] == dma]
 
         dma_candidates = []
+        model_idx = 0
         for i, row in temp.iterrows():
             if row["model_name"] not in models:
                 continue
-            params = {col[6:]: row[col] for col in temp if col.startswith("param_") and not pd.isnull(row[col])}
-            params = {name: int(value) if isinstance(value, (int, float)) and np.floor(value) == value else value for
-                      name, value in params.items()}
+            else:
+                params = {col[6:]: row[col] for col in temp if col.startswith("param_") and not pd.isnull(row[col])}
+                params = {name: int(value) if isinstance(value, (int, float)) and np.floor(value) == value else value
+                          for name, value in params.items()}
 
-            dma_candidates.append(
-                {
-                    "model_name": row["model_name"],
-                    "params": params,
-                    "cols_to_move_stat": row["cols_to_move_stat"],
-                    "cols_to_decompose": row["cols_to_decompose"],
-                    "decompose_target": True if dma in row["cols_to_decompose"] else False,
-                    "norm_method": row["norm"],
-                    "lags": {"Rainfall depth (mm)": int(row["lags_Rainfall depth (mm)"]),
-                             "Air temperature (°C)": int(row["lags_Air temperature (°C)"]),
-                             "Windspeed (km/h)": int(row["lags_Windspeed (km/h)"]),
-                             "Air humidity (%)": int(row["lags_Air humidity (%)"])
-                             },
-                    "lag_target": int(row[f"lags_{dma}"]),
-                    "clusters_idx": int(row["clusters_idx"]) if not pd.isnull(row["clusters_idx"]) else None
-                }
-            )
+                if constant_lags is None:
+                    lags = {"Rainfall depth (mm)": int(row["lags_Rainfall depth (mm)"]),
+                            "Air temperature (°C)": int(row["lags_Air temperature (°C)"]),
+                            "Windspeed (km/h)": int(row["lags_Windspeed (km/h)"]),
+                            "Air humidity (%)": int(row["lags_Air humidity (%)"])
+                            }
+                else:
+                    lags = constant_lags
+
+                dma_candidates.append(
+                    {
+                        "model_idx": model_idx,
+                        "model_name": row["model_name"],
+                        "params": params,
+                        "cols_to_move_stat": row["cols_to_move_stat"],
+                        "cols_to_decompose": row["cols_to_decompose"],
+                        "decompose_target": True if dma in row["cols_to_decompose"] else False,
+                        "norm_method": row["norm"],
+                        "lags": lags,
+                        "lag_target": int(row[f"lags_{dma}"]),
+                        "clusters_idx": int(row["clusters_idx"]) if not pd.isnull(row["clusters_idx"]) else None
+                    }
+                )
+                model_idx += 1
+
         candidates[dma] = {horizon: dma_candidates}
 
     with open(export_path, 'w', encoding='utf8') as file:
