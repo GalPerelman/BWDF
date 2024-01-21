@@ -128,9 +128,18 @@ def decompose_dictionaries_column(df, column_name, prefix='_'):
 
 def collect_experiments(dir_path, p, dmas, horizon, dates_idx, models, abs_n=None):
     df = pd.DataFrame()
+    ranking_cols = ['i1', 'i2'] if horizon == 'short' else ['i3']
 
     def get_param(raw_str):
         return raw_str.split('-')[1]
+
+    def rank(df):
+        df['w1'] = (df['i1'] - df['i1'].min()) / (df['i1'].max() - df['i1'].min())
+        df['w2'] = (df['i2'] - df['i2'].min()) / (df['i2'].max() - df['i2'].min())
+        df['w3'] = (df['i3'] - df['i3'].min()) / (df['i3'].max() - df['i3'].min())
+        df['rank'] = df[ranking_cols].mean(axis=1)
+        df = df.sort_values('rank')
+        return df
 
     for i, fname in enumerate(glob.glob(dir_path + "/*.csv")):
         _prefix, _dma_idx, _model_name, _dates_idx, _horizon, _slurm_id = fname.split('--')
@@ -140,8 +149,7 @@ def collect_experiments(dir_path, p, dmas, horizon, dates_idx, models, abs_n=Non
         _horizon = get_param(_horizon)
         if (_dma_idx in dmas) and (_model_name in models) and (_dates_idx in dates_idx) and (_horizon == horizon):
             temp = pd.read_csv(fname, index_col=0, engine="python", on_bad_lines='skip')
-            temp = temp.sort_values('i1')
-            # temp = temp.head(max(50, int(len(temp) * (p / 100))))
+            temp = rank(temp)
             temp = decompose_dictionaries_column(temp, column_name='model_params', prefix='param_')
             temp = decompose_dictionaries_column(temp, column_name='lags', prefix='lags_')
             df = pd.concat([df, temp])
