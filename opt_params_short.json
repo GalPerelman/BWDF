@@ -1,0 +1,330 @@
+
+{
+    "DMA A":
+        {
+          "short":
+                  {
+                "model_idx": 9,
+                "model_name": "multi",
+                "params": {
+                    "max_depth": 10,
+                    "learning_rate": 0.05,
+                    "n_estimators": 500,
+                    "reg_alpha": 0.1,
+                    "reg_lambda": 0.1,
+                    "min_child_weight": 5,
+                    "bootstrap": 1,
+                    "min_sample_leaf": 2,
+                    "min_sample_split": 2
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA A (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "moving_stat",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 24,
+                "clusters_idx": 1
+            }
+        },
+
+
+
+    "DMA B":
+          {
+            "short":
+                    {
+                "model_idx": 8,
+                "model_name": "multi",
+                "params": {
+                    "max_depth": 10,
+                    "learning_rate": 0.1,
+                    "n_estimators": 500,
+                    "reg_alpha": 0.1,
+                    "reg_lambda": 5,
+                    "min_child_weight": 3,
+                    "bootstrap": 1,
+                    "min_sample_leaf": 2,
+                    "min_sample_split": 2
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA B (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 24,
+                "clusters_idx": 0
+            }
+          },
+
+
+    "DMA C":
+          {
+            "short":
+                    {
+                "model_idx": 9,
+                "model_name": "multi",
+                "params": {
+                    "max_depth": 10,
+                    "learning_rate": 0.05,
+                    "n_estimators": 500,
+                    "reg_alpha": 0.1,
+                    "reg_lambda": 0.5,
+                    "min_child_weight": 3,
+                    "bootstrap": 1,
+                    "min_sample_leaf": 2,
+                    "min_sample_split": 2
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 12,
+                "clusters_idx": 3
+            }
+          },
+
+
+    "DMA D":
+          {
+            "short":
+                    {
+                "model_idx": 14,
+                "model_name": "xgb",
+                "params": {
+                    "max_depth": 3,
+                    "learning_rate": 0.1,
+                    "n_estimators": 500,
+                    "reg_alpha": 0.5,
+                    "reg_lambda": 0,
+                    "min_child_weight": 1
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 12,
+                "clusters_idx": 0
+            }
+          },
+
+
+    "DMA E":
+          {
+            "short":
+                    {
+                "model_idx": 6,
+                "model_name": "multi",
+                "params": {
+                    "max_depth": 10,
+                    "learning_rate": 0.05,
+                    "n_estimators": 100,
+                    "reg_alpha": 0.5,
+                    "reg_lambda": 0.1,
+                    "min_child_weight": 5
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 12,
+                "clusters_idx": 0
+            }
+          },
+
+
+    "DMA F":
+          {
+            "short":
+                    {
+                "model_idx": 7,
+                "model_name": "multi",
+                "params": {
+                    "max_depth": 10,
+                    "learning_rate": 0.05,
+                    "n_estimators": 50,
+                    "reg_alpha": 0.5,
+                    "reg_lambda": 5,
+                    "min_child_weight": 5
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 12,
+                "clusters_idx": 0
+            }
+          },
+
+
+    "DMA G":
+          {
+            "short":
+                    {
+                "model_idx": 11,
+                "model_name": "multi",
+                "params": {
+                    "max_depth": 10,
+                    "learning_rate": 0.05,
+                    "n_estimators": 500,
+                    "reg_alpha": 0,
+                    "reg_lambda": 0.5,
+                    "min_child_weight": 3,
+                    "bootstrap": 1,
+                    "min_sample_leaf": 2,
+                    "min_sample_split": 2
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 12,
+                "clusters_idx": 3
+            }
+          },
+
+
+    "DMA H":
+          {
+            "short":
+                    {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "learning_rate": 0.001,
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 24,
+                "clusters_idx": 0
+            }
+          },
+
+
+    "DMA I":
+          {
+            "short":
+                    {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "learning_rate": 0.01,
+                    "num_layers": 2,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 100,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 24,
+                "clusters_idx": 0
+            }
+          },
+
+
+    "DMA J":
+          {
+            "short":
+                    {
+                "model_idx": 9,
+                "model_name": "multi",
+                "params": {
+                    "max_depth": 5,
+                    "learning_rate": 0.1,
+                    "n_estimators": 200,
+                    "reg_alpha": 0.01,
+                    "reg_lambda": 5,
+                    "min_child_weight": 1,
+                    "bootstrap": 1,
+                    "min_sample_leaf": 2,
+                    "min_sample_split": 2
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 12,
+                "clusters_idx": 0
+            }
+          }
+}
+
