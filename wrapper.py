@@ -27,7 +27,7 @@ from ar_model import SARIMAWrap, StatsModels
 from patch_model import PatchTransformer
 from params_grids import grids
 from clusters import clusters
-
+from cross_validation import CV
 from logger import Logger
 
 slurm_job_id = os.environ.get('SLURM_JOB_ID')
@@ -144,13 +144,15 @@ def parse_args():
     parser.add_argument('--horizon', type=str, required=False)
     parser.add_argument('--norm_methods', nargs='+', type=str, required=False, default=[''])
 
-    parser.add_argument('--target_lags', nargs='+', type=int, required=True)
+    parser.add_argument('--target_lags', nargs='+', type=int, required=False)
     parser.add_argument('--weather_lags', nargs='+', type=int, required=False)
     parser.add_argument('--clusters_idx', nargs='+', type=int, required=False)
 
     parser.add_argument('--move_stats', type=int, required=False)
     parser.add_argument('--decompose_target', type=int, required=False)
     parser.add_argument('--output_dir', type=str, required=False)
+
+    parser.add_argument('--cv_candidates_path', type=str, required=False)
 
     args = parser.parse_args()
     if args.do == 'experiment':
@@ -163,6 +165,8 @@ def parse_args():
         random_search(args)
     elif args.do == 'nixtla':
         search_nixtla_models(args)
+    elif args.do == 'cv':
+        run_cv(args)
 
     return args
 
@@ -474,6 +478,13 @@ def search_nixtla_models(args):
             dma_results = pd.concat([dma_results, temp])
             results[dma_name] = dma_results
             results[dma_name].to_csv(os.path.join(output_dir, output_files[dma_name]))
+
+
+def run_cv(args):
+    start = constants.TZ.localize(datetime.datetime(2022, 7, 4, 0, 0))
+    cv = CV(candidates_path=args.cv_candidates_path,
+            folding_start_date=start, repeats=14, hours_step_size=24, files_suffix="v1")
+    cv.run_single_experiment(constants.DMA_NAMES[args.dma_idx], args.horizon)
 
 
 if __name__ == "__main__":
