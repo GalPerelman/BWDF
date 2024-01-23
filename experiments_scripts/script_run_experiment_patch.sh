@@ -3,7 +3,7 @@
 dma=(0)
 models=('patch')
 dates_idx=(3)
-horizon=('short', 'long')
+horizon=('short' 'long')
 
 for a in ${dma[@]}; do
 	for b in ${models[@]}; do
