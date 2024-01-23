@@ -63,6 +63,19 @@ def drop_other_dmas(data, y_label):
     return data
 
 
+def calculate_zscore(column):
+    """
+    Calculates the Z-scores of a pandas Series while ignoring NaN values.
+
+    :param column: Pandas Series with potential NaN values.
+    :return: Pandas Series with the Z-scores.
+    """
+    mean = column.mean(skipna=True)
+    std = column.std(ddof=0, skipna=True)
+    z_scores = (column - mean) / std
+    return z_scores
+
+
 def num_hours_between_timestamps(t1, t2):
     """
     Calculate the number of hours between two timestamps where t2 > t1

@@ -8,14 +8,27 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, PowerTransformer
 from sklearn.base import BaseEstimator, TransformerMixin
 
 import constants
+import utils
 
 
 class Preprocess:
-    def __init__(self, inflow: pd.DataFrame, weather: pd.DataFrame, cyclic_time_features: bool, n_neighbors: int):
+    def __init__(self, inflow: pd.DataFrame, weather: pd.DataFrame, cyclic_time_features: bool, n_neighbors: int,
+                 outliers_method: str = "", outliers_param: int = 0, window_size: int = 0, stuck_threshold: int = 100
+                 ):
         self.inflow = inflow
         self.weather = weather
         self.cyclic_time_features = cyclic_time_features
         self.n_neighbors = n_neighbors
+        self.outliers_method = outliers_method
+        self.outliers_param = outliers_param
+        self.window_size = window_size
+        self.stuck_threshold = stuck_threshold
+
+        if self.outliers_method:
+            self.inflow = self.outliers_cleaning(self.inflow, method=self.outliers_method,
+                                                 z_threshold=self.outliers_param, iqr_param=self.outliers_param,
+                                                 window_size=self.window_size)
+            self.filtered_outliers_inflow = self.inflow.copy(deep=True)
 
         self.inflow = self.data_completion(self.inflow)
         self.weather = self.data_completion(self.weather)
@@ -76,7 +89,7 @@ class Preprocess:
         numeric_columns = df.select_dtypes(include=np.number).columns
         for i, col in enumerate(numeric_columns):
             if method == 'z_score':
-                z_scores = stats.zscore(df[col])
+                z_scores = utils.calculate_zscore(df[col])
                 outliers = (z_scores > z_threshold) | (z_scores < -z_threshold)
 
             elif method == 'iqr':

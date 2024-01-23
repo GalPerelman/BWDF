@@ -8,6 +8,7 @@ from sklearn.neighbors import NearestNeighbors
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.tsa.stattools import adfuller
 
+import preprocess
 from data_loader import Loader
 from preprocess import Preprocess
 import constants
@@ -228,8 +229,8 @@ def outliers_analysis(data, method, param, window_size, stuck_threshold):
             axes[i, 0].scatter(data.index, data[column], c=colors, s=15, alpha=0.6, zorder=5)
 
         elif method == 'z_score':
-            z_scores = stats.zscore(data[column].dropna())
-            outliers = z_scores > param  # You can adjust this threshold
+            z_scores = utils.calculate_zscore(data[column])
+            outliers = (z_scores > param) | (z_scores < -param)
             axes[i, 0].scatter(data[column].index, data[column], c='C0', s=15, alpha=0.6, zorder=5)
             axes[i, 0].scatter(data[column].index[outliers], data[column][outliers], c='red', s=15, alpha=0.6, zorder=5)
 
@@ -277,7 +278,10 @@ def outliers_analysis(data, method, param, window_size, stuck_threshold):
         axes[i, 0].grid(zorder=0)
         axes[i, 1].grid(zorder=0)
 
-    fig.suptitle(f"outliers according to {param} STDs from mean")
+    fig.suptitle(f"outliers according to {method}"
+                 f"\nparam: {param},"
+                 f"window_size: {window_size},"
+                 f"stuck threshold: {stuck_threshold}")
     fig.subplots_adjust(bottom=0.08, top=0.92, left=0.1, right=0.95, hspace=0.2)
     fig.align_ylabels()
 
@@ -341,8 +345,8 @@ if __name__ == "__main__":
     # moving_stat(data, window_size=24)
     # stationary_test(data)
 
-    outliers_analysis(data=loader.inflow, method='rolling_iqr', param=3, window_size=168*4, stuck_threshold=5)
-    outliers_analysis(data=loader.weather, method='iqr', param=5, window_size=None, stuck_threshold=24)
+    outliers_analysis(data=loader.inflow, method='z_score', param=3, window_size=24*30*3, stuck_threshold=5)
+    # outliers_analysis(data=loader.weather, method='iqr', param=4, window_size=None, stuck_threshold=24)
     # knn_outlier_detection(data[constants.DMA_NAMES])
     # graphs.plot_time_series(loader.inflow, columns=constants.DMA_NAMES, shade_missing=True)
     # graphs.plot_time_series(loader.weather, columns=constants.WEATHER_COLUMNS, shade_missing=True)
