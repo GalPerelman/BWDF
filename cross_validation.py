@@ -12,11 +12,12 @@ from preprocess import Preprocess
 
 
 class CV:
-    def __init__(self, candidates_path, folding_start_date, repeats, hours_step_size):
+    def __init__(self, candidates_path, folding_start_date, repeats, hours_step_size, files_suffix):
         self.candidates_path = candidates_path
         self.folding_start_date = folding_start_date
         self.repeats = repeats
         self.hours_step_size = hours_step_size
+        self.files_suffix = files_suffix
 
         self.candidates = utils.read_json(self.candidates_path)
         self.raw_data = self.load_data()
@@ -63,7 +64,6 @@ class CV:
             pred.columns = [dma]
 
             i1, i2, i3, mape = evaluation.get_metrics(self.raw_data, pred, horizon=horizon)
-            print(label_clusters)
             df = pd.DataFrame({
                 'model_idx': model_idx,
                 'dma': dma,
@@ -95,32 +95,40 @@ class CV:
         for model_idx, model_config in enumerate(self.candidates[dma][horizon]):
             fold_results = self.folding_pred(dma, horizon, model_config, model_idx)
             all_result = pd.concat([all_result, fold_results])
-            all_result.to_csv(f"cv_dma-{dma[:5]}_{horizon}.csv")
+            all_result.to_csv(f"cv_dma-{dma[:5]}_{horizon}_{self.files_suffix}.csv")
 
-    def run_all(self):
+    def run_all(self, horizon):
         for dma in constants.DMA_NAMES:
-            for horizon in ['short', 'long']:
-                self.run_single_experiment(dma, horizon)
+            self.run_single_experiment(dma, horizon)
 
 
 if __name__ == "__main__":
-    # df = utils.collect_experiments("exp_output/v3", p=0, dmas=[_ for _ in range(10)], horizon='short',
-    #                                dates_idx=[0, 2, 3, 4], models=['multi', 'xgb', 'lstm', 'prophet'], abs_n=2)
-    # df.to_csv("experiments_analysis/candidates_short.csv")
+    df = utils.collect_experiments("experiment_output/v3", p=0, dmas=[_ for _ in range(10)], horizon='short',
+                                   dates_idx=[0, 2, 3, 4], models=['multi', 'xgb', 'lstm', 'prophet'], abs_n=3)
+    df.to_csv("experiments_analysis/candidates_short_v1.csv", encoding='utf8')
 
-    # df = utils.collect_experiments("exp_output/v3", p=0, dmas=[_ for _ in range(10)], horizon='long',
-    #                                dates_idx=[0, 2, 3, 4], models=['multi', 'xgb', 'lstm', 'prophet'], abs_n=2)
-    # df.to_csv("experiments_analysis/candidates_long.csv")
-    #
-    # utils.experiment_to_json(csv_path="experiments_analysis/candidates_short.csv", horizon="short",
-    #                          models=['lstm', 'xgb', 'multi', 'prophet'],
-    #                          export_path="experiments_analysis/candidates_short.json")
-    #
-    # utils.experiment_to_json(csv_path="experiments_analysis/candidates_long.csv", horizon="long",
-    #                          models=['lstm', 'xgb', 'multi', 'prophet'],
-    #                          export_path="experiments_analysis/candidates_long.json")
+    df = utils.collect_experiments("experiment_output/v3", p=0, dmas=[_ for _ in range(10)], horizon='long',
+                                   dates_idx=[0, 2, 3, 4], models=['multi', 'xgb', 'lstm', 'prophet'], abs_n=3)
+    df.to_csv("experiments_analysis/candidates_long_v1.csv", encoding='utf8')
 
-    start = constants.TZ.localize(datetime.datetime(2022, 6, 6, 0, 0))
-    cv = CV(candidates_path="experiments_analysis/candidates_short.json",
-            folding_start_date=start, repeats=10, hours_step_size=24)
-    cv.run_all()
+    utils.experiment_to_json(csv_path="experiments_analysis/candidates_short_v1.csv", horizon="short",
+                             models=['lstm', 'xgb', 'multi', 'prophet'],
+                             export_path="experiments_analysis/candidates_short_v1.json",
+                             # constant_lags={"Air temperature (°C)": 6, "Air humidity (%)": 6}
+                             )
+
+    utils.experiment_to_json(csv_path="experiments_analysis/candidates_long_v1.csv", horizon="long",
+                             models=['lstm', 'xgb', 'multi', 'prophet'],
+                             export_path="experiments_analysis/candidates_long_v1.json",
+                             # constant_lags={"Air temperature (°C)": 6, "Air humidity (%)": 6}
+                             )
+
+    # start = constants.TZ.localize(datetime.datetime(2022, 7, 4, 0, 0))
+    # cv = CV(candidates_path="experiments_analysis/candidates_short_constant_lags.json",
+    #         folding_start_date=start, repeats=14, hours_step_size=24, files_suffix="constant_lags")
+    # cv.run_all(horizon='short')
+    
+    # cv = CV(candidates_path="experiments_analysis/candidates_long.json",
+    #         folding_start_date=start, repeats=14, hours_step_size=24)
+    # cv.run_all(horizon='long')
+
