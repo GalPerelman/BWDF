@@ -132,7 +132,7 @@ def collect_experiments(dir_path, p, dmas, horizon, dates_idx, models, abs_n=Non
     def get_param(raw_str):
         return raw_str.split('-')[1]
 
-    def rank(df):
+    def rank(df, ranking_cols):
         df['w1'] = (df['i1'] - df['i1'].min()) / (df['i1'].max() - df['i1'].min())
         df['w2'] = (df['i2'] - df['i2'].min()) / (df['i2'].max() - df['i2'].min())
         df['w3'] = (df['i3'] - df['i3'].min()) / (df['i3'].max() - df['i3'].min())
@@ -148,23 +148,23 @@ def collect_experiments(dir_path, p, dmas, horizon, dates_idx, models, abs_n=Non
         _horizon = get_param(_horizon)
         if (_dma_idx in dmas) and (_model_name in models) and (_dates_idx in dates_idx) and (_horizon == horizon):
             temp = pd.read_csv(fname, index_col=0, engine="python", on_bad_lines='skip')
-            temp = rank(temp)
-            temp = decompose_dictionaries_column(temp, column_name='model_params', prefix='param_')
-            temp = decompose_dictionaries_column(temp, column_name='lags', prefix='lags_')
             df = pd.concat([df, temp])
 
-    def select_smallest_n_percent(group, n_percent, target_col):
+    def select_smallest_n(group, n_percent, ranking_cols):
+        group = rank(group, ranking_cols)
         if abs_n is None:
             n = max(50, math.ceil(len(group) * n_percent / 100))
         else:
             n = abs_n
-        return group.nsmallest(n, target_col)
+        return group.nsmallest(n, 'rank')
 
     df = df.drop_duplicates()
-    print(df.shape)
-    target_col = 'i1' if horizon == 'short' else 'i3'
+    print(df.shape, df['run_time'].mean())
     df = df.groupby(['dma', 'model_name', 'dates_idx'], group_keys=False).apply(
-        lambda x: select_smallest_n_percent(x, n_percent=p, target_col=target_col))
+        lambda x: select_smallest_n(x, n_percent=p, ranking_cols=ranking_cols))
+
+    df = decompose_dictionaries_column(df, column_name='model_params', prefix='param_')
+    df = decompose_dictionaries_column(df, column_name='lags', prefix='lags_')
     return df
 
 
