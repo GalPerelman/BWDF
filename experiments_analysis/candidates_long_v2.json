@@ -1,0 +1,2671 @@
+{
+    "DMA A (L/s)": {
+        "long": [
+            {
+                "model_idx": 0,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 100,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 1,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "learning_rate": 0.01,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [
+                    "Rainfall depth (mm)",
+                    "Air temperature (°C)",
+                    "Windspeed (km/h)",
+                    "Air humidity (%)"
+                ],
+                "cols_to_decompose": [
+                    "DMA A (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 3,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.01,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 4,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 6,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA A (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 7,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA A (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 8,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 100,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA A (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            }
+        ]
+    },
+    "DMA B (L/s)": {
+        "long": [
+            {
+                "model_idx": 0,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 100,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA B (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 1,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 3,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 3,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 100,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA B (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 4,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA B (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 6,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 7,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 150,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA B (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 8,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 100,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            }
+        ]
+    },
+    "DMA C (L/s)": {
+        "long": [
+            {
+                "model_idx": 0,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA C (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 1,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA C (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA C (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 3,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 100,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA C (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "moving_stat",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 4,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA C (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [
+                    "Rainfall depth (mm)",
+                    "Air temperature (°C)",
+                    "Windspeed (km/h)",
+                    "Air humidity (%)"
+                ],
+                "cols_to_decompose": [
+                    "DMA C (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 6,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 100,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "moving_stat",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 7,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 8,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 100,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "moving_stat",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            }
+        ]
+    },
+    "DMA D (L/s)": {
+        "long": [
+            {
+                "model_idx": 0,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA D (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 1,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.01,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [
+                    "Rainfall depth (mm)",
+                    "Air temperature (°C)",
+                    "Windspeed (km/h)",
+                    "Air humidity (%)"
+                ],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA D (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 3,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 150,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA D (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 4,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA D (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA D (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 6,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 7,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 100,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA D (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 8,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA D (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            }
+        ]
+    },
+    "DMA E (L/s)": {
+        "long": [
+            {
+                "model_idx": 0,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA E (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 1,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [
+                    "Rainfall depth (mm)",
+                    "Air temperature (°C)",
+                    "Windspeed (km/h)",
+                    "Air humidity (%)"
+                ],
+                "cols_to_decompose": [
+                    "DMA E (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 100,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA E (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 3,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA E (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 4,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA E (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 100,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA E (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 6,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 7,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 100,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 8,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            }
+        ]
+    },
+    "DMA F (L/s)": {
+        "long": [
+            {
+                "model_idx": 0,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "moving_stat",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 1,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [
+                    "Rainfall depth (mm)",
+                    "Air temperature (°C)",
+                    "Windspeed (km/h)",
+                    "Air humidity (%)"
+                ],
+                "cols_to_decompose": [
+                    "DMA F (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 3,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 3,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.01,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 4,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "learning_rate": 0.01,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 6,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA F (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 7,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA F (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 8,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 100,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA F (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            }
+        ]
+    },
+    "DMA G (L/s)": {
+        "long": [
+            {
+                "model_idx": 0,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 150,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 1,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.01,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "moving_stat",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 3,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 4,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 100,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 6,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA G (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 7,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 8,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA G (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            }
+        ]
+    },
+    "DMA H (L/s)": {
+        "long": [
+            {
+                "model_idx": 0,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 3,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 1,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA H (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA H (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "moving_stat",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 3,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 4,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA H (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 6,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA H (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 7,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 3,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 100,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 8,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA H (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            }
+        ]
+    },
+    "DMA I (L/s)": {
+        "long": [
+            {
+                "model_idx": 0,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA I (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "moving_stat",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 1,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "learning_rate": 0.01,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA I (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 3,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA I (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 4,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA I (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA I (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 6,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA I (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 7,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA I (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 8,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 3,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            }
+        ]
+    },
+    "DMA J (L/s)": {
+        "long": [
+            {
+                "model_idx": 0,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA J (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 1,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "learning_rate": 0.01,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA J (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 2,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA J (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "standard",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 3,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 2,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.2,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [],
+                "decompose_target": false,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 4,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 12,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "rmsprop",
+                    "learning_rate": 0.001,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA J (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 5,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 150,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA J (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 6,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 24,
+                    "units": 50,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA J (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 7,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 3,
+                    "look_back": 24,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 150,
+                    "dropout": 0.1,
+                    "recurrent_dropout": 0.2,
+                    "optimizer": "adam",
+                    "learning_rate": 0.01,
+                    "activation": "tanh"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA J (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 6,
+                    "Air temperature (°C)": 6,
+                    "Windspeed (km/h)": 6,
+                    "Air humidity (%)": 6
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            },
+            {
+                "model_idx": 8,
+                "model_name": "lstm",
+                "params": {
+                    "num_layers": 1,
+                    "look_back": 48,
+                    "epochs": 10,
+                    "batch_size": 48,
+                    "units": 150,
+                    "dropout": 0.3,
+                    "recurrent_dropout": 0.5,
+                    "optimizer": "adam",
+                    "learning_rate": 0.001,
+                    "activation": "relu"
+                },
+                "cols_to_move_stat": [],
+                "cols_to_decompose": [
+                    "DMA J (L/s)"
+                ],
+                "decompose_target": true,
+                "norm_method": "fixed_window",
+                "lags": {
+                    "Rainfall depth (mm)": 0,
+                    "Air temperature (°C)": 0,
+                    "Windspeed (km/h)": 0,
+                    "Air humidity (%)": 0
+                },
+                "lag_target": 0,
+                "clusters_idx": 0
+            }
+        ]
+    }
+}
