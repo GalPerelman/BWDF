@@ -13,22 +13,22 @@ import utils
 
 class Preprocess:
     def __init__(self, inflow: pd.DataFrame, weather: pd.DataFrame, cyclic_time_features: bool, n_neighbors: int,
-                 outliers_method: str = "", outliers_param: int = 0, window_size: int = 0, stuck_threshold: int = 100
-                 ):
+                 outliers_config: dict = None):
         self.inflow = inflow
         self.weather = weather
         self.cyclic_time_features = cyclic_time_features
         self.n_neighbors = n_neighbors
-        self.outliers_method = outliers_method
-        self.outliers_param = outliers_param
-        self.window_size = window_size
-        self.stuck_threshold = stuck_threshold
+        self.outliers_config = outliers_config
 
-        if self.outliers_method:
-            self.inflow = self.outliers_cleaning(self.inflow, method=self.outliers_method,
-                                                 z_threshold=self.outliers_param, iqr_param=self.outliers_param,
-                                                 window_size=self.window_size)
+        if self.outliers_config is not None:
+            for col in constants.DMA_NAMES:
+                self.inflow[[col]] = Preprocess.clear_column_outliers(self.inflow[[col]], col, self.outliers_config)
+
+            for col in constants.WEATHER_COLUMNS:
+                self.weather[[col]] = Preprocess.clear_column_outliers(self.weather[[col]], col, self.outliers_config)
+
             self.filtered_outliers_inflow = self.inflow.copy(deep=True)
+            self.filtered_outliers_weather = self.weather.copy(deep=True)
 
         self.inflow = self.data_completion(self.inflow)
         self.weather = self.data_completion(self.weather)
@@ -75,7 +75,20 @@ class Preprocess:
         self.data['is_special'] = self.data.index.normalize().isin(constants.SPECIAL_DATES).astype(int)
 
     @staticmethod
-    def outliers_cleaning(data, method, z_threshold, iqr_param, window_size):
+    def clear_column_outliers(column: pd.DataFrame, column_name: str, config: dict):
+        column = Preprocess.outliers_cleaning(column,
+                                              method=config["outliers_params"][column_name]["outliers_method"],
+                                              param=config["outliers_params"][column_name]["outliers_param"],
+                                              window_size=config["outliers_params"][column_name]["window_size"]
+                                              )
+        if config["outliers_params"][column_name]["stuck_threshold"] is not None:
+            threshold = config["outliers_params"][column_name]["stuck_threshold"]
+            column = Preprocess.detect_stuck_data_consecutive(column, threshold=threshold)
+
+        return column
+
+    @staticmethod
+    def outliers_cleaning(data, method, param, window_size):
         """
         Detects outliers in a pandas DataFrame column and replaces them with NaN.
 
@@ -90,14 +103,14 @@ class Preprocess:
         for i, col in enumerate(numeric_columns):
             if method == 'z_score':
                 z_scores = utils.calculate_zscore(df[col])
-                outliers = (z_scores > z_threshold) | (z_scores < -z_threshold)
+                outliers = (z_scores > param) | (z_scores < -param)
 
             elif method == 'iqr':
                 q1 = df[col].quantile(0.25)
                 q3 = df[col].quantile(0.75)
                 iqr = q3 - q1
-                lower_bound = q1 - iqr_param * iqr
-                upper_bound = q3 + iqr_param * iqr
+                lower_bound = q1 - param * iqr
+                upper_bound = q3 + param * iqr
                 outliers = (df[col] < lower_bound) | (df[col] > upper_bound)
 
             elif method == "rolling_iqr":
@@ -106,8 +119,8 @@ class Preprocess:
 
                 # Calculate the rolling IQR
                 rolling_iqr = rolling_q3 - rolling_q1
-                lower_bound = rolling_q1 - (iqr_param * rolling_iqr)
-                upper_bound = rolling_q3 + (iqr_param * rolling_iqr)
+                lower_bound = rolling_q1 - (param * rolling_iqr)
+                upper_bound = rolling_q3 + (param * rolling_iqr)
                 outliers = (df[col] < lower_bound) | (df[col] > upper_bound)
 
             else:
@@ -118,7 +131,7 @@ class Preprocess:
         return df
 
     @staticmethod
-    def detect_stuck_data_consecutive(data, consecutive_threshold):
+    def detect_stuck_data_consecutive(data, threshold):
         """
         Detects stuck data in a time series based on consecutive values being the same.
         """
@@ -127,7 +140,7 @@ class Preprocess:
             diff = df[col].diff().ne(0)
             groups = diff.cumsum()
             group_sizes = df.groupby(groups)[col].transform('size')
-            outliers = group_sizes >= consecutive_threshold
+            outliers = group_sizes >= threshold
             df.loc[outliers, col] = np.nan
 
         return df
@@ -456,6 +469,7 @@ class DifferencingScaler(BaseEstimator, TransformerMixin):
 
     https://stats.stackexchange.com/a/549967
     """
+
     def __init__(self, lag=1, method='diff'):
         self.lag = lag
         self.init_values = None
