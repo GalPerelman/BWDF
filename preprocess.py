@@ -349,6 +349,8 @@ class MovingWindowScaler(BaseEstimator, TransformerMixin):
 
         # Store the shifted statistics
         self.window_stats_ = {'mean': shifted_means, 'std': shifted_stds}
+        # Make sure no zeros in the std - to avoid division by zero z = (x - mu) / std
+        self.window_stats_['std'][self.window_stats_['std'] < 10 ** -6] = 10 ** - 6
 
         return self
 
