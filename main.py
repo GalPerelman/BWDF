@@ -3,7 +3,7 @@ import os
 import random
 import warnings
 
-import matplotlib.pyplot as plt
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import forecast
 from forecast import *
@@ -45,7 +45,6 @@ def run():
     data = prep.data
     forecast.predict_all_dmas(data=data, dates=args.dates, models=models_config, plot=args.plot, export=args.export,
                               export_path=args.export_path)
-    plt.show()
 
 
 if __name__ == "__main__":

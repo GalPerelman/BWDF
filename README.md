@@ -6,21 +6,19 @@ This repository contains the code for the Battle of Water Demand Forecast submis
 First, initiate a Python virtual environment
 The code was developed with Python 3.10.11
 The code was tested with Python 3.8.10
+Other Python version above 3.6 should be fine but were not tested
 
 Open a terminal window in the project directory
-Create new venv by running the command `python3 -m venv <venv name>`</br>
-Activate the venv by `source venv/bin/activate` (for mac) or `venv/Scripts/activate.bat` (for windows)</br>
+Create new venv by running the command:</br>
+`python -m venv <venv name>`</br>
+Activate the venv by:</br>
+`source venv/bin/activate` (for mac) or `venv\Scripts\activate.bat` (for windows)</br>
 
 ##### Install dependencies
 Once the virtual environment is setup and activated,
 Install the dependencies by running the following command:
-`pip install -r requirements.txt`</br>
-
-The `requirement.txt` file includes the packages with the specific versions used to develop the code with Windows OS
-It was found that for other operation systems, packages versions might be different
-An alternative dependencies installation can be done by running:
 `pip install -r requirements_no_versions.txt`</br>
-This command will install the latest version of each package
+Due to the large number of dependencies, the installation might take 10-15 minutes
 
 ##### Run the code
 To run the code and generate a forecast for all the DMAs run `main.py`
