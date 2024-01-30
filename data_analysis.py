@@ -18,7 +18,6 @@ import utils
 
 def weather_features():
     fig, axes = plt.subplots(nrows=len(constants.WEATHER_COLUMNS), figsize=(8, 7))
-
     for i, col in enumerate(constants.WEATHER_COLUMNS):
         axes[i].hist(data[col], bins=50, edgecolor='k', alpha=0.4)
         axes[i].set_ylabel(col, fontsize=9)
@@ -57,12 +56,12 @@ def hourly_distribution(data, columns):
     fig_hist.subplots_adjust(bottom=0.1, top=0.98, left=0.1, right=0.9, hspace=0.1)
 
 
-def correlation_analysis(data, norm_method=''):
+def correlation_analysis(data, norm_method='', norm_param=None):
     data = data.loc[(data.index >= constants.DATES_OF_LATEST_WEEK['start_train'])
                     & (data.index < constants.DATES_OF_LATEST_WEEK['end_test']), constants.DMA_NAMES]
 
     if norm_method:
-        data, scalers = Preprocess.fit_transform(data, columns=constants.DMA_NAMES, method=norm_method)
+        data, scalers = Preprocess.fit_transform(data, columns=constants.DMA_NAMES, method=norm_method, param=norm_param)
 
     fig, axes = plt.subplots(nrows=2, ncols=5, figsize=(10, 5))
     axes = axes.ravel()
@@ -154,19 +153,6 @@ def cluster_dmas():
 
     graphs.plot_time_series(data=df, columns=df.columns)
     graphs.plot_time_series(data=daily, columns=daily.columns)
-
-
-def covid_data():
-    covid = pd.read_csv("resources/covid.csv", index_col=0)
-    covid.index = pd.to_datetime(covid.index, format="%d/%m/%Y", utc=True)
-    covid.index = covid.index.tz_convert(constants.TZ).normalize()
-
-    covid = covid.pivot_table(index=covid.index, columns='region_name', values='total_cases')
-    covid = covid.sum(axis=1)
-    covid.name = 'covid'
-
-    covid.loc[(covid < 0) | (covid > covid.mean() + 3 * covid.std())] = covid.mean()
-    return covid
 
 
 def moving_stat(data, window_size):
@@ -261,8 +247,6 @@ def outliers_analysis(data, method, param, window_size, stuck_threshold):
 
             # Identify outliers
             outliers = (data[column] < data['lower_bound']) | (data[column] > data['upper_bound'])
-
-            # outliers = (df[column] < lower_bound) | (df[column] > upper_bound)
             axes[i, 0].scatter(data[column].index, data[column], c='C0', s=15, alpha=0.6, zorder=5)
             axes[i, 0].scatter(data[column].index[outliers], data[column][outliers], c='red', s=15, alpha=0.6, zorder=5)
 
@@ -345,7 +329,7 @@ if __name__ == "__main__":
     # moving_stat(data, window_size=24)
     # stationary_test(data)
 
-    outliers_analysis(data=loader.inflow, method='z_score', param=3, window_size=24*30*3, stuck_threshold=5)
+    # outliers_analysis(data=loader.inflow, method='z_score', param=3, window_size=24*30*3, stuck_threshold=5)
     # outliers_analysis(data=loader.weather, method='iqr', param=4, window_size=None, stuck_threshold=24)
     # knn_outlier_detection(data[constants.DMA_NAMES])
     # graphs.plot_time_series(loader.inflow, columns=constants.DMA_NAMES, shade_missing=True)
