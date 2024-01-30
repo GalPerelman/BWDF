@@ -53,7 +53,7 @@ class Preprocess:
             self.data['day'] = self.data.index.day
             self.data['hour'] = self.data.index.hour
             # self.data['weekday'] = self.data.index.day_name()
-            self.data['weekday_int'] = (self.data.index.weekday + 1) % 7 + 1
+            self.data['weekday_int'] = self.data.index.weekday
             self.data['week_num'] = self.data.index.strftime('%U').astype(int) + 1
 
         elif self.cyclic_time_features:
@@ -61,8 +61,8 @@ class Preprocess:
             self.data['hour_cos'] = np.cos(self.data.index.hour * (2. * np.pi / 24))
             self.data['day_sin'] = np.sin(self.data.index.day * (2. * np.pi / 31))  # Assuming max 31 days in a month
             self.data['day_cos'] = np.cos(self.data.index.day * (2. * np.pi / 31))
-            self.data['weekday_sin'] = np.sin(((self.data.index.weekday + 1) % 7 + 1) * (2. * np.pi / 7))
-            self.data['weekday_cos'] = np.cos(((self.data.index.weekday + 1) % 7 + 1) * (2. * np.pi / 7))
+            self.data['weekday_sin'] = np.sin(self.data.index.weekday * (2. * np.pi / 7))
+            self.data['weekday_cos'] = np.cos(self.data.index.weekday * (2. * np.pi / 7))
             self.data['month_sin'] = np.sin(self.data.index.month * (2. * np.pi / 12))
             self.data['month_cos'] = np.cos(self.data.index.month * (2. * np.pi / 12))
             self.data['weeknum_sin'] = np.sin((self.data.index.strftime('%U').astype(int) + 1) * (2. * np.pi / 52))
