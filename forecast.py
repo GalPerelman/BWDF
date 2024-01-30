@@ -1,5 +1,4 @@
 import datetime
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -7,12 +6,15 @@ import xgboost as xgb
 from sklearn.ensemble import RandomForestRegressor
 
 import constants
+import evaluation
+import graphs
 import utils
 from ar_model import SARIMAWrap
 from lstm_model import LSTMForecaster
 from preprocess import Preprocess
 from prophet_model import ProphetForecaster
 from multi_series import MultiSeriesForecaster
+from clusters import clusters
 
 
 class Forecast:
@@ -105,7 +107,6 @@ class Forecast:
 
 def folding_forecast(data, dma_name, cols_to_lag, cols_to_move_stat, window_size, cols_to_decompose, norm_method,
                      start_train, start_test, labels_cluster, model, params, horizon=24, folds=7):
-
     pred = pd.DataFrame()
     _data = data.copy(deep=True)
     _data = data.loc[data.index < start_test + datetime.timedelta(hours=horizon * folds)]
@@ -146,8 +147,95 @@ def predict_dma(data, dma_name, model_name, params, start_train, start_test, end
         # only if target label is not lagged, found to be less recommended
         if pred_type == 'multi-step':
             pred = f.predict(model=models[model_name], params=params)
-               
+
         elif pred_type == 'step-ahead':
             pred = f.one_step_loop_predict(model=models[model_name], params=params)
 
     return pred
+
+
+def predict_all_dmas(data, dates, models: dict, plot=False, export=False, export_path=''):
+    results = pd.DataFrame()
+    if plot:
+        fig, axes = plt.subplots(nrows=len(constants.DMA_NAMES), sharex=True, figsize=(10, 8))
+        fig.align_ylabels()
+        plt.subplots_adjust(bottom=0.05, top=0.95, left=0.1, right=0.9, hspace=0.2)
+
+    for i, dma in enumerate(constants.DMA_NAMES):
+        start_train = dates['start_train']
+        start_test = dates['start_test']
+        end_short_pred = start_test + datetime.timedelta(days=1)
+        end_long_pred = start_test + datetime.timedelta(days=7)
+
+        print(f"Predicting {dma[:5]}")
+
+        # predict short term - 24 hours
+        short_model_config = models[dma[:5]]['short']
+        short_model_name = short_model_config['model_name']
+        short_model_params = short_model_config['params']
+        if short_model_name == "multi":
+            clusters_idx = short_model_config["clusters_idx"]
+            label_clusters = clusters[clusters_idx][dma]
+        else:
+            label_clusters = []
+
+        target_lags = short_model_config["lag_target"]
+        lags = {**short_model_config["lags"], **{dma: target_lags}}
+
+        pred_short = predict_dma(data=data, dma_name=dma, model_name=short_model_name, params=short_model_params,
+                                 start_train=start_train, start_test=start_test, end_test=end_short_pred,
+                                 cols_to_lag=lags,
+                                 cols_to_move_stat=short_model_config["cols_to_move_stat"],
+                                 window_size=24, cols_to_decompose=short_model_config["cols_to_decompose"],
+                                 norm_method=short_model_config["norm_method"],
+                                 pred_type="step-ahead", labels_cluster=label_clusters)
+
+        # manually adjustments - DMA A
+        if dma == constants.DMA_NAMES[0] and models["manual_adjustments"][dma]['short']:
+            pred_short.iloc[0] = 0.0505 * pred_short.sum() + 4.85
+
+        # predict long term - 168 hours
+        long_model_config = models[dma[:5]]['long']
+        long_model_name = long_model_config['model_name']
+        long_model_params = long_model_config['params']
+        if long_model_name == "multi":
+            clusters_idx = long_model_config["clusters_idx"]
+            label_clusters = clusters[clusters_idx][dma]
+        else:
+            label_clusters = []
+
+        target_lags = long_model_config["lag_target"]
+        lags = {**long_model_config["lags"], **{dma: target_lags}}
+
+        pred_long = predict_dma(data=data, dma_name=dma, model_name=long_model_name, params=long_model_params,
+                                start_train=start_train, start_test=start_test, end_test=end_long_pred,
+                                cols_to_lag=lags,
+                                cols_to_move_stat=long_model_config["cols_to_move_stat"],
+                                window_size=168, cols_to_decompose=long_model_config["cols_to_decompose"],
+                                norm_method=long_model_config["norm_method"],
+                                pred_type="step-ahead", labels_cluster=label_clusters)
+
+        pred = pd.concat([pred_short, pred_long.iloc[24:]])
+        pred.columns = [dma]
+
+        if plot:
+            try:
+                # for experiments plot true and predicted values
+                y_true = data.loc[(data.index >= start_test) & (data.index < end_long_pred), [dma]]
+                axes[i] = graphs.plot_test(observed=y_true, predicted=pred, ylabel=dma[:5], ax=axes[i])
+                plt.savefig(export_path + ".png")
+            except Exception as e:
+                # for test plot only predicted values
+                axes[i].plot(pred.index, pred[dma])
+                axes[i].grid()
+                axes[i].set_ylabel(f"{dma[:5]}")
+                plt.savefig(export_path + ".png")
+
+        results = pd.concat([results, pred], axis=1)
+
+    if export:
+        _results = results.copy(deep=True)
+        _results.index = results.index.tz_localize(None)
+        _results.reset_index().to_csv(export_path + ".csv", index=False)
+
+    return results
