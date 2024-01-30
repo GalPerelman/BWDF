@@ -27,6 +27,15 @@ To run the code and generate a forecast for all the DMAs run `main.py`
 Example usage to run the first test period
 `python main.py --predict test --models_config models_config_w1.json --test_name w1 --plot true`
 
+The code repository also contains .bat files to run the test periods
+To run the first test (w1) double-click the file `predict_w1.bat`
+
+The run time is expected to be 5-10 minutes
+During the run the code will print to console according to its progress:
+Predicting DMA A
+Predicting DMA B
+...
+
 ##### Arguments
 `predict`          Must be one of `test` or `experiment`</br>
 `models_config`    Path to a json file that defines the models configuration</br>
@@ -34,3 +43,10 @@ Example usage to run the first test period
 `experiment_idx`   Pass only if `predict` argument is `experiment`. The experiment index</br>
 `plot`             true for plot the forecast, false otherwise. default is true</br>
 `export`           true for export forecast to csv, false otherwise. default is true</br>
+
+
+### Output
+The code generates two outputs:
+1) A CSV file with the forecast - should be manually copy and paste to the BWDF template.
+The file is written to the local folder as `forecast-test-<test_name>.csv` or `forecast-experiment-<experiment_idx>.csv` 
+2) Forecast plot - Written to the local folder as `forecast-test-<test_name>.png` or `forecast-experiment-<experiment_idx>.png`
