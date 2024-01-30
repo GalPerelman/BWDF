@@ -1,8 +1,11 @@
+import os
 import pandas as pd
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
 from sklearn.base import BaseEstimator, RegressorMixin
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from keras import backend as K
 from keras.models import Sequential, load_model
@@ -166,32 +169,29 @@ class LSTMForecaster(BaseEstimator, RegressorMixin):
         return forecast
 
 
-def predict_all_dmas(data, start_train, start_test, end_test, cols_to_lag, norm_method):
+def predict_all_dmas(data, start_train, start_test, end_test, cols_to_lag, lag_target, norm_method):
     test_true = data.loc[(data.index >= start_test) & (data.index < end_test)]
     df = pd.DataFrame(index=pd.date_range(start=start_test, end=end_test - datetime.timedelta(hours=1), freq='1H'))
 
     fig, axes = plt.subplots(nrows=len(constants.DMA_NAMES), sharex=True, figsize=(12, 9))
 
     for i, dma in enumerate(constants.DMA_NAMES):
-        temp_data = data.copy()
-        temp_data = utils.drop_other_dmas(temp_data, dma)
-        temp_data, lagged_cols = preprocess.lag_features(temp_data, cols_to_lag=cols_to_lag)
-        standard_cols = constants.WEATHER_COLUMNS + lagged_cols + [dma]
+        # TARGET LAGS MUST BE 0 IN LSTM MODEL
+        _cols_to_lag = {**cols_to_lag, **{dma: lag_target}}
 
         preprocessed = Preprocess.run(data=data.copy(deep=True),
                                       y_label=dma,
                                       start_train=start_train,
                                       start_test=start_test,
                                       end_test=end_test,
-                                      cols_to_lag={'Rainfall depth (mm)': 12, dma: 24},
+                                      cols_to_lag=_cols_to_lag,
                                       cols_to_move_stat=[],
                                       window_size=24,
                                       cols_to_decompose=[],
-                                      norm_method='fixed_window',
+                                      norm_method=norm_method,
                                       labels_cluster=[])
 
         x_train, y_train, x_test, y_test, scalers, norm_cols, y_labels = preprocessed
-
         look_back = 24
         lstm = LSTMForecaster(look_back=look_back, epochs=10, batch_size=24)
         lstm.fit(x_train, y_train)
@@ -202,7 +202,11 @@ def predict_all_dmas(data, start_train, start_test, end_test, cols_to_lag, norm_
 
         period_dates = pd.date_range(start=start_test, end=end_test - datetime.timedelta(hours=1), freq='1H')
         forecast = pd.DataFrame({dma: pred}, index=period_dates)
-        axes[i] = graphs.plot_test(test_true[[dma]], forecast, ax=axes[i])
+        try:
+            axes[i] = graphs.plot_test(test_true[[dma]], forecast, ax=axes[i])
+        except ValueError:
+            axes[i].plot(forecast.index, forecast[dma])
+            axes[i].grid()
         axes[i].set_ylabel(dma[:5])
 
     fig.align_ylabels()
@@ -223,5 +227,5 @@ if __name__ == "__main__":
     end_test = start_test + datetime.timedelta(hours=168)
     cols_to_lag = {'Air humidity (%)': 12, 'Rainfall depth (mm)': 12, 'Air temperature (°C)': 12, 'Windspeed (km/h)': 12}
     predict_all_dmas(data, start_train=start_train, start_test=start_test, end_test=end_test, cols_to_lag=cols_to_lag,
-                     norm_method='power')
+                     lag_target=0, norm_method='power')
     plt.show()
