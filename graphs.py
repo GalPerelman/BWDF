@@ -1,12 +1,10 @@
 import math
-import ast
 import glob
 import os
 
 import pandas as pd
 import numpy as np
 import warnings
-import matplotlib as mpl
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -20,6 +18,8 @@ from plotly.subplots import make_subplots
 import constants
 import evaluation
 import utils
+from data_loader import Loader
+from preprocess import Preprocess
 
 warnings.filterwarnings("ignore")
 pd.set_option('display.max_columns', 500)
@@ -73,7 +73,8 @@ def plot_time_series(data, columns, downscale=0, shade_missing: bool = False, te
 
 
 def visualize_data_completion(raw_data, completed_data, columns):
-    axes = plot_time_series(data=raw_data, columns=columns, downscale=0, shade_missing=True, test_periods=True)
+    fig = plot_time_series(data=raw_data, columns=columns, downscale=0, shade_missing=True, test_periods=True)
+    axes = fig.axes
 
     for i, col in enumerate(columns):
         nan_idx = raw_data[raw_data[col].isna()].index
@@ -231,7 +232,6 @@ def select_models(df, subplots_col, hover_cols, colors_col, markers_col, x_col, 
 
     _hover_cols = columns + hover_cols
     hover_cols = list(set(_hover_cols) & set(df.columns))
-
     index_map = {value: index for index, value in enumerate(_hover_cols)}
     hover_cols = sorted(hover_cols, key=lambda x: index_map[x])
 
@@ -369,8 +369,8 @@ def analyze_hyperparameters(dir_path, dma_idx, horizon, dates_idx, models):
 
 
 def plot_all_experiments(p):
-    df = utils.collect_experiments("exp_output/v3", p=p, dmas=[_ for _ in range(10)], horizon='short',
-                                   dates_idx=[0, 2, 3, 4],
+    df = utils.collect_experiments("experiment_output/v3", p=p, dmas=[_ for _ in range(10)], horizon='short',
+                                   dates_idx=[0, 1, 2, 3, 4],
                                    models=['multi', 'xgb', 'lstm', 'prophet', 'patch', 'sarima'])
 
     select_models(df=df,
@@ -382,8 +382,8 @@ def plot_all_experiments(p):
                   y_col='i2',
                   file_name='short')
 
-    df = utils.collect_experiments("exp_output/v3", p=p, dmas=[_ for _ in range(10)], horizon='long',
-                                   dates_idx=[0, 2, 3, 4],
+    df = utils.collect_experiments("experiment_output/v3", p=p, dmas=[_ for _ in range(10)], horizon='long',
+                                   dates_idx=[0, 1, 2, 3, 4],
                                    models=['multi', 'xgb', 'lstm', 'prophet', 'patch', 'sarima'])
 
     select_models(df=df,
@@ -398,10 +398,7 @@ def plot_all_experiments(p):
 
 def analyze_cv(cv_path, ranking_cols):
     df = pd.read_csv(cv_path)
-    # df = df[df[ranking_cols[0]] <= 100]
-    # df = df[df[ranking_cols[0]] <= df['i1'].mean() + df['i1'].std() * 5]
-
-    fig, axes = plt.subplots(nrows=len(ranking_cols), figsize=(10, 3*len(ranking_cols)))
+    fig, axes = plt.subplots(nrows=len(ranking_cols), figsize=(10, 3 * len(ranking_cols)))
     axes = np.atleast_2d(axes).ravel()
 
     category_color_map = {str(category): MODELS_COLORS[label] for
@@ -414,7 +411,7 @@ def analyze_cv(cv_path, ranking_cols):
         axes[i].scatter(x=means['model_idx'], y=means[col], color='black', marker='o', s=10, zorder=10)
 
         axes[i].grid()
-        axes[i].set_ylim(axes[i].get_ylim()[0], axes[i].get_ylim()[1] + 1)
+        axes[i].set_ylim(max(0, axes[i].get_ylim()[0]), min(axes[i].get_ylim()[1] + 1, 10))
 
         categories = df['model_idx'].unique()
         for j, category in enumerate(categories):
@@ -427,18 +424,49 @@ def analyze_cv(cv_path, ranking_cols):
 
 def analyze_all_cv():
     for dma in constants.DMA_NAMES:
-        analyze_cv(f"experiments_analysis/cv/cv_dma-{dma[:5]}_short.csv", ranking_cols=['i1', 'i2'])
-        analyze_cv(f"experiments_analysis/cv/cv_dma-{dma[:5]}_long.csv", ranking_cols=['i3'])
+        print(dma)
+        analyze_cv(f"experiments_analysis/cv_v1/cv_dma-{dma[:5]}_short_v1.csv", ranking_cols=['i1', 'i2'])
+        analyze_cv(f"experiments_analysis/cv_v1/cv_dma-{dma[:5]}_long_v1.csv", ranking_cols=['i3', 'mape'])
+
+
+def typical_weeks(columns, pred=None):
+    # load historic data
+    loader = Loader()
+    data = Preprocess(loader.inflow, loader.weather, cyclic_time_features=False, n_neighbors=3).data
+    visualize_data_completion(raw_data=loader.inflow, completed_data=data, columns=constants.DMA_NAMES)
+
+    fig, axes = plt.subplots(nrows=len(columns), sharex=True, figsize=(10, 8))
+    data['week_since_start'] = ((data.index - data.index.min()).days / 7).astype(int)
+    data['hour_of_week'] = data.index.dayofweek * 24 + data.index.hour
+
+    mondays = data.index[(data.index.weekday == 0) & (data.index.hour == 0)]
+    for i, col in enumerate(data[columns].columns):
+        for monday in mondays[-15:]:
+            end_of_week = monday + pd.Timedelta(hours=168)
+            weekly_data = data[monday:end_of_week]
+            axes[i].plot(range(len(weekly_data)), weekly_data[col], c='C0', alpha=0.5)
+
+        if pred is not None:
+            axes[i].plot(range(len(pred)), pred[col], c='k')
+
+        axes[i].set_ylabel(textwrap.fill(f"{col}", 10))
+        axes[i].grid()
+
+    fig.align_ylabels()
+    fig.subplots_adjust(bottom=0.08, top=0.98, left=0.1, right=0.9, hspace=0.2)
+    fig.text(0.5, 0.02, 'Hour of the day', ha='center')
 
 
 if __name__ == "__main__":
     # plot_pareto()
-    # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[0, 1, 2, 3],
-    #                         models=['multi', 'xgb', 'lstm', 'prophet'], p=5)
     # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[0, 3, 4], models=['multi'])
     # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[3], models=['multi'])
     # analyze_hyperparameters("exp_output/v3", dma_idx=0, horizon="short", dates_idx=[4], models=['multi'])
-    # plot_all_experiments(p=0.2)
-    analyze_all_cv()
+
+    # plot_all_experiments(p=0.1)
+    # analyze_all_cv()
+
+    # pred = pd.read_csv('forecast-test-w1.csv', index_col=0)
+    # typical_weeks(columns=constants.DMA_NAMES, pred=pred)
 
     plt.show()
