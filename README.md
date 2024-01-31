@@ -21,18 +21,19 @@ Install the dependencies by running the following command:
 Due to the large number of dependencies, the installation might take 10-15 minutes
 
 ##### Run the code
-To run the code and generate a forecast for all the DMAs run `main.py`
-Example usage to run the first test period
+To run the code and generate a forecast for all the DMAs `main.py` should be run</br>
+Example usage to run the first test period</br>
 `python main.py --predict test --models_config models_config_w1.json --test_name w1 --plot true`
 
-The code repository also contains .bat files to run the test periods
+Alternative wa to run w1 prediction:</br>
+The repository also contains a `.bat` file to run the w1 test period
 To run the first test (w1) double-click the file `predict_w1.bat`
 
 The run time is expected to be 5-10 minutes
-During the run the code will print to console according to its progress:
-Predicting DMA A
-Predicting DMA B
-...
+During the run the code will print to console according to its progress:</br>
+Predicting DMA A</br>
+Predicting DMA B</br>
+...</br>
 
 ##### Arguments
 `predict`          Must be one of `test` or `experiment`</br>
@@ -45,6 +46,6 @@ Predicting DMA B
 
 ### Output
 The code generates two outputs:
-1) A CSV file with the forecast - should be manually copy and paste to the BWDF template.
+1) A CSV file with the forecast - should be manually copy and paste to the BWDF template.</br>
 The file is written to the local folder as `forecast-test-<test_name>.csv` or `forecast-experiment-<experiment_idx>.csv` 
 2) Forecast plot - Written to the local folder as `forecast-test-<test_name>.png` or `forecast-experiment-<experiment_idx>.png`
