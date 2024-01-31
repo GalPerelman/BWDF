@@ -152,7 +152,7 @@ def predict_dma(data, dma_name, model_name, params, start_train, start_test, end
         elif pred_type == 'step-ahead':
             pred = f.one_step_loop_predict(model=models[model_name], params=params)
 
-    if model_name in ["RNN", "StemGNN", "TimesNet", "MLP", "GRU"]:
+    if model_name in ["RNN", "StemGNN", "TimesNet", "MLP", "GRU", "NHITS"]:
         train, test = Preprocess.train_test_split(data, start_train, start_test, end_test)
         nn = NNForecaster(dma=dma_name, dmas_cluster=labels_cluster, model_name=model_name, params=params,)
         nn.fit(x=train, y=test)
