@@ -110,7 +110,7 @@
                     "Air humidity (%)": 6
                 },
                 "lag_target": 12,
-                "clusters_idx": 0
+                "clusters_idx": null
             },
       "long":{
                 "model_idx": 28,
@@ -141,7 +141,7 @@
                     "Air humidity (%)": 6
                 },
                 "lag_target": 24,
-                "clusters_idx": 0
+                "clusters_idx": null
             }
    },
    "DMA C":{
@@ -172,7 +172,7 @@
                     "Air humidity (%)": 0
                 },
                 "lag_target": 24,
-                "clusters_idx": 0
+                "clusters_idx": null
             },
       "long":{
                 "model_idx": 12,
@@ -232,7 +232,7 @@
                     "Air humidity (%)": 0
                 },
                 "lag_target": 12,
-                "clusters_idx": 0
+                "clusters_idx": null
             },
       "long":{
                 "model_idx": 26,
@@ -256,7 +256,7 @@
                     "Air humidity (%)": 6
                 },
                 "lag_target": 24,
-                "clusters_idx": 0
+                "clusters_idx": null
             }
    },
    "DMA E":{
@@ -282,7 +282,7 @@
                     "Air humidity (%)": 6
                 },
                 "lag_target": 24,
-                "clusters_idx": 0
+                "clusters_idx": null
             },
       "long":{
                 "model_idx": 28,
@@ -306,7 +306,7 @@
                     "Air humidity (%)": 6
                 },
                 "lag_target": 12,
-                "clusters_idx": 0
+                "clusters_idx": null
             }
    },
    "DMA F":{
@@ -334,7 +334,7 @@
                     "Air humidity (%)": 0
                 },
                 "lag_target": 12,
-                "clusters_idx": 0
+                "clusters_idx": null
             },
       "long":{
                 "model_idx": 27,
@@ -358,7 +358,7 @@
                     "Air humidity (%)": 0
                 },
                 "lag_target": 24,
-                "clusters_idx": 0
+                "clusters_idx": null
             }
    },
    "DMA G":{
@@ -446,7 +446,7 @@
                     "Air humidity (%)": 6
                 },
                 "lag_target": 24,
-                "clusters_idx": 0
+                "clusters_idx": null
             },
       "long":{
                 "model_idx": 28,
@@ -475,7 +475,7 @@
                     "Air humidity (%)": 0
                 },
                 "lag_target": 24,
-                "clusters_idx": 0
+                "clusters_idx": null
             }
    },
    "DMA I":{
@@ -506,7 +506,7 @@
                     "Air humidity (%)": 6
                 },
                 "lag_target": 12,
-                "clusters_idx": 0
+                "clusters_idx": null
             },
       "long":{
                 "model_idx": 11,

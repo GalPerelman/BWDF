@@ -15,6 +15,7 @@ from preprocess import Preprocess
 from prophet_model import ProphetForecaster
 from multi_series import MultiSeriesForecaster
 from clusters import clusters
+from nn_models import NNForecaster
 
 
 class Forecast:
@@ -151,6 +152,13 @@ def predict_dma(data, dma_name, model_name, params, start_train, start_test, end
         elif pred_type == 'step-ahead':
             pred = f.one_step_loop_predict(model=models[model_name], params=params)
 
+    if model_name in ["RNN", "StemGNN", "TimesNet", "MLP", "GRU"]:
+        train, test = Preprocess.train_test_split(data, start_train, start_test, end_test)
+        nn = NNForecaster(dma=dma_name, dmas_cluster=labels_cluster, model_name=model_name, params=params,)
+        nn.fit(x=train, y=test)
+        pred = nn.predict()
+        pred = f.format_forecast(pred)
+
     return pred
 
 
@@ -173,9 +181,8 @@ def predict_all_dmas(data, dates, models: dict, plot=False, export=False, export
         short_model_config = models[dma[:5]]['short']
         short_model_name = short_model_config['model_name']
         short_model_params = short_model_config['params']
-        if short_model_name == "multi":
-            clusters_idx = short_model_config["clusters_idx"]
-            label_clusters = clusters[clusters_idx][dma]
+        if short_model_config["clusters_idx"] is not None:
+            label_clusters = clusters[short_model_config["clusters_idx"]][dma]
         else:
             label_clusters = []
 
