@@ -99,6 +99,10 @@ def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, co
                           _window_size=window_size, _cols_to_decompose=_cols_to_decompose, _norm_method=norm_method,
                           _labels_cluster=labels_cluster)
 
+    # manually adjustments - DMA A
+    if dma_name == constants.DMA_NAMES[0] and horizon == 'short':
+        predictions.iloc[0] = 0.0505 * predictions.sum() + 4.85
+
     predictions.columns = [dma_name]
     run_time = time.time() - t0
     try:
@@ -136,6 +140,8 @@ def predict_dma(data, dma_name, model_name, model_params, dates_idx, horizon, co
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--inflow_data_file', type=str, required=True)
+    parser.add_argument('--weather_data_file', type=str, required=True)
     parser.add_argument('--do', type=str, required=True)
     parser.add_argument('--search_params', type=int, required=True)
     parser.add_argument('--dma_idx', type=int, required=False)
@@ -214,7 +220,7 @@ def generate_filename(args):
 def run_experiment(args):
     loader = Loader(inflow_data_file=args.inflow_data_file, weather_data_file=args.weather_data_file)
     p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3,
-                   outliers_config=args.outoutliers_config)
+                   outliers_config=args.outliers_config)
     data = p.data
 
     results = pd.DataFrame()
@@ -306,7 +312,7 @@ def run_experiment(args):
 def test_experiment(args, n_tests=20):
     loader = Loader(inflow_data_file=args.inflow_data_file, weather_data_file=args.weather_data_file)
     p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3,
-                   outliers_config=args.outoutliers_config)
+                   outliers_config=args.outliers_config)
     data = p.data
 
     results = pd.DataFrame()
@@ -356,7 +362,7 @@ def run_hyperparam_opt(args):
 def random_search(args, n=5000):
     loader = Loader(inflow_data_file=args.inflow_data_file, weather_data_file=args.weather_data_file)
     p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3,
-                   outliers_config=args.outoutliers_config)
+                   outliers_config=args.outliers_config)
     data = p.data
 
     results = pd.DataFrame()
@@ -435,8 +441,9 @@ def random_search(args, n=5000):
 
 
 def search_nixtla_models(args):
-    loader = Loader()
-    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
+    loader = Loader(inflow_data_file=args.inflow_data_file, weather_data_file=args.weather_data_file)
+    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3,
+                   outliers_config=args.outliers_config)
     data = p.data
 
     output_dir = utils.validate_dir_path(args.output_dir)
