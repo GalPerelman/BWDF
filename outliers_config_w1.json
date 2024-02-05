@@ -1,0 +1,18 @@
+{
+  "outliers_params": {
+     "DMA A (L/s)": {"outliers_method": "iqr", "outliers_param": 3.5, "window_size": null, "stuck_threshold": 5},
+     "DMA B (L/s)": {"outliers_method": "iqr", "outliers_param": 3.5, "window_size": null, "stuck_threshold": 5},
+     "DMA C (L/s)": {"outliers_method": "iqr", "outliers_param": 3.5, "window_size": null, "stuck_threshold": 5},
+     "DMA D (L/s)": {"outliers_method": "iqr", "outliers_param": 3.5, "window_size": null, "stuck_threshold": 5},
+     "DMA E (L/s)": {"outliers_method": "iqr", "outliers_param": 3.5, "window_size": null, "stuck_threshold": 5},
+     "DMA F (L/s)": {"outliers_method": "iqr", "outliers_param": 3.5, "window_size": null, "stuck_threshold": 5},
+     "DMA G (L/s)": {"outliers_method": "iqr", "outliers_param": 3.5, "window_size": null, "stuck_threshold": 5},
+     "DMA H (L/s)": {"outliers_method": "iqr", "outliers_param": 3.5, "window_size": null, "stuck_threshold": 5},
+     "DMA I (L/s)": {"outliers_method": "iqr", "outliers_param": 3.5, "window_size": null, "stuck_threshold": 5},
+     "DMA J (L/s)": {"outliers_method": "iqr", "outliers_param": 3.5, "window_size": null, "stuck_threshold": 5},
+     "Rainfall depth (mm)": {"outliers_method": "", "outliers_param": null, "window_size": null, "stuck_threshold": null},
+     "Air temperature (°C)": {"outliers_method": "", "outliers_param": null, "window_size": null, "stuck_threshold": 5},
+     "Windspeed (km/h)": {"outliers_method": "", "outliers_param": null, "window_size": null, "stuck_threshold": 5},
+     "Air humidity (%)": {"outliers_method": "", "outliers_param": null, "window_size": null, "stuck_threshold": 5}
+   }
+}

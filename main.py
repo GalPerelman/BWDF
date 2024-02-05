@@ -27,10 +27,12 @@ def validate_input(args):
 
 def run():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--inflow_data_file', type=str, required=True)
+    parser.add_argument('--weather_data_file', type=str, required=True)
     parser.add_argument('--predict', type=str, required=True, choices=['experiment', 'test'])
     parser.add_argument('--models_config', type=str, required=True)
     parser.add_argument('--test_name', type=str, required=False, choices=['w1', 'w2', 'w3', 'w4'])
-    parser.add_argument('--experiment_idx', type=int, required=False, choices=[0, 1, 2, 3, 4])
+    parser.add_argument('--experiment_idx', type=int, required=False, choices=[0, 1, 2, 3, 4, 5])
     parser.add_argument('--plot', type=bool, required=False, default=True)
     parser.add_argument('--export', type=bool, required=False, default=True)
     args = parser.parse_args()
@@ -38,7 +40,7 @@ def run():
     args = validate_input(args)
     models_config = utils.read_json(args.models_config)
 
-    loader = Loader()
+    loader = Loader(inflow_data_file=args.inflow_data_file, weather_data_file=args.weather_data_file)
     prep = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3,
                       outliers_config=models_config)
 

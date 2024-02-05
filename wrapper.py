@@ -150,11 +150,16 @@ def parse_args():
 
     parser.add_argument('--move_stats', type=int, required=False)
     parser.add_argument('--decompose_target', type=int, required=False)
+
+    parser.add_argument('--outliers_config_path', type=str, required=True)
     parser.add_argument('--output_dir', type=str, required=False)
 
     parser.add_argument('--cv_candidates_path', type=str, required=False)
 
     args = parser.parse_args()
+
+    args.outliers_config = utils.read_json(args.outliers_config_path)
+
     if args.do == 'experiment':
         run_experiment(args)
     elif args.do == 'test_experiment':
@@ -207,8 +212,9 @@ def generate_filename(args):
 
 
 def run_experiment(args):
-    loader = Loader()
-    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
+    loader = Loader(inflow_data_file=args.inflow_data_file, weather_data_file=args.weather_data_file)
+    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3,
+                   outliers_config=args.outoutliers_config)
     data = p.data
 
     results = pd.DataFrame()
@@ -245,54 +251,62 @@ def run_experiment(args):
     for params_cfg in parameter_sets:
         for norm in args.norm_methods:
             for wl in args.weather_lags:
-                for tl in args.target_lags:
-                    for ms in include_moving_stats_cols:
-                        for dt in _decompose_target:
-                            for c_idx in args.clusters_idx:
-                                cols_to_lag = {'Rainfall depth (mm)': wl,
-                                               'Air temperature (°C)': wl,
-                                               'Windspeed (km/h)': wl,
-                                               'Air humidity (%)': wl,
-                                               }
+                for weather_cols in ['all', 'reduced']:
+                    for tl in args.target_lags:
+                        for ms in include_moving_stats_cols:
+                            for dt in _decompose_target:
+                                for c_idx in args.clusters_idx:
 
-                                cols_to_move_stats = constants.WEATHER_COLUMNS if ms else []
-                                try:
-                                    res = predict_dma(data=data,
-                                                      dma_name=constants.DMA_NAMES[args.dma_idx],
-                                                      model_name=args.model_name,
-                                                      model_params=params_cfg,
-                                                      dates_idx=args.dates_idx,
-                                                      horizon=args.horizon,
-                                                      cols_to_lag=cols_to_lag,
-                                                      lag_target=tl,
-                                                      cols_to_move_stat=cols_to_move_stats,
-                                                      window_size=window_size,
-                                                      cols_to_decompose=[],
-                                                      decompose_target=dt,
-                                                      norm_method=norm,
-                                                      clusters_idx=c_idx
-                                                      )
+                                    if weather_cols == 'all':
+                                        cols_to_lag = {'Rainfall depth (mm)': wl,
+                                                       'Air temperature (°C)': wl,
+                                                       'Windspeed (km/h)': wl,
+                                                       'Air humidity (%)': wl,
+                                                       }
+                                    else:
+                                        cols_to_lag = {'Air temperature (°C)': wl,
+                                                       'Air humidity (%)': wl,
+                                                       }
 
-                                    results = pd.concat([results, res])
-                                    results.to_csv(os.path.join(output_dir, output_file))
-                                    del res  # Free up memory
-                                    gc.collect()  # Collect garbage after each combination of parameters
-                                except Exception as e:
-                                    logger.debug(
-                                        f"args: {vars(args)}\nparams: {params_cfg}\ncols_to_lag: {cols_to_lag}"
-                                        f"\nlag_target: {tl}\ncols_to_move_stat: {cols_to_move_stats}\n"
-                                        f"window_size: {window_size}\nnorm_method: {norm}\nclusters_idx: {c_idx}")
-                                    logger.debug(str(e))
-                                    logging.error("Exception occurred", exc_info=True)
+                                    cols_to_move_stats = constants.WEATHER_COLUMNS if ms else []
+                                    try:
+                                        res = predict_dma(data=data,
+                                                          dma_name=constants.DMA_NAMES[args.dma_idx],
+                                                          model_name=args.model_name,
+                                                          model_params=params_cfg,
+                                                          dates_idx=args.dates_idx,
+                                                          horizon=args.horizon,
+                                                          cols_to_lag=cols_to_lag,
+                                                          lag_target=tl,
+                                                          cols_to_move_stat=cols_to_move_stats,
+                                                          window_size=window_size,
+                                                          cols_to_decompose=[],
+                                                          decompose_target=dt,
+                                                          norm_method=norm,
+                                                          clusters_idx=c_idx
+                                                          )
 
-                                    # Alternatively, you can format the traceback yourself
-                                    tb_info = traceback.format_exc()
-                                    logging.error(f"Traceback info: {tb_info}")
+                                        results = pd.concat([results, res])
+                                        results.to_csv(os.path.join(output_dir, output_file))
+                                        del res  # Free up memory
+                                        gc.collect()  # Collect garbage after each combination of parameters
+                                    except Exception as e:
+                                        logger.debug(
+                                            f"args: {vars(args)}\nparams: {params_cfg}\ncols_to_lag: {cols_to_lag}"
+                                            f"\nlag_target: {tl}\ncols_to_move_stat: {cols_to_move_stats}\n"
+                                            f"window_size: {window_size}\nnorm_method: {norm}\nclusters_idx: {c_idx}")
+                                        logger.debug(str(e))
+                                        logging.error("Exception occurred", exc_info=True)
+
+                                        # Alternatively, you can format the traceback yourself
+                                        tb_info = traceback.format_exc()
+                                        logging.error(f"Traceback info: {tb_info}")
 
 
 def test_experiment(args, n_tests=20):
-    loader = Loader()
-    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
+    loader = Loader(inflow_data_file=args.inflow_data_file, weather_data_file=args.weather_data_file)
+    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3,
+                   outliers_config=args.outoutliers_config)
     data = p.data
 
     results = pd.DataFrame()
@@ -340,8 +354,9 @@ def run_hyperparam_opt(args):
 
 
 def random_search(args, n=5000):
-    loader = Loader()
-    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
+    loader = Loader(inflow_data_file=args.inflow_data_file, weather_data_file=args.weather_data_file)
+    p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3,
+                   outliers_config=args.outoutliers_config)
     data = p.data
 
     results = pd.DataFrame()
@@ -371,15 +386,21 @@ def random_search(args, n=5000):
         params_cfg = parameter_sets[np.random.randint(low=0, high=len(parameter_sets))]
         norm = args.norm_methods[np.random.randint(low=0, high=len(args.norm_methods))]
         wl = args.weather_lags[np.random.randint(low=0, high=len(args.weather_lags))]
+        weather_cols = random.choice(['all', 'reduced'])
         tl = args.target_lags[np.random.randint(low=0, high=len(args.target_lags))]
         dt = bool(random.getrandbits(1))
         clusters_idx = clusters_set[np.random.randint(low=0, high=len(clusters_set))]
 
-        cols_to_lag = {'Rainfall depth (mm)': wl,
-                       'Air temperature (°C)': wl,
-                       'Windspeed (km/h)': wl,
-                       'Air humidity (%)': wl,
-                       }
+        if weather_cols == 'all':
+            cols_to_lag = {'Rainfall depth (mm)': wl,
+                           'Air temperature (°C)': wl,
+                           'Windspeed (km/h)': wl,
+                           'Air humidity (%)': wl,
+                           }
+        else:
+            cols_to_lag = {'Air temperature (°C)': wl,
+                           'Air humidity (%)': wl,
+                           }
 
         try:
             res = predict_dma(data=data,
