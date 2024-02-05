@@ -12,6 +12,8 @@ for a in ${dma[@]}; do
 	  for c in ${dates_idx[@]}; do
 	    for d in ${horizon[@]}; do
           bash ./create_tmp_empty.sh "python ./wrapper.py
+                                      --inflow_data_file Inflow_Data.xlsx
+                                      --weather_data_file Weather_Data_2.xlsx
                                       --do experiment
                                       --search_params 1
                                       --dma_idx $a
@@ -23,6 +25,7 @@ for a in ${dma[@]}; do
                                       --weather_lags 0 6
                                       --move_stats $move_stats
                                       --decompose_target $decompose_target
+                                      --outliers_config_path outliers_config_w2.json
                                       --output_dir exp_output"
 
 	    done
