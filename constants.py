@@ -125,10 +125,24 @@ DATES_JULY = {
     'end_test': TZ.localize(datetime.datetime(2021, 8, 1, 0, 0))
 }
 
+LATEST_WEEK_W2 = {
+    'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
+    'start_test': TZ.localize(datetime.datetime(2022, 10, 24, 0, 0)),
+    'end_test': TZ.localize(datetime.datetime(2022, 10, 31, 0, 0))
+}
+
+PREV_YEAR_W2 = {
+    'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
+    'start_test': TZ.localize(datetime.datetime(2021, 10, 31, 0, 0)),
+    'end_test': TZ.localize(datetime.datetime(2021, 11, 7, 0, 0))
+}
+
 EXPERIMENTS_DATES = {
     0: DATES_TO_TEST_EXTREME_RAINFALL,
     1: DATES_TO_TEST_NOV_HOLIDAYS,
     2: DATES_TO_TEST_MISSING_WEATHER,
     3: DATES_OF_LATEST_WEEK,
-    4: DATES_JULY
+    4: DATES_JULY,
+    5: LATEST_WEEK_W2,
+    6: PREV_YEAR_W2
 }

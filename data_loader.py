@@ -11,9 +11,9 @@ pd.set_option('display.width', 1000)
 
 
 class Loader:
-    def __init__(self):
-        self.inflow = self.load_excel(os.path.join(constants.RESOURCES, "InflowData_1.xlsx"))
-        self.weather = self.load_excel(os.path.join(constants.RESOURCES, "WeatherData_1.xlsx"))
+    def __init__(self, inflow_data_file, weather_data_file):
+        self.inflow = self.load_excel(os.path.join(constants.RESOURCES, inflow_data_file))
+        self.weather = self.load_excel(os.path.join(constants.RESOURCES, weather_data_file))
 
     @staticmethod
     def load_excel(file_path: str):
