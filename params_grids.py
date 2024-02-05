@@ -99,7 +99,7 @@ grids = {
                     'bootstrap': [True],
                     "max_depth": [3, 5, 10],
                     "learning_rate": [0.01, 0.05, 0.1],
-                    "n_estimators": [50, 100, 200, 500],
+                    "n_estimators": [100, 200, 500],
                     "reg_alpha": [0, 0.01, 0.1, 0.5],
                     "reg_lambda": [0, 0.01, 0.1, 5],
                     "min_sample_leaf": [2],
@@ -115,7 +115,7 @@ grids = {
             'params':
                 {
                     "input_size": [1, 2],
-                    "encoder_layers": [2,4],
+                    "encoder_layers": [2, 4],
                     "learning_rate": [0.0001, 0.01],
                     "n_heads": [8, 16, 24],
                     "patch_len": [8, 16, 24],
