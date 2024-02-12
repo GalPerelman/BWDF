@@ -161,6 +161,9 @@ def parse_args():
     parser.add_argument('--output_dir', type=str, required=False)
 
     parser.add_argument('--cv_candidates_path', type=str, required=False)
+    parser.add_argument('--cv_start_year', type=int, required=False)
+    parser.add_argument('--cv_start_month', type=int, required=False)
+    parser.add_argument('--cv_start_day', type=int, required=False)
 
     args = parser.parse_args()
 
@@ -508,10 +511,15 @@ def search_nixtla_models(args):
             results[dma_name].to_csv(os.path.join(output_dir, output_files[dma_name]))
 
 
-def run_cv(args):
-    start = constants.TZ.localize(datetime.datetime(2022, 7, 4, 0, 0))
-    cv = CV(candidates_path=args.cv_candidates_path,
-            folding_start_date=start, repeats=14, hours_step_size=24, files_suffix="v1")
+def run_cv(args, files_suffix=""):
+    start = constants.TZ.localize(datetime.datetime(args.cv_start_year,
+                                                    args.cv_start_month,
+                                                    args.cv_start_day,
+                                                    0, 0))
+    cv = CV(inflow_data_file=args.inflow_data_file, weather_data_file=args.weather_data_file,
+            outliers_config=args.outliers_config, candidates_path=args.cv_candidates_path,
+            folding_start_date=start, repeats=14, hours_step_size=24, files_suffix=files_suffix,
+            output_dir=args.output_dir)
     cv.run_single_experiment(constants.DMA_NAMES[args.dma_idx], args.horizon)
 
 

@@ -14,5 +14,18 @@
      "Air temperature (°C)": {"outliers_method": "", "outliers_param": null, "window_size": null, "stuck_threshold": 5},
      "Windspeed (km/h)": {"outliers_method": "", "outliers_param": null, "window_size": null, "stuck_threshold": 5},
      "Air humidity (%)": {"outliers_method": "", "outliers_param": null, "window_size": null, "stuck_threshold": 5}
-   }
+   },
+
+   "manual_adjustments": {
+     "DMA A (L/s)": {"short": true, "long": false},
+     "DMA B (L/s)": {"short": false, "long": false},
+     "DMA C (L/s)": {"short": false, "long": false},
+     "DMA D (L/s)": {"short": false, "long": false},
+     "DMA E (L/s)": {"short": false, "long": false},
+     "DMA F (L/s)": {"short": false, "long": false},
+     "DMA G (L/s)": {"short": false, "long": false},
+     "DMA H (L/s)": {"short": false, "long": false},
+     "DMA I (L/s)": {"short": false, "long": false},
+     "DMA J (L/s)": {"short": false, "long": false}
+  }
 }

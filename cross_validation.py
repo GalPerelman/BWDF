@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import pandas as pd
 
@@ -12,22 +13,28 @@ from preprocess import Preprocess
 
 
 class CV:
-    def __init__(self, candidates_path, folding_start_date, repeats, hours_step_size, files_suffix):
+    def __init__(self, inflow_data_file, weather_data_file, outliers_config,
+                 candidates_path, folding_start_date, repeats, hours_step_size, files_suffix, output_dir):
+        self.inflow_data_file = inflow_data_file
+        self.weather_data_file = weather_data_file
+        self.outliers_config = outliers_config
         self.candidates_path = candidates_path
         self.folding_start_date = folding_start_date
         self.repeats = repeats
         self.hours_step_size = hours_step_size
         self.files_suffix = files_suffix
+        self.output_dir = utils.validate_dir_path(output_dir)
 
         self.candidates = utils.read_json(self.candidates_path)
         self.raw_data = self.load_data()
 
         self.window_size = {'short': 24, 'long': 168}
 
-    @staticmethod
-    def load_data():
-        loader = Loader()
-        p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3)
+    def load_data(self):
+        loader = Loader(inflow_data_file=self.inflow_data_file, weather_data_file=self.weather_data_file)
+        p = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3,
+                       outliers_config=self.outliers_config)
+
         return p.data
 
     def folding_pred(self, dma, horizon, model_config, model_idx):
@@ -60,6 +67,11 @@ class CV:
                                         labels_cluster=label_clusters,
                                         pred_type="step-ahead"
                                         )
+
+            # manually adjustments - DMA A
+            if (dma == constants.DMA_NAMES[0] and horizon == 'short'
+                    and self.outliers_config["manual_adjustments"][dma]['short']):
+                pred.iloc[0] = 0.0505 * pred.sum() + 4.85
 
             pred.columns = [dma]
 
@@ -95,7 +107,7 @@ class CV:
         for model_idx, model_config in enumerate(self.candidates[dma][horizon]):
             fold_results = self.folding_pred(dma, horizon, model_config, model_idx)
             all_result = pd.concat([all_result, fold_results])
-            all_result.to_csv(f"cv_dma-{dma[:5]}_{horizon}_{self.files_suffix}.csv")
+            all_result.to_csv(os.path.join(self.output_dir, f"cv_dma-{dma[:5]}_{horizon}_{self.files_suffix}.csv"))
 
     def run_all(self, horizon):
         for dma in constants.DMA_NAMES:
