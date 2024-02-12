@@ -5,6 +5,7 @@ import os
 import json
 
 import numpy as np
+import pandas.errors
 import pytz
 import pandas as pd
 import datetime
@@ -171,7 +172,7 @@ def collect_experiments(dir_path, p, dmas, horizon, dates_idx, models, abs_n=Non
             n = abs_n
         return group.nsmallest(n, 'rank')
 
-    df = df.drop_duplicates()
+    df = df.drop_duplicates(subset=['dma', 'dates_idx', 'model_name'] + ranking_cols)
     print(df.shape, df['run_time'].mean())
     df = df.groupby(['dma', 'model_name', 'dates_idx'], group_keys=False).apply(
         lambda x: select_smallest_n(x, n_percent=p, ranking_cols=ranking_cols))
