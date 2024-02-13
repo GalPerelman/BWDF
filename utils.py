@@ -161,8 +161,11 @@ def collect_experiments(dir_path, p, dmas, horizon, dates_idx, models, abs_n=Non
         _dates_idx = int(get_param(_dates_idx))
         _horizon = get_param(_horizon)
         if (_dma_idx in dmas) and (_model_name in models) and (_dates_idx in dates_idx) and (_horizon == horizon):
-            temp = pd.read_csv(fname, index_col=0, engine="python", on_bad_lines='skip')
-            df = pd.concat([df, temp])
+            try:
+                temp = pd.read_csv(fname, index_col=0, engine="python", on_bad_lines='skip')
+                df = pd.concat([df, temp])
+            except pd.errors.EmptyDataError:
+                print(f"Empty DataFrame: {fname}")
 
     def select_smallest_n(group, n_percent, ranking_cols):
         group = rank(group, ranking_cols)
