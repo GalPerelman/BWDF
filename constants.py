@@ -131,6 +131,12 @@ LATEST_WEEK_W2 = {
     'end_test': TZ.localize(datetime.datetime(2022, 10, 31, 0, 0))
 }
 
+LATEST_TWO_WEEKS_W2 = {
+    'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
+    'start_test': TZ.localize(datetime.datetime(2022, 10, 17, 0, 0)),
+    'end_test': TZ.localize(datetime.datetime(2022, 10, 24, 0, 0))
+}
+
 PREV_YEAR_W2 = {
     'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
     'start_test': TZ.localize(datetime.datetime(2021, 10, 31, 0, 0)),
@@ -144,5 +150,6 @@ EXPERIMENTS_DATES = {
     3: DATES_OF_LATEST_WEEK,
     4: DATES_JULY,
     5: LATEST_WEEK_W2,
-    6: PREV_YEAR_W2
+    6: LATEST_TWO_WEEKS_W2,
+    7: PREV_YEAR_W2
 }
