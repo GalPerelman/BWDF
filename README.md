@@ -23,7 +23,7 @@ Due to the large number of dependencies, the installation might take 10-15 minut
 ##### Run the code
 To run the code and generate a forecast for all the DMAs `main.py` should be run</br>
 Example usage to run the first test period</br>
-`python main.py --predict test --models_config models_config_w1.json --test_name w1 --plot true`
+`python main.py --inflow_data_file Inflow_Data.xlsx --weather_data_file Weather_Data_2.xlsx --predict test --models_config models_config_w1.json --test_name w1 --plot true`
 
 Alternative wa to run w1 prediction:</br>
 The repository also contains a `.bat` file to run the w1 test period
@@ -36,12 +36,14 @@ Predicting DMA B</br>
 ...</br>
 
 ##### Arguments
-`predict`          Must be one of `test` or `experiment`</br>
-`models_config`    Path to a json file that defines the models configuration</br>
-`test_name`        Pass only if `predict` argument is `test`. The test period to predict, must be one of `w1`, `w2`, `w3`, `w4`</br>
-`experiment_idx`   Pass only if `predict` argument is `experiment`. The experiment index</br>
-`plot`             true for plot the forecast, false otherwise. default is true</br>
-`export`           true for export forecast to csv, false otherwise. default is true</br>
+`inflow_data_file` - Historic inflow data file, name only, not file path. file is located in `resources` directory</br></br>
+`weather_data_file` - Weather data file, name only, not file path. file is located in `resources` directory</br>
+`predict` - Must be one of `test` or `experiment`</br>
+`models_config` - Path to a json file that defines the models configuration</br>
+`test_name` - Pass only if `predict` argument is `test`. The test period to predict, must be one of `w1`, `w2`, `w3`, `w4`</br>
+`experiment_idx` - Pass only if `predict` argument is `experiment`. The experiment index</br>
+`plot` - "true" for plot the forecast, false otherwise. default is true</br>
+`export` - "true" for export forecast to csv, false otherwise. default is true</br>
 
 
 ### Output
