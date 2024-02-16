@@ -1,8 +1,8 @@
 #!/bin/bash
 
 dma=(0 1 2 3 4 5 6 7 8 9)
-models=('lstm')
-dates_idx=(5 6)
+models=('xgb' 'multi' 'lstm')
+dates_idx=(8 9)
 horizon=('short' 'long')
 move_stats=0  # int to represent bool - 1 will include moving avg and moving std columns, 0 will not
 decompose_target=0  # int to represent bool - 1 will decompose target to trend, seasonality and noise, 0 will not
@@ -21,7 +21,7 @@ for a in ${dma[@]}; do
                                       --dates_idx $c
                                       --horizon $d
                                       --norm_methods standard moving_stat fixed_window
-                                      --target_lags 0
+                                      --target_lags 0 12 24
                                       --weather_lags 0 6
                                       --move_stats $move_stats
                                       --decompose_target $decompose_target

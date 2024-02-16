@@ -32,8 +32,7 @@ def run():
     parser.add_argument('--predict', type=str, required=True, choices=['experiment', 'test'])
     parser.add_argument('--models_config', type=str, required=True)
     parser.add_argument('--test_name', type=str, required=False, choices=['w1', 'w2', 'w3', 'w4'])
-    parser.add_argument('--experiment_idx', type=int, required=False,
-                        choices=[0, 1, 2, 3, 4, 5, 6, 7])
+    parser.add_argument('--experiment_idx', type=int, required=False)
     parser.add_argument('--plot', type=bool, required=False, default=True)
     parser.add_argument('--export', type=bool, required=False, default=True)
     args = parser.parse_args()
