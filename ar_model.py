@@ -160,7 +160,7 @@ if __name__ == "__main__":
     data = data.drop([col for col in constants.DMA_NAMES if col not in constants.DMA_NAMES], axis=1)
 
     horizon = 24
-    dates = constants.DATES_OF_LATEST_WEEK
+    dates = constants.W1_LATEST_WEEK
     train, test = Preprocess.train_test_split(data, dates['start_train'],
                                               dates['start_test'],
                                               dates['start_test'] + datetime.timedelta(hours=horizon))

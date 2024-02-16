@@ -68,10 +68,10 @@ class ProphetForecaster(BaseEstimator, RegressorMixin):
 if __name__ == "__main__":
     # usage example
     data = utils.import_preprocessed("resources/preprocessed_data.csv")
-    start_train = constants.DATES_OF_LATEST_WEEK['start_train']
-    start_test = constants.DATES_OF_LATEST_WEEK['start_test']
-    end_short_pred = constants.DATES_OF_LATEST_WEEK['start_test'] + datetime.timedelta(days=1)
-    end_long_pred = constants.DATES_OF_LATEST_WEEK['end_test']
+    start_train = constants.W1_LATEST_WEEK['start_train']
+    start_test = constants.W1_LATEST_WEEK['start_test']
+    end_short_pred = constants.W1_LATEST_WEEK['start_test'] + datetime.timedelta(days=1)
+    end_long_pred = constants.W1_LATEST_WEEK['end_test']
 
     p = ProphetForecaster()
     params = {'seasonality_mode': 'additive', 'daily_seasonality': True, 'weekly_seasonality': True,

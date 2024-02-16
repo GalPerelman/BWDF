@@ -222,8 +222,8 @@ if __name__ == "__main__":
 
     norm_methods = ['standard', 'min_max', 'robust', 'power', 'quantile']
 
-    start_train = constants.DATES_OF_LATEST_WEEK['start_train']
-    start_test = constants.DATES_OF_LATEST_WEEK['start_test']
+    start_train = constants.W1_LATEST_WEEK['start_train']
+    start_test = constants.W1_LATEST_WEEK['start_test']
     end_test = start_test + datetime.timedelta(hours=168)
     cols_to_lag = {'Air humidity (%)': 12, 'Rainfall depth (mm)': 12, 'Air temperature (°C)': 12, 'Windspeed (km/h)': 12}
     predict_all_dmas(data, start_train=start_train, start_test=start_test, end_test=end_test, cols_to_lag=cols_to_lag,

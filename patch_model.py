@@ -105,7 +105,7 @@ class PatchTransformer(BaseEstimator, RegressorMixin):
 
 if __name__ == "__main__":
     data = utils.import_preprocessed("resources/preprocessed_not_cyclic.csv")
-    dates = constants.DATES_JULY
+    dates = constants.W1_PREV_YEAR
     horizon=168
 
     data, added_cols = Preprocess.construct_decomposed_features(data, columns=constants.DMA_NAMES)

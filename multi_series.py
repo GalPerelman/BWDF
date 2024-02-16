@@ -162,7 +162,7 @@ def predict_all_dma(dates, models, plot=False, record_score=False):
 
 def tune_dma(dma):
     loader = Loader()
-    dates = constants.DATES_OF_LATEST_WEEK
+    dates = constants.W1_LATEST_WEEK
     data = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3).data
     data.index.freq = 'H'
 
@@ -194,7 +194,7 @@ def tune_dma(dma):
 
 if __name__ == "__main__":
     loader = Loader()
-    dates = constants.DATES_OF_LATEST_WEEK
+    dates = constants.W1_LATEST_WEEK
     data = Preprocess(loader.inflow, loader.weather, cyclic_time_features=True, n_neighbors=3).data
     data.index.freq = 'H'
 
