@@ -161,6 +161,12 @@ W3_LATEST_WEEK = {
     'end_test': TZ.localize(datetime.datetime(2023, 1, 16, 0, 0))
 }
 
+W3_LATEST_TWO_WEEKS = {
+    'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
+    'start_test': TZ.localize(datetime.datetime(2023, 1, 2, 0, 0)),
+    'end_test': TZ.localize(datetime.datetime(2023, 1, 9, 0, 0))
+}
+
 EXPERIMENTS_DATES = {
     0: DATES_TO_TEST_EXTREME_RAINFALL,
     1: DATES_TO_TEST_NOV_HOLIDAYS,
@@ -172,5 +178,6 @@ EXPERIMENTS_DATES = {
     7: W2_PREV_YEAR,
     8: W3_PREV_YEAR,
     9: W3_PREV_YEAR2,
-    10: W3_LATEST_WEEK
+    10: W3_LATEST_WEEK,
+    11: W3_LATEST_TWO_WEEKS
 }
