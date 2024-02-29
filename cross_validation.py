@@ -102,10 +102,16 @@ class CV:
 
         return fold_results
 
-    def run_single_experiment(self, dma, horizon):
+    def run_single_experiment(self, dma, horizon, reverse=False):
         all_result = pd.DataFrame()
-        for model_idx, model_config in enumerate(self.candidates[dma][horizon]):
-            fold_results = self.folding_pred(dma, horizon, model_config, model_idx)
+
+        if reverse:
+            models_configs = self.candidates[dma][horizon][::-1]
+        else:
+            models_configs = self.candidates[dma][horizon]
+
+        for model in models_configs:
+            fold_results = self.folding_pred(dma, horizon, model, model["model_idx"])
             all_result = pd.concat([all_result, fold_results])
             all_result.to_csv(os.path.join(self.output_dir, f"cv_dma-{dma[:5]}_{horizon}_{self.files_suffix}.csv"))
 
