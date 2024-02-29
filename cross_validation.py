@@ -68,11 +68,6 @@ class CV:
                                         pred_type="step-ahead"
                                         )
 
-            # manually adjustments - DMA A
-            if (dma == constants.DMA_NAMES[0] and horizon == 'short'
-                    and self.outliers_config["manual_adjustments"][dma]['short']):
-                pred.iloc[0] = 0.0505 * pred.sum() + 4.85
-
             pred.columns = [dma]
 
             i1, i2, i3, mape = evaluation.get_metrics(self.raw_data, pred, horizon=horizon)
