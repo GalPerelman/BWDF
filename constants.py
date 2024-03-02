@@ -167,6 +167,24 @@ W3_LATEST_TWO_WEEKS = {
     'end_test': TZ.localize(datetime.datetime(2023, 1, 9, 0, 0))
 }
 
+W4_PREV_YEAR = {
+    'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
+    'start_test': TZ.localize(datetime.datetime(2022, 3, 7, 0, 0)),
+    'end_test': TZ.localize(datetime.datetime(2022, 3, 14, 0, 0))
+}
+
+W4_LATEST_WEEK = {
+    'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
+    'start_test': TZ.localize(datetime.datetime(2023, 2, 27, 0, 0)),
+    'end_test': TZ.localize(datetime.datetime(2023, 3, 6, 0, 0))
+}
+
+W4_LATEST_TWO_WEEKS = {
+    'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
+    'start_test': TZ.localize(datetime.datetime(2023, 2, 20, 0, 0)),
+    'end_test': TZ.localize(datetime.datetime(2023, 2, 27, 0, 0))
+}
+
 TEMP = {
     'start_train': TZ.localize(datetime.datetime(2021, 1, 1, 0, 0)),
     'start_test': TZ.localize(datetime.datetime(2022, 12, 12, 0, 0)),
@@ -186,5 +204,8 @@ EXPERIMENTS_DATES = {
     9: W3_PREV_YEAR2,
     10: W3_LATEST_WEEK,
     11: W3_LATEST_TWO_WEEKS,
+    12: W4_PREV_YEAR,
+    13: W4_LATEST_WEEK,
+    14: W4_LATEST_TWO_WEEKS,
     99: TEMP
 }

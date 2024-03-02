@@ -2,18 +2,18 @@
 
 dma=(0 1 2 3 4 5 6 7 8 9)
 models=('xgb' 'multi' 'lstm')
-dates_idx=(8 9)
+dates_idx=(12 13 14)
 horizon=('short' 'long')
-move_stats=0  # int to represent bool - 1 will include moving avg and moving std columns, 0 will not
-decompose_target=0  # int to represent bool - 1 will decompose target to trend, seasonality and noise, 0 will not
+move_stats=1  # int to represent bool - 1 will include moving avg and moving std columns, 0 will not
+decompose_target=1  # int to represent bool - 1 will decompose target to trend, seasonality and noise, 0 will not
 
 for a in ${dma[@]}; do
 	for b in ${models[@]}; do
 	  for c in ${dates_idx[@]}; do
 	    for d in ${horizon[@]}; do
           bash ./create_tmp_empty.sh "python ./wrapper.py
-                                      --inflow_data_file Inflow_Data.xlsx
-                                      --weather_data_file Weather_Data_2.xlsx
+                                      --inflow_data_file Inflow_Data_4.xlsx
+                                      --weather_data_file Weather_Data_4.xlsx
                                       --do random_search
                                       --search_params 1
                                       --dma_idx $a
