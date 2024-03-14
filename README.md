@@ -26,6 +26,8 @@ Example usage to run the first test period</br>
 `python main.py --inflow_data_file Inflow_Data_1.xlsx --weather_data_file Weather_Data_1.xlsx --predict test --models_config models_config_w1.json --test_name w1 --plot true`
 `python main.py --inflow_data_file Inflow_Data_2.xlsx --weather_data_file Weather_Data_2.xlsx --predict test --models_config models_config_w2.json --test_name w2 --plot true`
 `python main.py --inflow_data_file Inflow_Data_3.xlsx --weather_data_file Weather_Data_3.xlsx --predict test --models_config models_config_w3.json --test_name w3 --plot true`
+`python main.py --inflow_data_file Inflow_Data_4.xlsx --weather_data_file Weather_Data_4.xlsx --predict test --models_config models_config_w4.json --test_name w4 --plot true`
+
 
 Alternative way to run predictions:</br>
 The repository also contains `.bat` files for quick run.
@@ -33,6 +35,7 @@ These files assume the virtual environment was created, and it is named `venv`
 To run the first test (w1) double-click the file `predict_w1.bat`
 To run the second test (w2) double-click the file `predict_w2.bat`
 To run the third test (w3) double-click the file `predict_w3.bat`
+To run the third test (w4) double-click the file `predict_w4.bat`
 
 The run time is expected to be 5-10 minutes
 During the run the code will print to console according to its progress:</br>
